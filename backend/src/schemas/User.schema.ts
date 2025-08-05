@@ -1,0 +1,18 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
+import { Role } from './Role.schema';
+
+@Schema()
+export class User {
+  @Prop({ unique: true, required: true, lowercase: true })
+  churchName: string;
+  @Prop({ required: true })
+  userName: string;
+  @Prop()
+  password: string;
+  @Prop()
+  refresh_token?: string;
+  @Prop({ type: [{ type: mongoose.Types.ObjectId, ref: 'Role' }] })
+  roles: Role[]; // Array of references to Role documents
+}
+export const userSchema = SchemaFactory.createForClass(User);
