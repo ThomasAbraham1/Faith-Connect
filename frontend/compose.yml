@@ -1,11 +1,11 @@
 services:
-  nestjs:
+  reactjs:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nestjs
+    container_name: reactjs
     ports:
-      - "3000:3000"
+      - "5173:5173"
     # volumes:
       # - ./src:/app/src
     develop:
@@ -19,15 +19,15 @@ services:
         - action: rebuild
           path: package.json
           target: /app/package.json
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: admin_user
-    #   MONGO_INITDB_ROOT_PASSWORD: admin_password
-volumes:
-  mongodb_data:
+#   mongodb:
+#     image: mongo:latest
+#     container_name: mongodb
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - mongodb_data:/data/db
+#     # environment:
+#     #   MONGO_INITDB_ROOT_USERNAME: admin_user
+#     #   MONGO_INITDB_ROOT_PASSWORD: admin_password
+# volumes:
+#   mongodb_data:
