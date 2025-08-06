@@ -8,9 +8,11 @@ import { JwtStrategy } from './jwt.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabaseModule } from 'src/database/database.module';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+import { TwillioModule } from 'src/otp/twillio/twillio.module';
 
 @Module({
   imports: [
+    TwillioModule,
     DatabaseModule,
     MongooseModule,
     UsersModule,

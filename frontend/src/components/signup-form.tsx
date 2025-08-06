@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
-
 import {
   Card,
   CardContent,
@@ -14,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import axios from "axios";
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -50,7 +49,7 @@ export function LoginForm({
     };
 
     axios
-      .post(`${apiURL}/auth/login`, payload)
+      .post(`${apiURL}/users`, payload)
       .then((response) => {
         console.log("Post successful:", response.data);
       })
@@ -74,7 +73,7 @@ export function LoginForm({
         <div className={cn("flex flex-col gap-6", className)} {...props}>
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-xl">Welcome back</CardTitle>
+              <CardTitle className="text-xl">Welcome to Faith Connect</CardTitle>
               {/* <CardDescription>
             Login with your Apple or Google account
           </CardDescription> */}
@@ -149,14 +148,15 @@ export function LoginForm({
                       />
                     </div>
                     <Button type="submit" className="w-full">
-                      Login
+                      Signup
                     </Button>
                   </div>
                   <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
-                    <a href="/signup" className="underline underline-offset-4">
-                      Sign up
+                    Already have an account?{" "}
+                    <a href="/" className="underline underline-offset-4">
+                      Login
                     </a>
+                    
                   </div>
                 </div>
               </form>
@@ -171,3 +171,4 @@ export function LoginForm({
     </div>
   );
 }
+// BB31FPZQ8XKUEYC8QSYDT9N5

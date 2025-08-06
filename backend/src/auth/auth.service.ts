@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/User.schema';
 import { Model } from 'mongoose';
+import { TwillioService } from 'src/otp/twillio/twillio.service';
 
 @Injectable()
 export class AuthService {
@@ -11,28 +12,34 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<User>,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private twillioService: TwillioService
   ) {}
 
   async signIn(
     username: string,
     churchName: string,
     pass: string,
+    phone: string,
+    email: string,
   ): Promise<{
     access_token: string;
     refresh_token: string;
     updated_db_document: object | null;
   }> {
     const user = await this.usersService.findOne(churchName);
-    if(!user){
-      throw new UnauthorizedException("Church doesn't exist in this system, please sign up");
+    if (!user) {
+      throw new UnauthorizedException(
+        "Church doesn't exist in this system, please sign up",
+      );
     }
     if (user?.password !== pass) {
       console.log(
         'Db password: ' + user?.password + '/n login Password: ' + pass,
       );
       throw new UnauthorizedException("Password didn't match");
-    } 
-    console.log(user);
+    }
+    const smsResponse = await this.twillioService.sendSMS();
+    console.log(user + "/n" + smsResponse);
     const payload = { sub: user._id, churchName: user.churchName };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -66,7 +73,8 @@ export class AuthService {
     const churchName = refreshTokenSearchResult?.churchName;
     const payload = { sub: userId, churchName: churchName };
     // Throw error if refreshtoken isn't matching the one stored in DB
-    if (!refreshTokenSearchResult) throw new UnauthorizedException('Invalid JWT refresh token');
+    if (!refreshTokenSearchResult)
+      throw new UnauthorizedException('Invalid JWT refresh token');
     // Create new access and refresh tokens
     const [new_access_token, new_refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -90,4 +98,6 @@ export class AuthService {
       updated_db_document: result,
     };
   }
+
+
 }

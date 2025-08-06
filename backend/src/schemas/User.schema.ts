@@ -8,8 +8,12 @@ export class User {
   churchName: string;
   @Prop({ required: true })
   userName: string;
-  @Prop()
+  @Prop({ required: true })
   password: string;
+  @Prop()
+  phone: string;
+  @Prop()
+  email: string;
   @Prop()
   refresh_token?: string;
   @Prop({ type: [{ type: mongoose.Types.ObjectId, ref: 'Role' }] })
