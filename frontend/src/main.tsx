@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { LoginForm } from "./components/login-form.tsx";
 import { SignupForm } from "./components/signup-form.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
 
 let router = createBrowserRouter([
   {
@@ -20,7 +21,9 @@ let router = createBrowserRouter([
 ]);
 createRoot(document.getElementById("root")!).render(
   <>
-    <RouterProvider router={router} />
-    <App />
+    <AuthProvider>
+      <RouterProvider router={router} />
+      <App />
+    </AuthProvider>
   </>
 );
