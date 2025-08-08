@@ -13,11 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const {login} = useAuth();
   const [churchname, setChurchname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +52,9 @@ export function LoginForm({
     };
 
     axios
-      .post(`${apiURL}/auth/login`, payload)
+      .post(`${apiURL}/auth/login`, payload, {
+        withCredentials:true
+      })
       .then((response) => {
         console.log("Post successful:", response.data);
       })

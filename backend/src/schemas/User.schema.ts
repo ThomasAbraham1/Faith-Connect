@@ -14,8 +14,6 @@ export class User {
   phone: string;
   @Prop()
   email: string;
-  @Prop()
-  refresh_token?: string;
   @Prop({ type: [{ type: mongoose.Types.ObjectId, ref: 'Role' }] })
   roles: Role[]; // Array of references to Role documents
 }

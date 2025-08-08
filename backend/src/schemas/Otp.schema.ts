@@ -6,12 +6,14 @@ import { User } from './User.schema';
 export class Otp extends Document {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: User,
+    ref: 'User',
   })
   userId: string;
+  @Prop()
+  secret: string;
   @Prop({
     type: Date,
-    expires: "20s"
+    expires: "1000s"
   })
   createdAt: Date;
 }

@@ -19,8 +19,8 @@ export class UsersService {
         }
     }
 
-    async findOne(username: string): Promise<CreateUserDto | undefined | null> {
-    return this.userModel.findOne({churchName: username});
+    async findOne(churchName: string): Promise<CreateUserDto | null> {
+    return this.userModel.findOne({churchName: churchName});
     
 }
 //  async refreshToken(refreshToken): Promise<{accessToken, refreshToken, churchName}>{
