@@ -10,6 +10,8 @@ import { TwillioModule } from 'src/otp/twillio/twillio.module';
 import { PassportModule } from '@nestjs/passport';
 import { SessionSerializer } from './session.serializer';
 import { LocalStrategy } from './local.strategy';
+import { OtpAuthModule } from 'src/otp/otp-auth/otp-auth.module';
+import { JwtHelperModule } from 'src/crypt/jwt-helper/jwt-helper.module';
 
 @Module({
   imports: [
@@ -17,14 +19,11 @@ import { LocalStrategy } from './local.strategy';
     DatabaseModule,
     MongooseModule,
     UsersModule,
+    JwtHelperModule,
+    OtpAuthModule,
     PassportModule.register({
       session:true
     }),
-    // JwtModule.register({ 
-    //   global: true,
-    //   secret: jwtConstants.secret,
-    //   // signOptions: { expiresIn: '1900s' },  
-    // }),
   ], 
   controllers: [AuthController],
   providers: [AuthService, SessionSerializer, LocalStrategy],

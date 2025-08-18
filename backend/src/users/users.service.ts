@@ -21,7 +21,6 @@ export class UsersService {
 
     async findOne(churchName: string): Promise<CreateUserDto | null> {
     return this.userModel.findOne({churchName: churchName});
-    
 }
 //  async refreshToken(refreshToken): Promise<{accessToken, refreshToken, churchName}>{
 //     return {

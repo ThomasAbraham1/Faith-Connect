@@ -8,6 +8,9 @@ import { DatabaseModule } from './database/database.module';
 import { TwilioModule } from 'nestjs-twilio';
 import { ConfigModule } from '@nestjs/config';
 import { TwillioModule } from './otp/twillio/twillio.module';
+import { OtpAuthModule } from './otp/otp-auth/otp-auth.module';
+import { EmailModule } from './otp/email/email.module';
+import { JwtHelperModule } from './crypt/jwt-helper/jwt-helper.module';
 
 
 @Module({ 
@@ -20,6 +23,9 @@ import { TwillioModule } from './otp/twillio/twillio.module';
       isGlobal: true 
     }),
     TwillioModule,
+    OtpAuthModule,
+    EmailModule,
+    JwtHelperModule,
   ],
   controllers: [AppController],
   providers: [AppService],
