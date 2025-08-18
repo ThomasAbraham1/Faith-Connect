@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { HydratedDocument } from 'mongoose';
 import { Role } from './Role.schema';
 
+
+export type UserDocument = HydratedDocument<User>;
 @Schema()
 export class User {
   @Prop({ unique: true, required: true, lowercase: true })

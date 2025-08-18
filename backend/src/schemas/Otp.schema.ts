@@ -11,11 +11,6 @@ export class Otp extends Document {
   userId: string;
   @Prop()
   secret: string;
-  @Prop({
-    type: Date,
-    expires: "1000s"
-  })
-  createdAt: Date;
 }
 
 export const otpSchema = SchemaFactory.createForClass(Otp)

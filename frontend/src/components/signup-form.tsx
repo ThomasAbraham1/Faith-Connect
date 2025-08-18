@@ -1,6 +1,10 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
+import "react-phone-number-input/style.css";
+// import { PhoneInput } from "react-international-phone";
+import PhoneInput, { type Value } from "react-phone-number-input";
+
 import {
   Card,
   CardContent,
@@ -12,55 +16,61 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import axios from "axios";
+import { handleSignupFormSubmitService } from "@/services/authService";
+import { useNavigate } from "react-router";
+import { useAuth } from "@/context/AuthContext";
+import { useForm, Controller } from "react-hook-form";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [churchname, setChurchname] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  // const [churchname, setChurchname] = useState("");
+  // const [username, setUsername] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [phone, setPhone] = useState<Value | undefined>();
+  let navigate = useNavigate();
+  const { transitionTo } = useAuth();
 
-  interface loginResponse {
-    access_token: string;
-    refresh_token: string;
-    updated_db_document: updatedDbDocument;
-  }
-
-  interface updatedDbDocument {
-    _id: string;
-    churchName: string;
-    userName: string;
+  type FormFields = {
+    username: string;
+    churchname: string;
     password: string;
-    roles: string[];
-    __v: string;
-    refresh_token: string;
-  }
-
-  const handleLoginFormSubmission = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<loginResponse> => {
-    e.preventDefault();
-    const apiURL = import.meta.env.VITE_APP_API_URL;
-    const payload = {
-      userName: username,
-      churchName: churchname,
-      password: password,
-    };
-
-    axios
-      .post(`${apiURL}/users`, payload)
-      .then((response) => {
-        console.log("Post successful:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error posting data:", error.response.data);
-      });
-    // fetch()
-    // console.log(username + password + churchname  )
-    return {} as loginResponse;
+    phone: string;
+    email: string;
   };
-
+  const {
+    register,
+    watch,
+    control,
+    handleSubmit,
+    formState: { isSubmitted, isValid, errors },
+  } = useForm<FormFields>({
+    defaultValues: {
+      churchname: "",
+      username: "",
+      email: "",
+      password: "",
+      phone: "",
+    },
+  });
+  const { churchname, username, email, password, phone } = watch();
+  const handleSignupFormSubmission = async (data: FormFields) => {
+    const phone = data.phone;
+    console.log(data);
+    const response = await handleSignupFormSubmitService(
+      username,
+      churchname,
+      password,
+      phone,
+      email
+    );
+    if (typeof response != "boolean" || typeof response != "string") {
+      transitionTo("awaitingOTPSelectMethod");
+      navigate("/otpMethod");
+    }
+  };
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -73,39 +83,13 @@ export function SignupForm({
         <div className={cn("flex flex-col gap-6", className)} {...props}>
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-xl">Welcome to Faith Connect</CardTitle>
-              {/* <CardDescription>
-            Login with your Apple or Google account
-          </CardDescription> */}
+              <CardTitle className="text-xl">
+                Welcome to Faith Connect
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLoginFormSubmission}>
+              <form onSubmit={handleSubmit(handleSignupFormSubmission)}>
                 <div className="grid gap-6">
-                  {/* <div className="flex flex-col gap-4">
-                <Button type="button" variant="outline" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with Apple
-                </Button>
-                <Button type="button"  variant="outline" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with Google
-                </Button>
-              </div> */}
-                  {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Or continue with
-                </span>
-              </div> */}
                   <div className="grid gap-6">
                     <div className="grid gap-3">
                       <Label htmlFor="churchName">Church Name</Label>
@@ -113,10 +97,24 @@ export function SignupForm({
                         id="churchName"
                         type="text"
                         value={churchname}
-                        onChange={(e) => setChurchname(e.target.value)}
                         placeholder="Bethel Church"
-                        required
+                        {...register("churchname", {
+                          required: "Church name cannot be empty.",
+                          minLength: {
+                            value: 2,
+                            message: "Minimum length is 2",
+                          },
+                          maxLength: {
+                            value: 40,
+                            message: "Maximum length is 40",
+                          },
+                        })}
                       />
+                      {errors.churchname && (
+                        <div className="text-red-500 text-sm">
+                          {errors.churchname.message}
+                        </div>
+                      )}
                     </div>
                     <div className="grid gap-3">
                       <Label htmlFor="userName">User Name</Label>
@@ -124,10 +122,73 @@ export function SignupForm({
                         id="userName"
                         type="text"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
                         placeholder="PastorJeff"
-                        required
+                        {...register("username", {
+                          required: "User name cannot be empty",
+                          minLength: {
+                            value: 2,
+                            message: "Minimum length is 2",
+                          },
+                          maxLength: {
+                            value: 20,
+                            message: "Maximum length is 20",
+                          },
+                        })}
                       />
+                      {errors.username && (
+                        <div className="text-red-500 text-sm">
+                          {errors.username.message}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="text"
+                        value={email}
+                        placeholder="pastor@bethel.com"
+                        {...register("email", {
+                          required: "Email cannot be empty",
+                          minLength: {
+                            value: 2,
+                            message: "Minimum length is 2",
+                          },
+                          maxLength: {
+                            value: 40,
+                            message: "Maximum length is 40",
+                          },
+                          pattern: {
+                            value: /^\S+@\S+$/i,
+                            message: "Invalid email address",
+                          },
+                        })}
+                      />
+                      {errors.email && (
+                        <div className="text-red-500 text-sm">
+                          {errors.email.message}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Controller
+                        name="phone"
+                        control={control}
+                        rules={{ required: "Phone is required" }}
+                        render={({ field }) => (
+                          <PhoneInput
+                            {...field}
+                            placeholder="Enter phone number"
+                            onChange={(value) => field.onChange(value)}
+                          />
+                        )}
+                      />
+                      {errors.phone && (
+                        <div className="text-red-500 text-sm">
+                          {errors.phone.message}
+                        </div>
+                      )}
                     </div>
                     <div className="grid gap-3">
                       <div className="flex items-center">
@@ -142,12 +203,33 @@ export function SignupForm({
                       <Input
                         id="password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
                         type="password"
-                        required
+                        {...register("password", {
+                          required: "Password cannot be empty",
+                          minLength: {
+                            value: 8,
+                            message:
+                              "Password must be at least 8 characters long",
+                          },
+                          pattern: {
+                            value:
+                              /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                            message:
+                              "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+                          },
+                        })}
                       />
+                      {errors.password && (
+                        <div className="text-red-500 text-sm">
+                          {errors.password.message}
+                        </div>
+                      )}
                     </div>
-                    <Button type="submit" className="w-full">
+                    <Button
+                      // disabled={!isValid}
+                      type="submit"
+                      className="w-full"
+                    >
                       Signup
                     </Button>
                   </div>
@@ -156,7 +238,6 @@ export function SignupForm({
                     <a href="/" className="underline underline-offset-4">
                       Login
                     </a>
-                    
                   </div>
                 </div>
               </form>
@@ -172,3 +253,28 @@ export function SignupForm({
   );
 }
 // BB31FPZQ8XKUEYC8QSYDT9N5
+// For validation Using ZOD
+
+// import { z } from "zod";
+// import { isPossiblePhoneNumber } from "react-phone-number-input";
+
+// const signupSchema = z.object({
+//   username: z.string().min(1, "Username is required"),
+//   churchname: z.string().min(1, "Church name is required"),
+//   password: z.string().min(6, "Password must be at least 6 characters"),
+//   email: z.string().email("Invalid email address"),
+//   phone: z
+//     .string()
+//     .refine((val) => isPossiblePhoneNumber(val), {
+//       message: "Invalid phone number",
+//     }),
+// });
+
+// // Example usage:
+// const result = signupSchema.safeParse({
+//   username: "John",
+//   churchname: "Grace Church",
+//   password: "123456",
+//   email: "test@example.com",
+//   phone: "+12223333333",
+// });
