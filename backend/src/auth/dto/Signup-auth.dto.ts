@@ -1,13 +1,13 @@
 import { IsNotEmpty } from 'class-validator';
+import mongoose, { ObjectId, Types } from 'mongoose';
 
 interface Role {
   name: string;
-  permission: Permission[];
+  permissions: Permission[];
 }
 
 interface Permission {
   name: string;
-  
 }
 export class SignupDto {
   @IsNotEmpty()
@@ -17,7 +17,7 @@ export class SignupDto {
   @IsNotEmpty()
   password: string;
   phone: string;
-
+  churchId: Types.ObjectId;
   email: string;
   roles: Role[];
 }

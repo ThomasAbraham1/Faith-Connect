@@ -11,6 +11,8 @@ import { TwillioModule } from './otp/twillio/twillio.module';
 import { OtpAuthModule } from './otp/otp-auth/otp-auth.module';
 import { EmailModule } from './otp/email/email.module';
 import { JwtHelperModule } from './crypt/jwt-helper/jwt-helper.module';
+import { ChurchesModule } from './churches/churches.module';
+import { MembersModule } from './members/members.module';
 
 
 @Module({ 
@@ -26,6 +28,8 @@ import { JwtHelperModule } from './crypt/jwt-helper/jwt-helper.module';
     OtpAuthModule,
     EmailModule,
     JwtHelperModule,
+    ChurchesModule,
+    MembersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

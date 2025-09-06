@@ -1,19 +1,21 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router";
-import { Button } from "./ui/button";
-import { CardTitle } from "./ui/card";
+import { useLoaderData, useNavigate } from "react-router";
+import { Button } from "../../components/ui/button";
+import { CardTitle } from "../../components/ui/card";
 import { selectOTPMethod } from "@/services/authService";
+import { useEffect } from "react";
 
 export function OTPMethodSelection() {
-  const { setAuthStage } = useAuth();
+  // const twoFaMemoryCheckerResponse = useLoaderData();
+  // const doesDeviceExist = twoFaMemoryCheckerResponse.data.doesDeviceExist;
   const navigate = useNavigate();
-
+  // useEffect(() => {
+  //   if (doesDeviceExist) navigate('/dashboard');
+  // }, []);
   const handleMethodSelect = async (method: "sms" | "email") => {
-    await selectOTPMethod(method); // Calls backend to send OTP
-    setAuthStage("awaitingOTP");
-    navigate("/otp");
+    const response = await selectOTPMethod(method); // Calls backend to send OTP
+    if (response) navigate("/otp");
   };
 
   return (

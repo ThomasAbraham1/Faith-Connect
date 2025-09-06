@@ -3,10 +3,10 @@ import { Document } from 'mongoose';
 
 @Schema()
 export class Permission extends Document {
-  @Prop({ required: true })
+  @Prop()
   resource: string; // e.g., 'users', 'products', 'articles'
 
-  @Prop({ required: true })
+  @Prop()
   action: string; // e.g., 'read', 'write', 'delete'
 
   @Prop({ unique: true })

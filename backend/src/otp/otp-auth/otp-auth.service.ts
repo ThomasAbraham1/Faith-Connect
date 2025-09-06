@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Request, Response } from 'express';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { authenticator } from 'otplib';
 import { JwtHelperService } from 'src/crypt/jwt-helper/jwt-helper.service';
 import { Otp } from 'src/schemas/Otp.schema';
@@ -14,11 +14,11 @@ export class OtpAuthService {
     @InjectModel(Twofa.name) private readonly twofaModel: Model<Twofa>,
     private readonly jwthelperService: JwtHelperService,
   ) {}
-  async createOtp(userId) {
+  async createOtp(userId: Types.ObjectId) {
     const secret = authenticator.generateSecret();
     authenticator.options = {
       digits: 6,
-      step: 120, // Time step in seconds
+      step: 5*60, // Time step in seconds
     };
 
     // Storing temporarily the secret code
@@ -37,7 +37,7 @@ export class OtpAuthService {
   }
 
   async verifyOtp(token: string, userId: string, responseObj: Response) {
-    // Verify a TOTP code
+    // Verify TOTP code
     try {
       const response = await this.otpModel.findOne({ _id: userId });
       const secret = response?.secret;
@@ -64,6 +64,7 @@ export class OtpAuthService {
           sameSite: 'strict',
         });
       }
+      console.log('IsOtpValid:', isValid)
       return { isOtpValid: isValid };
     } catch (e) {
       console.error(e);

@@ -7,11 +7,11 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useAuth } from "@/context/AuthContext";
 import { verifyOtpRequest } from "@/services/authService";
+import { useNavigate } from "react-router";
 
 export function InputOTPControlled() {
-  const { selectOTPMethod, isAuthenticated, isAwaitingOTP } = useAuth();
+  const navigate = useNavigate();
 
   const [value, setValue] = React.useState("");
   // console.log(isAwaitingOTP());

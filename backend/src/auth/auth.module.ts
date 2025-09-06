@@ -12,14 +12,18 @@ import { SessionSerializer } from './session.serializer';
 import { LocalStrategy } from './local.strategy';
 import { OtpAuthModule } from 'src/otp/otp-auth/otp-auth.module';
 import { JwtHelperModule } from 'src/crypt/jwt-helper/jwt-helper.module';
+import { EmailModule } from 'src/otp/email/email.module';
+import { ChurchesModule } from 'src/churches/churches.module';
 
 @Module({
   imports: [
+    EmailModule,
     TwillioModule,
     DatabaseModule,
     MongooseModule,
     UsersModule,
     JwtHelperModule,
+    ChurchesModule,
     OtpAuthModule,
     PassportModule.register({
       session:true
