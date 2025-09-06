@@ -7,23 +7,18 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-export class UserPermission {
-  @IsNotEmpty()
-  @IsString()
+import { Types } from 'mongoose';
+interface Role {
   name: string;
-
-  @IsNotEmpty()
-  @IsString()
-  permission: string;
+  permissions: Permission[];
 }
-export class CreateUserDto {
-  @IsNotEmpty()
-  @IsString()
-  churchName: string;
-  _id?: string;
+
+interface Permission {
+  name: string;
+}
+export class CreateUserDto{
   userName: string;
   password: string;
-  @ValidateNested()
-  @Type(() => UserPermission)
-  roles: UserPermission;
-}
+  churchId: Types.ObjectId;
+  roles: Role[]; 
+};

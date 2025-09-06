@@ -1,7 +1,7 @@
 import axios, { AxiosError, type AxiosResponse } from "axios";
-import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
 import PhoneInput, { type Value } from "react-phone-number-input";
+import api from "@/api/api";
 
 interface response {
   data: Record<"isOtpValid", boolean>;
@@ -9,16 +9,10 @@ interface response {
 export const verifyOtpRequest = async (value: string): Promise<void> => {
   console.log(value.length);
   if (value.length == 6) {
-    axios
-      .post(
-        `${import.meta.env.VITE_APP_API_URL}/auth/verifyOtp`,
-        {
-          otpToken: value,
-        },
-        {
-          withCredentials: true,
-        }
-      )
+    api
+      .post(`/auth/verifyOtp`, {
+        otpToken: value,
+      })
       .then((response: response) => {
         console.log(response.data.isOtpValid);
       })
@@ -64,9 +58,7 @@ export const handleSignupFormSubmitService = async (
     email: email,
   };
   try {
-    const response = await axios.post(`${apiURL}/auth/signup`, payload, {
-      withCredentials: true,
-    });
+    const response = await api.post(`/auth/signup`, payload);
     console.log("Post successful:", response.data);
     return response as AxiosResponse<any, any>;
   } catch (error: any) {
@@ -77,15 +69,28 @@ export const handleSignupFormSubmitService = async (
 // OTP request method
 export const selectOTPMethod = async (method: "sms" | "email") => {
   const apiURL = import.meta.env.VITE_APP_API_URL;
-
   try {
-    await fetch(`${apiURL}/auth/otpRequest`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ method }),
-      credentials: "include",
-    });
-  } catch (error) {
-    console.error("Failed to select OTP method:", error);
+    const response = await api.post(`/auth/otpRequest`, { method: method });
+    console.log("OTP Sent successfully:", response.data);
+    return response as AxiosResponse<any, any>;
+  } catch (error: any) {
+    console.error("Error posting data:", error.response.data);
+    // return error as AxiosResponse<any, any>;
   }
+};
+
+// Logout
+export const logout = async () => {
+  try {
+    const result = await api.post("/auth/logout");
+    console.log(result)
+    return result
+  } catch (error) {
+    console.log(error)
+    return error
+  }
+};
+
+export const twofaMemoryChecker = async () => {
+  return api.post("/auth/twofaMemoryCheck");
 };

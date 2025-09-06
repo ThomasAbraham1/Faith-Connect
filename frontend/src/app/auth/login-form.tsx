@@ -5,33 +5,46 @@ import { GalleryVerticalEnd } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
-
+import { useLocation } from "react-router";
+import api from "@/api/api";
+import { twofaMemoryChecker } from "@/services/authService";
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { transitionTo } = useAuth();
+  const location = useLocation();
+
   // const [churchname, setChurchname] = useState("");
   // const [username, setUsername] = useState("");
   // const [password, setPassword] = useState("");
   let navigate = useNavigate();
+  console.log("hello");
 
   type FormFields = {
     churchname: string;
     username: string;
     password: string;
+    formSubmitError: string;
   };
   const {
     watch,
     handleSubmit,
     register,
+    setError,
+    clearErrors,
     formState: { errors },
-  } = useForm<FormFields>();
+  } = useForm<FormFields>({
+    defaultValues: {
+      churchname: "",
+      username: "",
+      password: "",
+      formSubmitError: "",
+    },
+  });
 
   interface loginResponse {
     access_token: string;
@@ -57,23 +70,32 @@ export function LoginForm({
     const payload = {
       userName: username,
       churchName: churchname,
-      password: password,
-    };
+      password: password, 
+    }; 
 
-    axios
+    api
       .post(`${apiURL}/auth/login`, payload, {
         withCredentials: true,
-      })
-      .then((response) => {
+      }) 
+      .then(async (response) => {
         console.log("Post successful:", response.data);
-        transitionTo("awaitingOTPSelectMethod");
-        navigate("/otpMethod");
+        // After successfull login, check if user needs to go through 2fa in this device
+        const twofaMemoryCheckResult = await twofaMemoryChecker();
+        const doesDeviceExist = twofaMemoryCheckResult.data.doesDeviceExist;
+        console.log("DoesDeviceExist:", doesDeviceExist);
+        if (doesDeviceExist) navigate("/dashboard");
+        else navigate("/otpMethod");
       })
       .catch((error) => {
+        setError("formSubmitError", {
+          type: "manual",
+          message: `${error.response.data.message}`,
+        });
+        setTimeout(() => {
+          clearErrors("formSubmitError");
+        }, 1000);
         console.error("Error posting data:", error.response.data);
       });
-    // fetch()
-    // console.log(username + password + churchname  )
     return {} as loginResponse;
   };
 
@@ -172,6 +194,16 @@ export function LoginForm({
                     <Button type="submit" className="w-full">
                       Login
                     </Button>
+                    {errors.formSubmitError && (
+                      <div className="text-destructive">
+                        {errors.formSubmitError.message}
+                      </div>
+                    )}
+                    {location.state?.error && (
+                      <div className="text-destructive">
+                        {location.state?.error}
+                      </div>
+                    )}
                   </div>
                   <div className="text-center text-sm">
                     Don&apos;t have an account?{" "}

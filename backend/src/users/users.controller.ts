@@ -5,6 +5,8 @@ import {
   Get,
   UseGuards,
   Request,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/CreateUser.dto';
@@ -15,7 +17,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
-    // console.log(createUserDto);
+    console.log(createUserDto);
     return this.usersService.createUser(createUserDto);
   }
 
@@ -29,5 +31,16 @@ export class UsersController {
   @Get('/protected')
   getHello(@Request() req): string {
     return req.user;
+  }
+
+  // Find all users
+  @Get()
+  findAll(){
+    return this.usersService.findAll()
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }

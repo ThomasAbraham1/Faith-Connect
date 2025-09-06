@@ -18,7 +18,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { handleSignupFormSubmitService } from "@/services/authService";
 import { useNavigate } from "react-router";
-import { useAuth } from "@/context/AuthContext";
 import { useForm, Controller } from "react-hook-form";
 
 export function SignupForm({
@@ -31,7 +30,6 @@ export function SignupForm({
   // const [email, setEmail] = useState("");
   // const [phone, setPhone] = useState<Value | undefined>();
   let navigate = useNavigate();
-  const { transitionTo } = useAuth();
 
   type FormFields = {
     username: string;
@@ -67,7 +65,6 @@ export function SignupForm({
       email
     );
     if (typeof response != "boolean" || typeof response != "string") {
-      transitionTo("awaitingOTPSelectMethod");
       navigate("/otpMethod");
     }
   };

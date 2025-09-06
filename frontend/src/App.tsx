@@ -1,14 +1,33 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import "./App.css";
-import { Button } from "./components/ui/button";
-import { LoginForm } from "./components/login-form";
+
+import { setNavigation } from "./api/navigationRef";
+import { useNavigate } from "react-router";
+import { ModeToggle } from "./components/mode-toggle";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const navigate = useNavigate();
+  useEffect(() => {
+    // setTimeout(() => {
+    //   const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)') 
+    //   const root = window.document.documentElement
+    //   root.classList.remove('dark', 'light','darkk') 
+    //   // root.classList.add('light')
+    //   console.log(root.classList)
 
-  return <></>;
+    // }, 1000); 
+    setNavigation(navigate), [navigate]; 
+  });
+  return (
+    <>
+    {/* Color theme toggler */}
+      <div className="fixed top-4 right-4 z-[9999]">
+        <ModeToggle />
+      </div>
+      <Outlet></Outlet>
+    </>
+  );
 }
 
 export default App;
