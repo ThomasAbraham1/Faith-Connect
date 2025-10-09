@@ -13,7 +13,7 @@ const CropContext = createContext<CropContextType | undefined>(undefined);
 export const CropProvider = ({ children }: { children: ReactNode }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+ 
     const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
     return (

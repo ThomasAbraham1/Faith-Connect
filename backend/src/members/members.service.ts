@@ -13,6 +13,10 @@ export class MembersService {
   ) { }
   async create(createMemberDto: CreateMemberDto) {
     try {
+      const doesUserNameExist = await this.userModel.findOne({ userName: createMemberDto.userName });
+      if (doesUserNameExist) {
+        throw Error('Username already exists');
+      }
       return await this.userModel.insertOne(createMemberDto);
     } catch (error) {
       throw error;

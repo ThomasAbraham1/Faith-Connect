@@ -45,11 +45,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       if (exception.code == 11000) {
         const field = Object.keys(exception.keyValue)[0];
         const value = exception.keyValue[field];
-        console.log("hello")
         errorCode = exception.custom?.code || 11000
         message = exception.custom?.message || `The value '${value}' already exists in the system` 
         redirectPage = exception.custom?.redirectPage
       }
+    } else{
+      message = (exception as any).message || message;
+      errorCode = (exception as any).code || errorCode;
     }
     console.log("It's happeneing in all exceptions filter")
     response.status(status).json({

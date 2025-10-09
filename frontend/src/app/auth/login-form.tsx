@@ -14,12 +14,13 @@ import api from "@/api/api";
 import { twofaMemoryChecker } from "@/services/authService";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUser } from "@/context/UserProvider";
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const location = useLocation();
-
+  const userContext = useUser();
   // const [churchname, setChurchname] = useState("");
   // const [username, setUsername] = useState("");
   // const [password, setPassword] = useState("");
@@ -70,13 +71,18 @@ export function LoginForm({
       return api.post(`/auth/login`, data)
     },
     onSuccess: async (response) => {
-      console.log(response);
+      console.log(response.data.data);
+      userContext.setChurch(response.data.data.UserInfo.church);
+      userContext.setUser(response.data.data.UserInfo.user);
       console.log("Post successful:", response.data);
       // After successfull login, check if user needs to go through 2fa in this device
       const twofaMemoryCheckResult = await twofaMemoryChecker();
       const doesDeviceExist = twofaMemoryCheckResult.data.data.doesDeviceExist;
       console.log("DoesDeviceExist:", twofaMemoryCheckResult);
-      if (doesDeviceExist) navigate("/dashboard");
+      if (doesDeviceExist) {
+        userContext.setShdInitialUserQueryRun(true);
+        navigate("/dashboard");
+      }
       else navigate("/otpMethod");
       // setValue("userName", "");
       // setValue("password", "");
@@ -209,40 +215,40 @@ export function LoginForm({
                       )}
                     </div>
 
-                    <Button type="submit" onClick={() => clearErrors("formSubmitError") } className="w-full">
-                    Login <>
-                      {mutation.isPending && (
-                        <Spinner></Spinner>
-                      )}
-                    </>
-                  </Button>
-                  {errors.formSubmitError && (
-                    <div className="text-destructive">
-                      {errors.formSubmitError.message}
-                    </div>
-                  )}
-                  {location.state?.error && (
-                    <div className="text-destructive">
-                      {location.state?.error}
-                    </div>
-                  )}
+                    <Button type="submit" onClick={() => clearErrors("formSubmitError")} className="w-full">
+                      Login <>
+                        {mutation.isPending && (
+                          <Spinner></Spinner>
+                        )}
+                      </>
+                    </Button>
+                    {errors.formSubmitError && (
+                      <div className="text-destructive">
+                        {errors.formSubmitError.message}
+                      </div>
+                    )}
+                    {location.state?.error && (
+                      <div className="text-destructive">
+                        {location.state?.error}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center text-sm">
+                    Don&apos;t have an account?{" "}
+                    <a href="/signup" className="underline underline-offset-4">
+                      Sign up
+                    </a>
+                  </div>
                 </div>
-                <div className="text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <a href="/signup" className="underline underline-offset-4">
-                    Sign up
-                  </a>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-        <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-          By clicking continue, you agree to our{" "}
-          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+              </form>
+            </CardContent>
+          </Card>
+          <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+            By clicking continue, you agree to our{" "}
+            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+          </div>
         </div>
       </div>
-    </div>
     </div >
   );
 }

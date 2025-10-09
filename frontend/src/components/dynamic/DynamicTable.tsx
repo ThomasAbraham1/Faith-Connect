@@ -111,20 +111,20 @@ export function DataTableDemo({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
+      <div className="overflow-hidden rounded-md border grid">
+        <Table className="">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className={header.column.id == "actions" ? "sticky right-0 bg-background  z-10" : ""}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -139,7 +139,7 @@ export function DataTableDemo({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-background z-10" : ""}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

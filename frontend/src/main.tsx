@@ -71,14 +71,14 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ContextProvider>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ContextProvider>
+        <ThemeProvider>
           <ToasterProvider>
             <RouterProvider router={router} />
           </ToasterProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ContextProvider>
+        </ThemeProvider>
+      </ContextProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

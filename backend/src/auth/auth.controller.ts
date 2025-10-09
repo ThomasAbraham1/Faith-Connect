@@ -33,7 +33,7 @@ export class AuthController {
     private twillioService: TwillioService,
     private readonly otpAuthService: OtpAuthService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   @HttpCode(HttpStatus.OK)
   // Login
@@ -110,6 +110,12 @@ export class AuthController {
     });
   }
 
+  @UseGuards(AuthenticatedGuard)
+  @Get('/me')
+  async getUserInfo(@Request() req) {
+    return req.user;
+  }
+
   // Veriyfing
   @UseGuards(AuthenticatedGuard)
   @Post('verifyOtp')
@@ -124,7 +130,7 @@ export class AuthController {
   }
 
   @Post('spinner')
-  async spinner(){
+  async spinner() {
     return 'May friend'
   }
 }

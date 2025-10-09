@@ -27,7 +27,16 @@ import { useEffect, type MouseEventHandler } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { PhoneInput } from "@/components/phone-input";
 import { DatePicker } from "@/components/date-picker";
+import { useUser } from "@/context/UserProvider";
+import { Textarea } from "@/components/ui/textarea";
 
+
+
+type roleRecordType = {
+  _id: string;
+  name: string;
+  Permissions: string[]
+}
 type formDataType = {
   userName: string;
   password: string;
@@ -35,7 +44,12 @@ type formDataType = {
   dateOfBirth: string;
   spiritualStatus: 'BELIEVER' | 'NON_BELIEVER' | 'SEEKER' | 'UNDECIDED';
   profilePic?: FileList | null | Blob;
-
+  role: string
+  firstName: string;
+  lastName: string;
+  fatherName: string;
+  motherName: string;
+  address: string;
 };
 
 // Children is edit icon, username and password are extracted from table and passed as default values
@@ -48,6 +62,12 @@ export const EditMembers = (props: {
   dateOfBirth: string;
   id: string;
   profilePicUrl: string;
+  roles: string;
+  fatherName: string;
+  address: string;
+  lastName: string;
+  motherName: string;
+  firstName: string;
   triggerButtonVariant:
   | "link"
   | "default"
@@ -74,21 +94,35 @@ export const EditMembers = (props: {
       phone: props.phone,
       dateOfBirth: props.dateOfBirth,
       spiritualStatus: props.spiritualStatus,
+      role: props.roles,
+      fatherName: props.fatherName,
+      motherName: props.motherName,
+      firstName: props.firstName,
+      lastName: props.lastName,
+      address: props.address,
     },
   });
   var profilePic = useWatch({ control, name: "profilePic" });
 
   const { AvatarUploadCropperContent, DynamicCropper, handleReset, setCroppedImageFunction, afterSubmitHandleReset } = useAvatarUploadHandler(setValue, control)
-  const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } =
-    useCrop();
-
+  const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } = useCrop();
+  const userContext = useUser()
   const submitHandlerFunction = async (data: formDataType) => {
     afterSubmitHandleReset()
 
     // Converting react hook form data into form data which is of Multipart type
     const formdata = new FormData();
-    formdata.append("userName", data.userName);
-    formdata.append("password", data.password);
+    formdata.append("userName", data.userName.trim());
+    formdata.append("password", data.password.trim());
+    formdata.append("spiritualStatus", data.spiritualStatus.trim());
+    formdata.append("dateOfBirth", data.dateOfBirth.trim());
+    formdata.append("phone", data.phone.trim());
+    formdata.append("address", data.address.trim());
+    formdata.append("motherName", data.motherName.trim());
+    formdata.append("fatherName", data.fatherName.trim());
+    formdata.append("lastName", data.lastName.trim());
+    formdata.append("firstName", data.firstName.trim());
+    formdata.append("roles", data.role);
     // Convert base64 string to blob
     if (croppedImage) {
       const base64 = await fetch(croppedImage);
@@ -99,6 +133,7 @@ export const EditMembers = (props: {
     const member = mutation.mutate(formdata);
   };
   const queryClient = useQueryClient();
+  console.log(props.roles)
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
       return api.patch(`/members/${props.id}`, data);
@@ -147,7 +182,7 @@ export const EditMembers = (props: {
         triggerButtonText: props.children,
         triggerButtonVariant: props.triggerButtonVariant,
       }}
-      gridConfig={{ size: 350, col: 1 }}
+      gridConfig={{ size: 550, col: 1 }}
     >
       <>
         {mutation.isPending && profilePicmutation.isPending && (
@@ -170,81 +205,169 @@ export const EditMembers = (props: {
           >
             <AvatarUploadCropperContent></AvatarUploadCropperContent>
             <AvatarUploadButton setValue={setValue} control={control} ></AvatarUploadButton>
-            <div className="grid gap-3">
-              <Label htmlFor="userName"> Username: </Label>
-              <Input id="userName"  {...register("userName", {
-                required: 'Username is required'
-              })} />
-              {errors.userName && (
-                <div className="text-red-500 text-sm">
-                  {errors.userName.message}
-                </div>
-              )}
-              <Label htmlFor="password"> Password: </Label>
-              <Input id="password" {...register("password", {
-                required: 'Password is required'
-              })} />
-              {errors.password && (
-                <div className="text-red-500 text-sm">
-                  {errors.password.message}
-                </div>
-              )}
-              <Label htmlFor="phone">Phone:</Label>
-              <Controller
-                name="phone"
-                control={control}
-                rules={{ required: "Phone is required" }}
-                render={({ field }) => (
-                  <PhoneInput value={field.value} placeholder="Enter a phone number" onChange={(value) => field.onChange(value)}></PhoneInput>
+            <div className="grid gap-6  sm:grid-cols-2 grid-rows-auto items-end">
+              <div className="grid gap-3">
+                <Label htmlFor="firstName">First Name: </Label>
+                <Input id="firstName"  {...register("firstName", {
+                  // required: 'First Name is required'
+                })} />{errors.firstName && (
+                  <div className="text-red-500 text-sm">
+                    {errors.firstName.message}
+                  </div>
                 )}
-              />
-              {errors.phone && (
-                <div className="text-red-500 text-sm">
-                  {errors.phone.message}
-                </div>
-              )}
-              <Label htmlFor="dateOfBirth">Date of birth:</Label>
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                rules={{ required: "Date of birth is required" }}
-                render={({ field }) => (
-                  <DatePicker value={field.value as any as Date} className='w-full' onChange={(value) => field.onChange(value)}></DatePicker>
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="lastName">Last name: </Label>
+                <Input id="lastName"  {...register("lastName", {
+                  // required: 'Last name is required'
+                })} />{errors.lastName && (
+                  <div className="text-red-500 text-sm">
+                    {errors.lastName.message}
+                  </div>
                 )}
-              />
-              {errors.dateOfBirth && (
-                <div className="text-red-500 text-sm">
-                  {errors.dateOfBirth.message}
-                </div>
-              )}
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="fatherName">Father Name: </Label>
+                <Input id="fatherName"  {...register("fatherName", {
+                  // required: 'Father Name is required'
+                })} />{errors.fatherName && (
+                  <div className="text-red-500 text-sm">
+                    {errors.fatherName.message}
+                  </div>
+                )}
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="motherName">Mother Name: </Label>
+                <Input id="motherName"  {...register("motherName", {
+                  // required: 'Mother Name is required'
+                })} />{errors.motherName && (
+                  <div className="text-red-500 text-sm">
+                    {errors.motherName.message}
+                  </div>
+                )}
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="userName"> Username: </Label>
+                <Input id="userName"  {...register("userName", {
+                  required: 'Username is required'
+                })} />
+                {errors.userName && (
+                  <div className="text-red-500 text-sm">
+                    {errors.userName.message}
+                  </div>
+                )}</div>
+              <div className="grid gap-3">
 
-              <Label htmlFor="spiritualStatus">Spiritual Status:</Label>
-              <Controller
-                name="spiritualStatus"
-                control={control}
-                rules={{ required: "Spiritual status is required" }}
-                render={({ field }) => (
-                  <Select value={field.value ?? ""} onValueChange={(value) => field.onChange(value)}>
-                    <SelectTrigger className=" w-full">
-                      <SelectValue placeholder="Choose spiritual status" />
-                    </SelectTrigger>
-                    <SelectContent className='w-full'>
-                      <SelectItem value="BELIEVER">BELIEVER</SelectItem>
-                      <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
-                      <SelectItem value="SEEKER">SEEKER</SelectItem>
-                      <SelectItem value="NON_BELIEVER">NON_BELIEVER</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <Label htmlFor="password"> Password: </Label>
+                <Input id="password" {...register("password", {
+                  required: 'Password is required'
+                })} />
+                {errors.password && (
+                  <div className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </div>
+                )}</div>
+              <div className="grid gap-3">
+                <Label htmlFor="address">Address: </Label>
+                <Textarea id="address"  {...register("address", {
+                  required: 'address is required'
+                })} />{errors.address && (
+                  <div className="text-red-500 text-sm">
+                    {errors.address.message}
+                  </div>
                 )}
-              />
-              {errors.spiritualStatus && (
-                <div className="text-red-500 text-sm">
-                  {errors.spiritualStatus.message}
-                </div>
-              )}
+              </div>
+              <div className="grid gap-3">
+
+                <Label htmlFor="phone">Phone:</Label>
+                <Controller
+                  name="phone"
+                  control={control}
+                  rules={{ required: "Phone is required" }}
+                  render={({ field }) => (
+                    <PhoneInput value={field.value} placeholder="Enter a phone number" onChange={(value) => field.onChange(value)}></PhoneInput>
+                  )}
+                />
+                {errors.phone && (
+                  <div className="text-red-500 text-sm">
+                    {errors.phone.message}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-3">
+
+                <Label htmlFor="dateOfBirth">Date of birth:</Label>
+                <Controller
+                  name="dateOfBirth"
+                  control={control}
+                  rules={{ required: "Date of birth is required" }}
+                  render={({ field }) => (
+                    <DatePicker value={field.value as any as Date} className='w-full' onChange={(value) => field.onChange(value)}></DatePicker>
+                  )}
+                />
+                {errors.dateOfBirth && (
+                  <div className="text-red-500 text-sm">
+                    {errors.dateOfBirth.message}
+                  </div>
+                )}</div>
+              <div className="grid gap-3">
+
+                <Label htmlFor="spiritualStatus">Spiritual Status:</Label>
+                <Controller
+                  name="spiritualStatus"
+                  control={control}
+                  rules={{ required: "Spiritual status is required" }}
+                  render={({ field }) => (
+                    <Select value={field.value ?? ""} onValueChange={(value) => field.onChange(value)}>
+                      <SelectTrigger className=" w-full">
+                        <SelectValue placeholder="Choose spiritual status" />
+                      </SelectTrigger>
+                      <SelectContent className='w-full'>
+                        <SelectItem value="BELIEVER">BELIEVER</SelectItem>
+                        <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                        <SelectItem value="SEEKER">SEEKER</SelectItem>
+                        <SelectItem value="NON_BELIEVER">NON_BELIEVER</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.spiritualStatus && (
+                  <div className="text-red-500 text-sm">
+                    {errors.spiritualStatus.message}
+                  </div>
+                )}</div>
+              <div className="grid gap-3">
+
+                <Label htmlFor="role">Roles:</Label>
+                <Controller
+                  name="role"
+                  control={control}
+                  rules={{ required: "Roles are required" }}
+                  render={({ field }) => (
+                    <Select value={field?.value ?? ""} onValueChange={(value) => field.onChange(value)}>
+                      <SelectTrigger className=" w-full">
+                        <SelectValue placeholder="Choose roles" />
+                      </SelectTrigger>
+                      <SelectContent className='w-full'>
+                        {userContext.church &&
+                          userContext.church.roles.map((roleRecord) =>
+                            <SelectItem value={roleRecord.name}>{roleRecord.name}</SelectItem>
+                          )
+                        }
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.role && (
+                  <div className="text-red-500 text-sm">
+                    {errors.role.message}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <SheetFooter>
+          <SheetFooter className="sticky bottom-0 bg-background z-10">
             <Button type="submit" className="w-full">
               Submit
             </Button>

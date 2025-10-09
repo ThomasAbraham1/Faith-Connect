@@ -45,10 +45,10 @@ export class MembersController {
     @UploadedFile() profilePic,
     @Body() createMemberDto: CreateMemberDto,
   ) {
-    console.log(createMemberDto)
+    console.log(createMemberDto);
     // Get church ID from session so as to insert member into correct church record
     const churchId = req.user.church._id;
-    console.log(profilePic)
+    console.log(profilePic);
     createMemberDto.churchId = churchId;
     if (profilePic) {
       createMemberDto.profilePic = {

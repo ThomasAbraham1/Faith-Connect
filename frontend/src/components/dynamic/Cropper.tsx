@@ -133,7 +133,7 @@ export const AvatarUploadButton = ({ setValue, control, children, isRequired }: 
     <>
       <Label htmlFor="profilePic" > Profile Picture: </Label >
       <Controller control={control} name="profilePic"
-        rules={isRequired ? { required: 'Profile Picture is required' } : {}}
+        // rules={isRequired ? { required: 'Profile Picture is required' } : {}}
 
         render={({
           field: { onChange, } }) => (
