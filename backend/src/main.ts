@@ -11,7 +11,19 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin:[ isProduction ? 'https://effervescent-beignet-60b0fd.netlify.app' : 'http://localhost:5173', 'https://faith-connect.onrender.com'],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'https://effervescent-beignet-60b0fd.netlify.app',
+        'http://localhost:5173',
+        'https://faith-connect.onrender.com',
+      ];
+      console.log('Request Origin:', origin); // Log the origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
   console.log(isProduction)
@@ -35,6 +47,7 @@ async function bootstrap() {
         maxAge: 60 * 60 * 1000 * 24 * 365,
         secure: true,
         sameSite: isProduction ? 'none' : 'lax',
+        domain: 'https://effervescent-beignet-60b0fd.netlify.app'
       },
     }),
   );
