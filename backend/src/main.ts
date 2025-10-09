@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin: isProduction ? 'http://localhost:5173' : 'http://localhost:5173',
+    origin: isProduction ? 'https://faith-connect.onrender.com/' : 'http://localhost:5173',
     credentials: true,
   });
   // Global Filter
