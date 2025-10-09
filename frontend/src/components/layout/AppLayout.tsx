@@ -30,8 +30,10 @@ export const AppLayout = () => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-      <NavHeader />
-        <Outlet></Outlet>
+        <NavHeader />
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <Outlet></Outlet>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

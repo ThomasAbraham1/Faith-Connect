@@ -179,7 +179,7 @@ export const AddMembers = (props: {
         triggerButtonText: "Add Member",
         triggerButtonVariant: props.triggerButtonVariant,
       }}
-      gridConfig={{ size: 550, col: 1 }}
+      gridConfig={{ size: 140, col: 1 }}
     >
       <>
         <form
@@ -354,7 +354,7 @@ export const AddMembers = (props: {
                       <SelectContent className='w-full'>
                         {!isRolesQueryPending &&
                           rolesData.data.map((roleRecord: roleRecordType) =>
-                            <SelectItem value={roleRecord.name}>{roleRecord.name}</SelectItem>
+                            <SelectItem key={roleRecord._id} value={roleRecord.name}>{roleRecord.name}</SelectItem>
                           )
                         }
                       </SelectContent>

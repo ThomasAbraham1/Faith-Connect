@@ -15,6 +15,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToasterProvider } from "./providers/ToasterProvider.tsx";
 import { ContextProvider } from './context/Context.tsx'
 import React from "react";
+import { SettingsPage } from './app/admin';
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
           {
             path: appRoutes.attendance.label,
             element: appRoutes.attendance.element,
+          },
+          {
+            path: appRoutes.settings.label,
+            element: appRoutes.settings.element,
           },
         ],
       },

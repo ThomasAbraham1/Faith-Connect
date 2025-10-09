@@ -107,6 +107,8 @@ export const EditMembers = (props: {
   const { AvatarUploadCropperContent, DynamicCropper, handleReset, setCroppedImageFunction, afterSubmitHandleReset } = useAvatarUploadHandler(setValue, control)
   const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } = useCrop();
   const userContext = useUser()
+  console.log(props);
+  
   const submitHandlerFunction = async (data: formDataType) => {
     afterSubmitHandleReset()
 

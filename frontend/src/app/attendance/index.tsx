@@ -202,15 +202,13 @@ export const Attendance = () => {
                     <LoadingSpinner />
                 </div>
             }
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Controller control={control} name="date" render={({ field }) =>
-                        <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => { if (value) field.onChange(format(value, 'yyyy-MM-dd')) }} />
-                    } />
-                    <DataTableDemo data={tableData} columns={columns} />
-                    <Button variant={'default'} className="w-full">Submit</Button>
-                </form>
-            </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <Controller control={control} name="date" render={({ field }) =>
+                    <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => { if (value) field.onChange(format(value, 'yyyy-MM-dd')) }} />
+                } />
+                <DataTableDemo data={tableData} columns={columns} />
+                <Button variant={'default'} className="w-full">Submit</Button>
+            </form>
         </>
     );
 }

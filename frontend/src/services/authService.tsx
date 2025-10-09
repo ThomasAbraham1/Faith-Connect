@@ -42,7 +42,7 @@ interface loginResponse {
   updated_db_document: updatedDbDocument;
 }
 
-export const handleSignupFormSubmitService = async (
+export const handleSignupFormSubmitService = (
   username: string,
   churchname: string,
   password: string,
@@ -68,27 +68,9 @@ export const handleSignupFormSubmitService = async (
     lastName: lastName
   };
 
-  const mutation = useMutation({
-    mutationFn: (data: any) => {
-      return api.post(`/auth/signup`, data);
-    },
-    onSuccess: (data) => {
-      console.log("Signup successful:", data);
-      // navigate("/otpMethod");
-      return data;
-    },
-    onError: (error: any) => console.error("Error posting data:", error.response.data)
-  });
+  
 
-  return mutation
-  try {
-    const response = await api.post(`/auth/signup`, payload);
-    console.log("Post successful:", response.data);
-    return response as AxiosResponse<any, any>;
-  } catch (error: any) {
-    console.error("Error posting data:", error.response.data);
-    throw error as AxiosResponse<any, any>;
-  }
+
 };
 // OTP request method
 export const selectOTPMethod = (method: string) => {

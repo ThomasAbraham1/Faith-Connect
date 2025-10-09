@@ -66,15 +66,16 @@ const demoGridConfig: gridConfig = {
 export function DynamicSheet({
   sheetConfig = demoSheetNaming,
   children,
-  gridConfig = demoGridConfig,
+  gridConfig,
   sheetOnOpenChange
 }: sheetType) {
+  console.log('gridConfig:', gridConfig)
   return (
     <Sheet onOpenChange={sheetOnOpenChange}>
       <SheetTrigger asChild>
         <Button variant={sheetConfig.triggerButtonVariant}>{sheetConfig.triggerButtonText}</Button>
       </SheetTrigger>
-      <SheetContent className={`w-[350px] sm:w-[${gridConfig.size}px] overflow-y-auto`}>
+      <SheetContent className={`w-80 sm:w-140 overflow-y-auto`}>
         {children}
       </SheetContent>
     </Sheet>
