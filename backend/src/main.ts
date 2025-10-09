@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin:[ isProduction ? 'https://heartfelt-cendol-1cbd6c.netlify.app' : 'http://localhost:5173', 'https://faith-connect.onrender.com'],
+    origin:[ isProduction ? 'https://effervescent-beignet-60b0fd.netlify.app' : 'http://localhost:5173', 'https://faith-connect.onrender.com'],
     credentials: true,
   });
   console.log(isProduction)
