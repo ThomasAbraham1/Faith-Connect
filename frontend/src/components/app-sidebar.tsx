@@ -11,7 +11,7 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-  CalendarCheck2 
+  CalendarCheck2
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -26,6 +26,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { appRoutes } from "@/routes";
+import { useUser } from "@/context/UserProvider";
 
 
 // This is sample data.
@@ -45,7 +46,7 @@ const data = {
       name: "Acme Corp.",
       logo: AudioWaveform,
       plan: "Startup",
-    },
+    }, 
     {
       name: "Evil Corp.",
       logo: Command,
@@ -161,9 +162,13 @@ const data = {
     //   icon: Map, 
     // },
   ],
-}; 
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const userContext = useUser()
+  data.user.email = userContext?.church?.email || "";
+  data.user.name = userContext?.user?.userName || "";
+  data.teams[0]
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

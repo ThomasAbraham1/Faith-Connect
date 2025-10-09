@@ -1,9 +1,13 @@
+import type { ReactNode } from "react"
 import { CropProvider } from "./CropProvider"
+import { UserProvider } from "./UserProvider"
 
-export const ContextProvider = ({ children }) => {
+export const ContextProvider = ({ children }: { children: ReactNode }) => {
     return (
-        <CropProvider>
-            {children}
-        </CropProvider>
+        <UserProvider>
+            <CropProvider>
+                {children}
+            </CropProvider>
+        </UserProvider>
     )
 }

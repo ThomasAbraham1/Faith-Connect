@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
 
-interface Role {
-  name: string;
-  permissions: Permission[];
-}
+// interface Role {
+//   name: string;
+//   permissions: Permission[];
+// }
 
 export enum SpiritualStatus {
   BELIEVER = 'BELIEVER',
@@ -23,7 +23,7 @@ export class CreateMemberDto {
   userName: string;
   password: string;
   churchId: Types.ObjectId;
-  roles: Role[];
+  roles: string[];
   spiritualStatus: SpiritualStatus
-  profilePic: profilePic; 
+  profilePic: profilePic;
 }

@@ -47,8 +47,10 @@ export const handleSignupFormSubmitService = async (
   churchname: string,
   password: string,
   phoneInE164: string,
-  email: string
-): Promise<AxiosResponse<any, any>> => {
+  email: string,
+  firstName: string,
+  lastName: string
+) => {
   // e.preventDefault();
 
   // let navigate = useNavigate();
@@ -62,7 +64,23 @@ export const handleSignupFormSubmitService = async (
     password: password,
     phone: phone,
     email: email,
+    firstName: firstName,
+    lastName: lastName
   };
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => {
+      return api.post(`/auth/signup`, data);
+    },
+    onSuccess: (data) => {
+      console.log("Signup successful:", data);
+      // navigate("/otpMethod");
+      return data;
+    },
+    onError: (error: any) => console.error("Error posting data:", error.response.data)
+  });
+
+  return mutation
   try {
     const response = await api.post(`/auth/signup`, payload);
     console.log("Post successful:", response.data);

@@ -19,6 +19,7 @@ import { handleSignupFormSubmitService } from "@/services/authService";
 import { useLocation, useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { PhoneInput } from "@/components/phone-input";
+import { useUser } from "@/context/UserProvider";
 
 export function SignupForm({
   className,
@@ -37,6 +38,8 @@ export function SignupForm({
     password: string;
     phone: string;
     email: string;
+    firstName: string;
+    lastName: string;
   };
   const {
     register,
@@ -53,28 +56,40 @@ export function SignupForm({
       phone: "",
     },
   });
-  const { churchname, username, email, password, phone } = watch();
+  const userContext = useUser()
+  const { churchname, username, email, password, phone, firstName, lastName } = watch();
   const location = useLocation();
   useEffect(() => {
     location.state = null
-  }, [])
+    console.log(userContext.user, userContext.church)
+  }, [userContext.user, userContext.church])
   const handleSignupFormSubmission = async (data: FormFields) => {
     const phone = data.phone;
     console.log(data);
-    const response = await handleSignupFormSubmitService(
-      username,
-      churchname,
-      password,
-      phone,
-      email
-    );
-    if (typeof response != "boolean" || typeof response != "string") {
-      navigate("/otpMethod");
+    try {
+      const response = await handleSignupFormSubmitService(
+        username,
+        churchname,
+        password,
+        phone,
+        email,
+        firstName,
+        lastName
+      );
+      if (typeof response != "boolean" || typeof response != "string") {
+        // navigate("/otpMethod");
+      }
+      userContext.setChurch(response.data.data.userInfo.church);
+      userContext.setUser(response.data.data.userInfo.user);
+      userContext.setShdInitialUserQueryRun(true);
+      // navigate("/otpMethod");
+    } catch (e) {
+      throw e;
     }
   };
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
+      <div className="flex w-full max-w-2xl flex-col gap-6">
         <a href="#" className="flex items-center gap-2 self-center font-medium">
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
             <GalleryVerticalEnd className="size-4" />
@@ -82,7 +97,7 @@ export function SignupForm({
           Faith Connect
         </a>
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-          <Card>
+          <Card className="w-full">
             <CardHeader className="text-center">
               <CardTitle className="text-xl">
                 Welcome to Faith Connect
@@ -90,8 +105,8 @@ export function SignupForm({
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(handleSignupFormSubmission)}>
-                <div className="grid gap-6">
-                  <div className="grid gap-6">
+                <div className="grid gap-6 ">
+                  <div className="grid gap-6 md:grid-cols-2">
                     <div className="grid gap-3">
                       <Label htmlFor="churchName">Church Name</Label>
                       <Input
@@ -114,6 +129,56 @@ export function SignupForm({
                       {errors.churchname && (
                         <div className="text-red-500 text-sm">
                           {errors.churchname.message}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        value={firstName}
+                        placeholder="Arelius"
+                        {...register("firstName", {
+                          required: "First Name cannot be empty",
+                          minLength: {
+                            value: 2,
+                            message: "Minimum length is 2",
+                          },
+                          maxLength: {
+                            value: 20,
+                            message: "Maximum length is 20",
+                          },
+                        })}
+                      />
+                      {errors.firstName && (
+                        <div className="text-red-500 text-sm">
+                          {errors.firstName.message}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid gap-3">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        value={lastName}
+                        placeholder="Augustine"
+                        {...register("lastName", {
+                          required: "Last Name cannot be empty",
+                          minLength: {
+                            value: 2,
+                            message: "Minimum length is 2",
+                          },
+                          maxLength: {
+                            value: 20,
+                            message: "Maximum length is 20",
+                          },
+                        })}
+                      />
+                      {errors.lastName && (
+                        <div className="text-red-500 text-sm">
+                          {errors.lastName.message}
                         </div>
                       )}
                     </div>
@@ -171,7 +236,7 @@ export function SignupForm({
                         </div>
                       )}
                     </div>
-                    <div className="grid gap-3">
+                    <div className="grid gap-3 w-full">
                       <Label htmlFor="phone">Phone</Label>
                       <Controller
                         name="phone"
@@ -190,12 +255,6 @@ export function SignupForm({
                     <div className="grid gap-3">
                       <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
-                        <a
-                          href="#"
-                          className="ml-auto text-sm underline-offset-4 hover:underline"
-                        >
-                          Forgot your password?
-                        </a>
                       </div>
                       <Input
                         id="password"
@@ -216,25 +275,31 @@ export function SignupForm({
                           },
                         })}
                       />
+                      <a
+                        href="#"
+                        className="ml-auto text-sm underline-offset-4 hover:underline"
+                      >
+                        Forgot your password?
+                      </a>
                       {errors.password && (
                         <div className="text-red-500 text-sm">
                           {errors.password.message}
                         </div>
                       )}
                     </div>
-                    <Button
-                      // disabled={!isValid}
-                      type="submit"
-                      className="w-full"
-                    >
-                      Signup
-                    </Button>
-                    {location.state?.error && (
-                      <div className="text-destructive">
-                        {location.state?.error}
-                      </div>
-                    )}
                   </div>
+                  <Button
+                    // disabled={!isValid}
+                    type="submit"
+                    className="w-full"
+                  >
+                    Signup
+                  </Button>
+                  {location.state?.error && (
+                    <div className="text-destructive">
+                      {location.state?.error}
+                    </div>
+                  )}
                   <div className="text-center text-sm">
                     Already have an account?{" "}
                     <a href="/" className="underline underline-offset-4">

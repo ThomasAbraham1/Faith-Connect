@@ -15,6 +15,7 @@ import { Alert } from "@/components/dynamic/Alert";
 import { EditMembers } from "./EditMembers";
 import { Modal } from "@/components/dynamic/Modal";
 import { ViewProfile } from "./ViewProfile";
+import { useUser } from "@/context/UserProvider";
 interface membersResponseObject {
   _id: string;
   userName: string;
@@ -27,9 +28,15 @@ interface membersResponseObject {
   phone: string;
   spiritualStatus: string;
   dateOfBirth: string;
+  address: string;
+  lastName: string;
+  firstName: string;
+  motherName: string;
+  fatherName: string;
 }
 
 export const MembersPage = () => {
+  const userContext = useUser()
   // Query
   const { isPending, error, data, isFetching } = useQuery({
     queryKey: ["membersData"],
@@ -37,7 +44,6 @@ export const MembersPage = () => {
       const response = await api.get("/members");
       console.log(response)
       return response;
-
     },
   });
 
@@ -54,20 +60,32 @@ export const MembersPage = () => {
 
   console.log("Hello myu man");
   if (!isPending && !mutation.isPending) {
+    // Take admin role ID and compare it with user data to filter members
+    const roleName = userContext.church?.roles.find((role) => role.name == "admin")?.name
+    console.log('roleName:', data)
+    // Removing admins and retrieving members only
     // Adhering to Dynamic Table data definition
-    const tableData: Member[] = data?.data.data.map(
+    const tableData: Member[] = data?.data.data.filter((member: membersResponseObject) => !member.roles.includes(roleName || '')).map(
       (value: membersResponseObject, index: number) => {
+        // Find role name for user role IDs
+        var userRoles: string;
+        // userRoles = userContext.church?.roles.filter((role) => value.roles.includes(role._id)).map((role) => role.name).join(", ") || "No Role"
+        // console.log(userRoles);
         return {
           id: value._id,
           username: value.userName,
           password: value.password,
           phone: value.phone,
+          role: value.roles.length > 1 ? value.roles.join(", ") : value.roles[0],
           spiritualStatus: value.spiritualStatus,
           dateOfBirth: value.dateOfBirth,
-
+          firstName: value.firstName,
+          lastName: value.lastName,
+          fatherName: value.fatherName,
+          motherName: value.motherName,
+          address: value.address,
           profilePicUrl: `/uploads/${value.profilePic?.profilePicName
             }`,
-          // value.roles.join(","),
         };
       }
     ) || [];
@@ -155,6 +173,72 @@ export const MembersPage = () => {
         },
       },
       {
+        accessorKey: "firstName",
+        header: () => <div className="text-right">First Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("firstName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "lastName",
+        header: () => <div className="text-right">Last Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("lastName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "fatherName",
+        header: () => <div className="text-right">Father's Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("fatherName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "motherName",
+        header: () => <div className="text-right">Mother's Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("motherName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "address",
+        header: () => <div className="text-right">Address</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("address")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "role",
+        header: () => <div className="text-right">Role</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("role")}
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "actions",
         header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => {
@@ -177,6 +261,7 @@ export const MembersPage = () => {
                 phone={row.getValue("phone")}
                 spiritualStatus={row.getValue("spiritualStatus")}
                 profilePicUrl={row.getValue("profilePicUrl")}
+                roles={row.getValue("role")}
                 triggerButtonVariant={"ghost"}
               >
                 <SquarePen></SquarePen>
@@ -191,6 +276,11 @@ export const MembersPage = () => {
                 <ViewProfile userName={row.getValue("username")}
                   dateOfBirth={row.getValue("dateOfBirth")}
                   phone={row.getValue("phone")}
+                  address={row.getValue("address")}
+                  firstName={row.getValue("firstName")}
+                  lastName={row.getValue("lastName")}
+                  fatherName={row.getValue("fatherName")}
+                  motherName={row.getValue("motherName")}
                   spiritualStatus={row.getValue("spiritualStatus")}
                   profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
               </Modal>
@@ -268,7 +358,7 @@ export const MembersPage = () => {
           {/* <DataTable
             table={tableCreator<ColumnDef>({ data: data, columns: columns })}
           /> */}
-          <DataTableDemo data={tableData} columns={columns} columnVisibilityObject={{ profilePicUrl: false }} />
+          <DataTableDemo data={tableData} columns={columns} columnVisibilityObject={{ profilePicUrl: false, address: false }} />
         </div>
       </>
     );
