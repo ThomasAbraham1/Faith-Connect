@@ -22,7 +22,7 @@ api.interceptors.response.use(
       if (navigate) {
         navigate("/signup", {
           state: { error: error.response.data.message },
-        });
+        }); 
       }
     }
     return Promise.reject(error);

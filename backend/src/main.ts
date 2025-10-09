@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin: isProduction ? 'https://faith-connect.onrender.com' : 'http://localhost:5173',
+    origin:[ isProduction ? 'https://faith-connect.onrender.com' : 'http://localhost:5173', 'http://localhost'],
     credentials: true,
   });
   console.log(isProduction)
@@ -33,6 +33,8 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
+        secure: true,
+        sameSite: isProduction ? 'none' : 'lax',
       },
     }),
   );
