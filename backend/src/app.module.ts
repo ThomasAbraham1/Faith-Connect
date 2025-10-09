@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { TwilioModule } from 'nestjs-twilio';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TwillioModule } from './otp/twillio/twillio.module';
 import { OtpAuthModule } from './otp/otp-auth/otp-auth.module';
 import { EmailModule } from './otp/email/email.module';
@@ -16,11 +16,25 @@ import { MembersModule } from './members/members.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AttendanceModule } from './attendance/attendance.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+    }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
-    MongooseModule.forRoot('mongodb://mongodb:27017/hello?retryWrites=true&w=majority'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        console.log('Connecting to MongoDB with URI:', configService.get<string>('MONGO_DB_URI'), process.env.NODE_ENV);
+        const uri = configService.get<string>('MONGO_DB_URI');
+        if (!uri) throw new Error('MONGO_DB_URI is not defined');
+        return { uri }; 
+      },
+      inject: [ConfigService],
+    }),
     UsersModule,
     AuthModule,
     DatabaseModule,
@@ -34,8 +48,9 @@ import { AttendanceModule } from './attendance/attendance.module';
     ChurchesModule,
     MembersModule,
     AttendanceModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -81,7 +81,7 @@ export const ViewProfile = ({ userName, profilePicUrl, phone, spiritualStatus, d
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Mother's Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{lastName || "N/A"}</p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{motherName || "N/A"}</p>
             </div>
           </div>
 

@@ -65,7 +65,10 @@ export const MembersPage = () => {
     console.log('roleName:', data)
     // Removing admins and retrieving members only
     // Adhering to Dynamic Table data definition
-    const tableData: Member[] = data?.data.data.filter((member: membersResponseObject) => !member.roles.includes(roleName || '')).map(
+    const tableData: Member[] = data?.data.data.filter((member: membersResponseObject) => {
+      console.log('member.roles:', member.roles, 'roleName:', roleName)
+      return !member.roles.includes(roleName || '') ? true : false
+    }).map(
       (value: membersResponseObject, index: number) => {
         // Find role name for user role IDs
         var userRoles: string;
@@ -89,6 +92,8 @@ export const MembersPage = () => {
         };
       }
     ) || [];
+
+    console.log(JSON.stringify(tableData))
 
     const columns: ColumnDef<Member>[] = [
       {
@@ -258,6 +263,11 @@ export const MembersPage = () => {
                 userName={row.getValue("username")}
                 password={row.getValue("password")}
                 dateOfBirth={row.getValue("dateOfBirth")}
+                address={row.getValue("address")}
+                firstName={row.getValue("firstName")}
+                lastName={row.getValue("lastName")}
+                fatherName={row.getValue("fatherName")}
+                motherName={row.getValue("motherName")}
                 phone={row.getValue("phone")}
                 spiritualStatus={row.getValue("spiritualStatus")}
                 profilePicUrl={row.getValue("profilePicUrl")}
@@ -353,13 +363,11 @@ export const MembersPage = () => {
             tableConfig={tableConfig}
             ChildComponent={AddMembers}
             /> */}
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <AddMembers triggerButtonVariant={"outline"} />
           {/* <DataTable
             table={tableCreator<ColumnDef>({ data: data, columns: columns })}
           /> */}
           <DataTableDemo data={tableData} columns={columns} columnVisibilityObject={{ profilePicUrl: false, address: false }} />
-        </div>
       </>
     );
   }

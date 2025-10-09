@@ -1,3 +1,4 @@
+import { SettingsPage } from "./app/admin";
 import { Attendance } from "./app/attendance";
 import { MembersPage } from "./app/members";
 
@@ -13,5 +14,11 @@ export const appRoutes = {
         path: "/dashboard/attendance",
         label: "Attendance",
         element: <Attendance />,
+    },
+    settings: 
+    {
+        path: "/dashboard/settings",
+        label: "Settings",
+        element: <SettingsPage />,
     }
 }

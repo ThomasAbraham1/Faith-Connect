@@ -93,7 +93,7 @@ export class AuthService {
         const userRole = churchInsertResult.roles.find(role => (role.name == 'admin' || role.name == 'Admin' || role.name == 'ADMIN'));
         console.log(userRole)
         if(!userRole) throw new BadRequestException('No admin role found in church roles')
-        userInfo.roles = [userRole._id as any as string];
+        userInfo.roles = [userRole.name];
         console.log(userInfo)
         // userInfo.roles = ['Admin']; // Default role assignment
         const userInsertResult = await this.usersService.createUser(userInfo, session);

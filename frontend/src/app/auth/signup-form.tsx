@@ -20,6 +20,10 @@ import { useLocation, useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { PhoneInput } from "@/components/phone-input";
 import { useUser } from "@/context/UserProvider";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/api/api";
+import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import { flushSync } from "react-dom";
 
 export function SignupForm({
   className,
@@ -33,8 +37,8 @@ export function SignupForm({
   let navigate = useNavigate();
 
   type FormFields = {
-    username: string;
-    churchname: string;
+    userName: string;
+    churchName: string;
     password: string;
     phone: string;
     email: string;
@@ -49,43 +53,34 @@ export function SignupForm({
     formState: { isSubmitted, isValid, errors },
   } = useForm<FormFields>({
     defaultValues: {
-      churchname: "",
-      username: "",
+      churchName: "",
+      userName: "",
       email: "",
       password: "",
       phone: "",
     },
   });
   const userContext = useUser()
-  const { churchname, username, email, password, phone, firstName, lastName } = watch();
+  const { churchName, userName, email, password, phone, firstName, lastName } = watch();
   const location = useLocation();
   useEffect(() => {
-    location.state = null
-    console.log(userContext.user, userContext.church)
-  }, [userContext.user, userContext.church])
+    userContext?.setShdInitialUserQueryRun(false)
+  }, [])
+  const mutation = useMutation({
+    mutationFn: (data: any) => {
+      return api.post(`/auth/signup`, data);
+    },
+    onSuccess: (data) => {
+      console.log("Signup successful:", data);
+      navigate("/otpMethod");
+      console.log(data);
+    },
+    onError: (error: any) => { throw error.response.data, navigate('/') }
+  });
   const handleSignupFormSubmission = async (data: FormFields) => {
     const phone = data.phone;
     console.log(data);
-    try {
-      const response = await handleSignupFormSubmitService(
-        username,
-        churchname,
-        password,
-        phone,
-        email,
-        firstName,
-        lastName
-      );
-      if (typeof response != "boolean" || typeof response != "string") {
-        // navigate("/otpMethod");
-      }
-      userContext.setChurch(response.data.data.userInfo.church);
-      userContext.setUser(response.data.data.userInfo.user);
-      userContext.setShdInitialUserQueryRun(true);
-      // navigate("/otpMethod");
-    } catch (e) {
-      throw e;
-    }
+    mutation.mutate(data)
   };
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
@@ -112,9 +107,9 @@ export function SignupForm({
                       <Input
                         id="churchName"
                         type="text"
-                        value={churchname}
+                        value={churchName}
                         placeholder="Bethel Church"
-                        {...register("churchname", {
+                        {...register("churchName", {
                           required: "Church name cannot be empty.",
                           minLength: {
                             value: 2,
@@ -126,9 +121,9 @@ export function SignupForm({
                           },
                         })}
                       />
-                      {errors.churchname && (
+                      {errors.churchName && (
                         <div className="text-red-500 text-sm">
-                          {errors.churchname.message}
+                          {errors.churchName.message}
                         </div>
                       )}
                     </div>
@@ -187,9 +182,9 @@ export function SignupForm({
                       <Input
                         id="userName"
                         type="text"
-                        value={username}
+                        value={userName}
                         placeholder="PastorJeff"
-                        {...register("username", {
+                        {...register("userName", {
                           required: "User name cannot be empty",
                           minLength: {
                             value: 2,
@@ -201,9 +196,9 @@ export function SignupForm({
                           },
                         })}
                       />
-                      {errors.username && (
+                      {errors.userName && (
                         <div className="text-red-500 text-sm">
-                          {errors.username.message}
+                          {errors.userName.message}
                         </div>
                       )}
                     </div>
@@ -294,6 +289,11 @@ export function SignupForm({
                     className="w-full"
                   >
                     Signup
+                    <>
+                      {mutation.isPending && (
+                        <Spinner></Spinner>
+                      )}
+                    </>
                   </Button>
                   {location.state?.error && (
                     <div className="text-destructive">

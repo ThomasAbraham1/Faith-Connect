@@ -65,6 +65,9 @@ export function LoginForm({
     refresh_token: string;
   }
 
+  useEffect(() => {
+    userContext?.setShdInitialUserQueryRun(false)
+  }, [])
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: (data: any) => {

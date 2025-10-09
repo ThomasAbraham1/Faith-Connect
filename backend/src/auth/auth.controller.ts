@@ -110,7 +110,7 @@ export class AuthController {
     });
   }
 
-  @UseGuards(AuthenticatedGuard)
+  // @UseGuards(AuthenticatedGuard)
   @Get('/me')
   async getUserInfo(@Request() req) {
     return req.user;

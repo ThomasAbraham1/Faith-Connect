@@ -37,7 +37,7 @@ const userContext = createContext<userContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
-    const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(false);
+    const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(true);
     const [church, setChurch] = React.useState<ChurchDocumentType | null>(null)
     const [user, setUser] = React.useState<UserDocumentType | null>(null)
     useEffect(() => {
@@ -50,7 +50,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 const response = await api.get('/auth/me');
                 setChurch(response.data.data.church)
                 setUser(response.data.data.user)
-                console.log(response)
+                console.log(response) 
                 return response
             } catch (error: any) {
                 toast.error(error.response.data.data.message || 'Error fetching user data')

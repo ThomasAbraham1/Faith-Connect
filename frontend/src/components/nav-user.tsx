@@ -1,5 +1,5 @@
 "use client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   BadgeCheck,
@@ -7,6 +7,7 @@ import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
+  Settings,
   Sparkles,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { logout } from "@/services/authService";
+import { appRoutes } from "@/routes";
 
 export function NavUser({
   user,
@@ -38,12 +40,12 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const navigate =useNavigate()
+  const navigate = useNavigate()
 
   // Logout handler
   const logoutHandler = async () => {
     const result = await logout();
-    if(result){
+    if (result) {
       navigate("/")
     }
   };
@@ -103,6 +105,12 @@ export function NavUser({
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
+              <Link to={appRoutes.settings.path}>
+                <DropdownMenuItem>
+                  <Settings />
+                  Settings
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem>
                 <Bell />
                 Notifications
