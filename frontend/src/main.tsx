@@ -28,8 +28,12 @@ const router = createBrowserRouter([
         element: <LoginForm />,
       },
       {
-        path: "signup",
+        path: "signupp",
         element: <Hello />,
+      },
+      {
+        path: "monkey",
+        element: <SignupForm />,
       },
       {
         path: "otp/:otpMethod",
