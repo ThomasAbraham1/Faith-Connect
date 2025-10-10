@@ -35,6 +35,7 @@ async function bootstrap() {
         maxAge: 60 * 60 * 1000 * 24 * 365,
         secure: true,
         httpOnly: true,
+        sameSite: 'none',
         domain: '.faithconnect.store',
       },
     }),
