@@ -9,7 +9,7 @@ handlers:
     upload: dist/assets/.*\.(js|css|png|jpg|jpeg|svg|ico|json|woff|woff2|ttf|eot)$
     secure: always
     http_headers:
-      Access-Control-Allow-Origin: "https://faith-connect-backend-1074840511461.asia-south1.r.appspot.com"
+      Access-Control-Allow-Origin: "https://faith-connect-backend-1074840511461.asia-south1.run.app"
   - url: /.*
     static_files: dist/index.html
     upload: dist/index.html
