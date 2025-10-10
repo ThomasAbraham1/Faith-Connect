@@ -2,13 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
+import { NestExpressApplication } from "@nestjs/platform-express"
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
     origin: 'https://www.faithconnect.store',
@@ -26,6 +27,8 @@ async function bootstrap() {
     throw new Error('SESSION_SECRET environment variable is not set');
   }
   // Sesssion intitialization
+
+  app.set('trust proxy', 1);
   app.use(
     session({
       secret: secret,
