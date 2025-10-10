@@ -16,6 +16,7 @@ async function bootstrap() {
         'https://effervescent-beignet-60b0fd.netlify.app',
         'http://localhost:5173',
         'https://faith-connect.onrender.com',
+      'https://faithconnect-474707.el.r.appspot.com'
       ];
       console.log('Request Origin:', origin); // Log the origin
       if (!origin || allowedOrigins.includes(origin)) {
