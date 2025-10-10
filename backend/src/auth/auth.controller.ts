@@ -133,4 +133,12 @@ export class AuthController {
   async spinner() {
     return 'May friend'
   }
+
+  @Get('session')
+  testSession(@Req() req) {
+    req.session.test = 'Hello, Session!';
+    console.log('Session:', req.session); // Debug session
+    return { message: 'Session set', session: req.session };
+  }
 }
+
