@@ -135,9 +135,20 @@ export class AuthController {
   }
 
   @Get('session')
-  testSession(@Req() req) {
+  async testSession(@Req() req) {
     req.session.test = 'Hello, Session!';
-    console.log('Session:', req.session); // Debug session
+    console.log('Session before save:', req.session);
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          reject(err);
+        } else {
+          console.log('Session saved:', req.session);
+          resolve('hello');
+        }
+      });
+    });
     return { message: 'Session set', session: req.session };
   }
 }

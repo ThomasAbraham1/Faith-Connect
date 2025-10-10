@@ -34,6 +34,8 @@ async function bootstrap() {
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
         secure: false,
+        httpOnly: true,
+        domain: '.faithconnect.store',
       },
     }),
   );
