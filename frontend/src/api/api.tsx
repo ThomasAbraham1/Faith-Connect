@@ -2,6 +2,7 @@ import axios from "axios";
 import { getNavigation } from "./navigationRef";
 
 const baseURL = import.meta.env.VITE_APP_API_URL;
+console.log(baseURL)
 const api = axios.create({
   baseURL: `${baseURL}`,
   withCredentials: true,

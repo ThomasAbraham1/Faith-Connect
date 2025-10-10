@@ -16,8 +16,8 @@ async function bootstrap() {
         'https://effervescent-beignet-60b0fd.netlify.app',
         'http://localhost:5173',
         'https://faith-connect.onrender.com',
-      'https://faithconnect-474707.el.r.appspot.com',
-      'https://www.faithconnect.store',
+        'https://faithconnect-474707.el.r.appspot.com',
+        'https://www.faithconnect.store',
       ];
       console.log('Request Origin:', origin); // Log the origin
       if (!origin || allowedOrigins.includes(origin)) {
@@ -26,6 +26,7 @@ async function bootstrap() {
         callback(new Error('Not allowed by CORS'));
       }
     },
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
     credentials: true,
   });
   console.log(isProduction)
@@ -48,7 +49,7 @@ async function bootstrap() {
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
         secure: isProduction ? true : false,
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite:'lax',
       },
     }),
   );
