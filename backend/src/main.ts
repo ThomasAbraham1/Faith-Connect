@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin: 'https://www.faithconnect.store',
+    origin: ['https://www.faithconnect.store', 'https://faith-connect-backend-1074840511461.asia-south1.run.app'],
     credentials: true,
   });
   console.log(isProduction)
