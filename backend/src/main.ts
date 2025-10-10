@@ -39,7 +39,6 @@ async function bootstrap() {
         secure: true,
         httpOnly: true,
         sameSite: 'none',
-        domain: '.faithconnect.store',
       },
     }),
   );
@@ -47,6 +46,7 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT || 8080; // App Engine requires 8080
+  await app.listen(port);
 }
 bootstrap();
