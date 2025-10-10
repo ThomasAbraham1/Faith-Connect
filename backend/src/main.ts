@@ -45,16 +45,19 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
-        secure: true,
+        secure: isProduction ? true : false,
         sameSite: isProduction ? 'none' : 'lax',
-        domain: 'https://effervescent-beignet-60b0fd.netlify.app'
       },
     }),
   );
+
   // console.log(process.env.JWT_SECRET)
   app.use(passport.initialize());
   app.use(passport.session());
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const host = '0.0.0.0'; // Required for Cloud Run
+  await app.listen(port, host);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  await app.listen(process.env.PORT ?? 3000);
+  // await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
