@@ -71,7 +71,8 @@ export function LoginForm({
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: (data: any) => {
-      return api.post(`/auth/session`, data)
+      // return api.post(`/auth/login`, data)
+      return api.get('/auth/session')
     },
     onSuccess: async (response) => {
       console.log(response.data.data);
