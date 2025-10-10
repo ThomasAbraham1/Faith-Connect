@@ -12,11 +12,11 @@ FROM node:20-alpine AS runtime
 RUN getent group node || addgroup --gid 1001 --system node && \
     getent passwd node || adduser --uid 1001 --system --shell /sbin/nologin --ingroup node node
 WORKDIR /app
-# Create public directory and set ownership
 RUN mkdir -p /app/public && chown -R node:node /app/public
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/package*.json ./
 USER node
-EXPOSE 3000
+#Use $PORT (Cloud Run sets to 8080)
+EXPOSE $PORT   
 CMD ["npm", "run", "start:prod"]
