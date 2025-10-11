@@ -47,6 +47,7 @@ export class OtpAuthService {
         );
       }
       const isValid = authenticator.verify({ token, secret });
+      const isProduction = process.env.NODE_ENV == 'production';
 
       // Calling JWT service for REMEMBER DEVICE token
 
@@ -59,6 +60,9 @@ export class OtpAuthService {
           rememberDeviceToken: rememberDeviceToken,
         });
         responseObj.cookie('rememberDeviceToken', rememberDeviceToken, {
+          secure: isProduction, // HTTPS only in prod
+          httpOnly: true, // Prevent JS access
+          sameSite: isProduction ? 'none' : 'lax', // Lax for local dev
           maxAge: 1000 * 60 * 60 * 24 * 365,
         });
       }
