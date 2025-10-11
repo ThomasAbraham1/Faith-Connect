@@ -38,6 +38,8 @@ export class User {
   roles: string[];
   @Prop({ type: ProfilePic })
   profilePic: ProfilePic;
+  @Prop({})
+  signature: string;
 }
 export const userSchema = SchemaFactory.createForClass(User);
 

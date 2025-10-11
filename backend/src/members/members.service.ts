@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -78,5 +78,33 @@ export class MembersService {
 
   deleteProfilePicture(profilePicPath: string) {
 
+  }
+
+  // Signature related functions
+  // Find Signature
+  async findSignature(churchId: string) {
+    try {
+      const result = await this.userModel.findOne({
+        churchId: churchId, roles: {
+          $in: ['pastor']
+        }
+      }, { signature: 1, _id: 1 });
+      if (!result)
+        throw new NotFoundException('Please create a member with pastor role first - For pastors signature')
+      return result
+    } catch (e) {
+      throw e
+    }
+  }
+  //Add signature
+  async createSignature(signaturePath, userId) {
+    try {
+      const result = await this.userModel.findOneAndUpdate({ _id: userId }, { signature: signaturePath }, {
+        new: true
+      })
+      return result
+    } catch (error) {
+      throw error
+    }
   }
 }

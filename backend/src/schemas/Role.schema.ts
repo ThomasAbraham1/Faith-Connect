@@ -4,7 +4,7 @@ import { Permission } from './Permission.schema'; // Assuming permission.schema.
 
 @Schema({ _id: true })
 export class Role extends Document {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   name: string; // e.g., 'Admin', 'Editor', 'Viewer'
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Permission' }] })

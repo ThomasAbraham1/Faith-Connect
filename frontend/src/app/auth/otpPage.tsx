@@ -20,7 +20,7 @@ export function InputOTPControlled() {
   const navigate = useNavigate();
   const [value, setValue] = React.useState("");
   const { countdown, start, reset, pause, isRunning } = useCountdownTimer({
-    timer: 1000 * 5,
+    timer: 1000 * 60,
   });
   React.useEffect(() => start(), [])
   const { otpMethod = '' } = useParams<string>()
@@ -68,7 +68,7 @@ export function InputOTPControlled() {
         <div className="text-center text-sm">
           {value === "" ? (
             <>
-              Enter your one-time password. <br /> Please check your phone{" "}
+              Enter your one-time password. <br /> Please check your phone or inbox{" "}
             </>
           ) : (
             <>You entered: {value}</>

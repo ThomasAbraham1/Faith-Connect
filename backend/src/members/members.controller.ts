@@ -20,7 +20,7 @@ import { diskStorage } from 'multer';
 import { profile } from 'console';
 import { join } from 'path';
 
-@UseGuards(AuthenticatedGuard)
+// @UseGuards(AuthenticatedGuard)
 @Controller('members')
 export class MembersController {
   constructor(private readonly membersService: MembersService) { }
@@ -99,5 +99,39 @@ export class MembersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.membersService.remove(id);
+  }
+
+  // Signature post
+  @Post('settings/signature')
+  @UseInterceptors(
+    FileInterceptor('signature', {
+      storage: diskStorage({
+        destination: join(__dirname, '..', '..', 'public', 'signatures'),
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${file.originalname}.png`);
+        },
+      }),
+    }),
+  )
+  createSignature(@Body() createSignatureDto, @UploadedFile() signature) {
+    console.log(__dirname, join(__dirname, '..', '..', 'public', 'uploads'))
+    console.log(signature);
+    const userId = createSignatureDto.userId;
+    const signaturePath = signature?.path;
+    return this.membersService.createSignature(signaturePath, userId)
+    // return this.settingsService.createSignature(createSettingDto);
+  }
+
+  // find signature
+  @Get('settings/signature')
+  findSignature(@Req() req) {
+    console.log("HELLo")
+    const churchId = req.user.church._id;
+    console.log(churchId)
+    return this.membersService.findSignature(churchId);
   }
 }

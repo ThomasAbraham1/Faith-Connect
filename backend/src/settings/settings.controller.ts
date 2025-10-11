@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
@@ -41,7 +41,7 @@ export class SettingsController {
   @UseInterceptors(
     FileInterceptor('signature', {
       storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'public', 'uploads'),
+        destination: join(__dirname, '..', '..', 'public', 'signatures'),
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
@@ -52,8 +52,9 @@ export class SettingsController {
       }),
     }),
   )
-  createSignature(@Body() createSettingDto: CreateSettingDto) {
+  createSignature(@Body() createSettingDto: CreateSettingDto, @UploadedFile() signature) {
     console.log(__dirname, join(__dirname, '..', '..', 'public', 'uploads'))
+    console.log(signature)
     // return this.settingsService.createSignature(createSettingDto);
   }
 }
