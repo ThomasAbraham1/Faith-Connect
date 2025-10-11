@@ -15,8 +15,6 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToasterProvider } from "./providers/ToasterProvider.tsx";
 import { ContextProvider } from './context/Context.tsx'
 import React from "react";
-import { SettingsPage } from './app/admin';
-import { Hello } from "./app/auth/hello.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,13 +27,13 @@ const router = createBrowserRouter([
       },
       {
         path: "Signup",
-        element: <Hello />,
+        element: <SignupForm />, 
       },
       {
         path: "monkey",
         element: <SignupForm />,
       },
-      {
+      { 
         path: "otp/:otpMethod",
         element: <InputOTPControlled />,
       },

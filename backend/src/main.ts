@@ -12,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com'],
+    origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com', 'http://localhost:5173'],
     credentials: true,
   });
   console.log(isProduction)
@@ -28,7 +28,6 @@ async function bootstrap() {
   }
   // Sesssion intitialization
 
-  app.set('trust proxy', 1);
   app.use(
     session({
       secret: secret,
@@ -36,17 +35,19 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
-        secure: true,
-        httpOnly: true,
-        sameSite: 'none',
+        secure: isProduction ? true: false,
+        httpOnly: true, 
+        sameSite: isProduction ? 'none' : 'lax',
       },
     }),
   );
+  app.set('trust proxy', 1);
   // console.log(process.env.JWT_SECRET)
   app.use(passport.initialize());
   app.use(passport.session());
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  const port = process.env.PORT || 8080; // App Engine requires 8080
-  await app.listen(port);
+  const port = process.env.PORT || 3000; // App Engine requires 8080
+  console.log(port)
+  app.listen(port);
 }
 bootstrap();
