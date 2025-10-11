@@ -60,8 +60,6 @@ export class OtpAuthService {
         });
         responseObj.cookie('rememberDeviceToken', rememberDeviceToken, {
           maxAge: 1000 * 60 * 60 * 24 * 365,
-          secure: true, // only over HTTPS in prod
-          sameSite: 'strict',
         });
       }
       console.log('IsOtpValid:', isValid)

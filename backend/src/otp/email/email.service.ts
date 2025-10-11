@@ -11,7 +11,7 @@ export class EmailService {
   constructor(
     private readonly otpService: OtpAuthService,
     private readonly htmlcontentGeneratorService: htmlContentGenerator,
-  ) {}
+  ) { }
 
   async sendEmail(user: UserDocument, email: string) {
     const userId = user._id;
@@ -28,7 +28,9 @@ export class EmailService {
 
     // Config - Nodemailer with email credentials
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587, // Use 587 for TLS
+      secure: false, // TLS for port 587
       auth: {
         user: 'cta102938@gmail.com',
         pass: process.env.GOOGLE_APP_PASSWORD,
