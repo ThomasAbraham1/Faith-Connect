@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
 
-export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant }) {
+export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant, modelTitle, modelDescription }) {
     const handlePrint = () => {
         window.print();
     };
@@ -14,9 +14,9 @@ export function Modal({ open, onOpenChange, children, triggerButtonContent, trig
             </DialogTrigger>
             <DialogContent className="max-w-md p-6 print:block print:shadow-none print:border-none">
                 <DialogHeader className="print:hidden ">
-                    <DialogTitle className="text-xl font-semibold text-center">Profile Information</DialogTitle>
+                    <DialogTitle className="text-xl font-semibold text-center">{modelTitle}</DialogTitle>
                     <DialogDescription>
-                        Click on the button below to print the profile information
+                        {modelDescription}
                     </DialogDescription>
                 </DialogHeader>
                 {children}

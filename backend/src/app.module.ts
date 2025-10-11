@@ -15,7 +15,7 @@ import { ChurchesModule } from './churches/churches.module';
 import { MembersModule } from './members/members.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { AttendanceModule } from './attendance/attendance.module';
+import { AttendanceModule } from './attendance/attendance.module'; 
 import { SettingsModule } from './settings/settings.module';
 
 @Module({

@@ -79,10 +79,13 @@ export class AuthService {
 
         // // Insert Church
         // console.log('Inserting church...');
+        console.log("Maybe heree?")
+
         const churchInsertResult = await this.churchesService.create(
           { churchName, email, phone },
           session, // pass the session
         );
+        console.log("And not past it?")
         // const churchInsertResult = await this.churchModel.insertOne({ churchName, email, phone }, { session })
         // userInfo.churchId = churchInsertResult._id;
 
@@ -92,10 +95,11 @@ export class AuthService {
         userInfo.churchId = churchInsertResult._id;
         const userRole = churchInsertResult.roles.find(role => (role.name == 'admin' || role.name == 'Admin' || role.name == 'ADMIN'));
         console.log(userRole)
-        if(!userRole) throw new BadRequestException('No admin role found in church roles')
+        if (!userRole) throw new BadRequestException('No admin role found in church roles')
         userInfo.roles = [userRole.name];
-        console.log(userInfo)
+        console.log(userInfo) 
         // userInfo.roles = ['Admin']; // Default role assignment
+        console.log("So errors happening in users document")
         const userInsertResult = await this.usersService.createUser(userInfo, session);
         // const userInsertResult = await this.userModel.insertOne(userInfo, { session });
 

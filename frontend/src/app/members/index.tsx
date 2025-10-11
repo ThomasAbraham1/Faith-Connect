@@ -282,7 +282,7 @@ export const MembersPage = () => {
                 }}>edit</Button> */}
               </EditMembers>
               {/* View button */}
-              <Modal triggerButtonContent={<Eye />} triggerButtonVariant={"ghost"}>
+              <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
                 <ViewProfile userName={row.getValue("username")}
                   dateOfBirth={row.getValue("dateOfBirth")}
                   phone={row.getValue("phone")}
@@ -363,11 +363,11 @@ export const MembersPage = () => {
             tableConfig={tableConfig}
             ChildComponent={AddMembers}
             /> */}
-          <AddMembers triggerButtonVariant={"outline"} />
-          {/* <DataTable
+        <AddMembers triggerButtonVariant={"outline"} />
+        {/* <DataTable
             table={tableCreator<ColumnDef>({ data: data, columns: columns })}
           /> */}
-          <DataTableDemo data={tableData} columns={columns} columnVisibilityObject={{ profilePicUrl: false, address: false }} />
+        <DataTableDemo data={tableData} columns={columns} columnVisibilityObject={{ profilePicUrl: false, address: false }} />
       </>
     );
   }
