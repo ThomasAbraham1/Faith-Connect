@@ -127,6 +127,8 @@ export const EditMembers = (props: {
     formdata.append("roles", data.role);
     // Convert base64 string to blob
     if (croppedImage) {
+      console.log("LJASLDJASLKDASLKDLKASJL")
+      console.log(croppedImage)
       const base64 = await fetch(croppedImage);
       const blobImage = await base64.blob();
       // console.log(blobImage)

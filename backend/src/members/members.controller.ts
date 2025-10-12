@@ -19,8 +19,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { profile } from 'console';
 import { join } from 'path';
+import { SignatureDto } from './dto/signature.dto';
 
-// @UseGuards(AuthenticatedGuard)
+@UseGuards(AuthenticatedGuard)
 @Controller('members')
 export class MembersController {
   constructor(private readonly membersService: MembersService) { }
@@ -120,9 +121,14 @@ export class MembersController {
   createSignature(@Body() createSignatureDto, @UploadedFile() signature) {
     console.log(__dirname, join(__dirname, '..', '..', 'public', 'uploads'))
     console.log(signature);
-    const userId = createSignatureDto.userId;
+    const userId = createSignatureDto?.userId;
     const signaturePath = signature?.path;
-    return this.membersService.createSignature(signaturePath, userId)
+    const signaturePicName = signature?.filename;
+    const signatureInfo: SignatureDto = { 
+      signaturePicName: signaturePicName,
+      signaturePicPath: signaturePath
+    } 
+    return this.membersService.createSignature(signatureInfo, userId )
     // return this.settingsService.createSignature(createSettingDto);
   }
 

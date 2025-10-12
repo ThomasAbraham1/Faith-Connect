@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/schemas/User.schema';
 import { Model } from 'mongoose';
 import * as fs from 'fs';
+import { Signature } from 'src/schemas/Signature.schema';
+import { SignatureDto } from './dto/signature.dto';
 
 @Injectable()
 export class MembersService {
@@ -15,7 +17,7 @@ export class MembersService {
     try {
       const doesUserNameExist = await this.userModel.findOne({ userName: createMemberDto.userName });
       if (doesUserNameExist) {
-        throw Error('Username already exists');
+        throw new ConflictException('Username already exists');
       }
       return await this.userModel.insertOne(createMemberDto);
     } catch (error) {
@@ -97,9 +99,9 @@ export class MembersService {
     }
   }
   //Add signature
-  async createSignature(signaturePath, userId) {
+  async createSignature(signature: SignatureDto, userId) {
     try {
-      const result = await this.userModel.findOneAndUpdate({ _id: userId }, { signature: signaturePath }, {
+      const result = await this.userModel.findOneAndUpdate({ _id: userId }, { signature }, {
         new: true
       })
       return result
