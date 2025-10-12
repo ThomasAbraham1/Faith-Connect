@@ -28,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message = 'Something went wrong';
     let errorCode = 'INTERNAL_ERROR';
     let redirectPage = ''
-    console.log(exception)
+    console.log(exception);
     if (exception instanceof HttpException) {
       console.log("HELLOASDAS")
       status = exception.getStatus();

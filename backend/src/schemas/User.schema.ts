@@ -2,6 +2,7 @@ import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Model } from 'mongoose';
 import { ProfilePic } from './ProfilePic.schema';
 import { Church, ChurchDocument, ChurchSchema } from './Church.schema';
+import { Signature, SignatureSchema } from './Signature.schema';
 
 export enum SpiritualStatus {
   BELIEVER = 'BELIEVER',
@@ -38,8 +39,8 @@ export class User {
   roles: string[];
   @Prop({ type: ProfilePic })
   profilePic: ProfilePic;
-  @Prop({})
-  signature: string;
+  @Prop({type: Signature})
+  signature: Signature;
 }
 export const userSchema = SchemaFactory.createForClass(User);
 

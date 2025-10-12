@@ -292,6 +292,7 @@ export const MembersPage = () => {
                   fatherName={row.getValue("fatherName")}
                   motherName={row.getValue("motherName")}
                   spiritualStatus={row.getValue("spiritualStatus")}
+                  churchName={userContext.church?.churchName}
                   profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
               </Modal>
             </div >

@@ -13,7 +13,7 @@ api.interceptors.response.use(
   (error) => {
     console.log(error)
     const navigate = getNavigation();
-    if (error.response?.status === 403) {
+    if (error.response?.status === 403 || error.response?.status === 500) {
       if (navigate) {
         navigate("/", {
           state: { error: "Your session is either expired or invalid. Please log in." },
