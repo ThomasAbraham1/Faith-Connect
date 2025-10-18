@@ -52,7 +52,10 @@ export class MembersService {
       const profilePicPath = userInfo.profilePic.profilePicPath;
       this.deleteExistingPicture(profilePicPath);
     }
-    return await this.userModel.updateOne({ _id: id }, updateMemberDto);
+    const result = await this.userModel.findOneAndUpdate({ _id: id }, updateMemberDto, {
+      new: true
+    });
+    return result
   }
 
   deleteExistingPicture(profilePicPath: string) {

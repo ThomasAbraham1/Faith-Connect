@@ -10,12 +10,13 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { MembersService } from './members.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { profile } from 'console';
 import { join } from 'path';
@@ -27,38 +28,60 @@ export class MembersController {
   constructor(private readonly membersService: MembersService) { }
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('profilePic', {
+  @UseInterceptors(...[
+    FileFieldsInterceptor([
+      { name: 'profilePic', maxCount: 1 }, // Allow one file for profilePic
+      { name: 'signature', maxCount: 1 }, // Allow one file for signature
+    ], {
       storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'public', 'uploads'),
+        destination: (req, file, cb) => {
+          // Set destination based on file field name
+          const destination =
+            file.fieldname === 'profilePic'
+              ? join(__dirname, '..', '..', 'public', 'uploads')
+              : join(__dirname, '..', '..', 'public', 'signatures');
+          cb(null, destination);
+        },
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
             .join('');
-          cb(null, `${randomName}${file.originalname}.png`);
+          // Preserve original file extension
+          const extension = file.originalname.split('.').pop();
+          cb(null, `${randomName}.${extension}`);
         },
       }),
     }),
+  ]
   )
   create(
     @Req() req,
-    @UploadedFile() profilePic,
+    @UploadedFiles() uploadedFiles,
     @Body() createMemberDto: CreateMemberDto,
   ) {
     console.log(createMemberDto);
     // Get church ID from session so as to insert member into correct church record
     const churchId = req.user.church._id;
-    console.log(profilePic);
+    console.log(uploadedFiles);
     createMemberDto.churchId = churchId;
-    if (profilePic) {
+    if (uploadedFiles.profilePic) {
       createMemberDto.profilePic = {
-        profilePicPath: profilePic.path,
-        profilePicName: profilePic.filename,
+        profilePicPath: uploadedFiles.profilePic[0].path,
+        profilePicName: uploadedFiles.profilePic[0].filename,
       };
+    }
+    // Add signature file to data object
+    if (uploadedFiles.signature) {
+      const signature: SignatureDto = {
+        signaturePicName: uploadedFiles.signature[0].filename,
+        signaturePicPath: uploadedFiles.signature[0].path
+      }
+      createMemberDto.signature = signature
     }
     // const createMemberDtoEdited = { ...createMemberDto, churchId: churchId };
     return this.membersService.create(createMemberDto);
+    // return createMemberDto
   }
 
   @Get()
@@ -74,26 +97,48 @@ export class MembersController {
 
   @Patch(':id')
   @UseInterceptors(
-    FileInterceptor('profilePic', {
+    FileFieldsInterceptor([
+      { name: 'profilePic', maxCount: 1 }, // Allow one file for profilePic
+      { name: 'signature', maxCount: 1 }, // Allow one file for signature
+    ], {
       storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'public', 'uploads'),
+        destination: (req, file, cb) => {
+          // Set destination based on file field name
+          const destination =
+            file.fieldname === 'profilePic'
+              ? join(__dirname, '..', '..', 'public', 'uploads')
+              : join(__dirname, '..', '..', 'public', 'signatures');
+          cb(null, destination);
+        },
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
             .join('');
-          cb(null, `${randomName}${file.originalname}.png`);
+          // Preserve original file extension
+          const extension = file.originalname.split('.').pop();
+          cb(null, `${randomName}.${extension}`);
         },
       }),
     }),
+
   )
-  update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFile() profilePic, @Req() req) {
-    if (profilePic) {
+  update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
+    if (uploadedFiles) {
       updateMemberDto.profilePic = {
-        profilePicPath: profilePic.path,
-        profilePicName: profilePic.filename,
+        profilePicPath: uploadedFiles.profilePic[0].path,
+        profilePicName: uploadedFiles.profilePic[0].filename,
       };
     }
+    // Add signature file to data object
+    if (uploadedFiles.signature) {
+      const signature: SignatureDto = {
+        signaturePicName: uploadedFiles.signature[0].filename,
+        signaturePicPath: uploadedFiles.signature[0].path
+      }
+      updateMemberDto.signature = signature
+    }
+
     return this.membersService.update(id, updateMemberDto, req.user);
   }
 
@@ -124,11 +169,11 @@ export class MembersController {
     const userId = createSignatureDto?.userId;
     const signaturePath = signature?.path;
     const signaturePicName = signature?.filename;
-    const signatureInfo: SignatureDto = { 
+    const signatureInfo: SignatureDto = {
       signaturePicName: signaturePicName,
       signaturePicPath: signaturePath
-    } 
-    return this.membersService.createSignature(signatureInfo, userId )
+    }
+    return this.membersService.createSignature(signatureInfo, userId)
     // return this.settingsService.createSignature(createSettingDto);
   }
 
