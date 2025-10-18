@@ -29,6 +29,9 @@ import { PhoneInput } from "@/components/phone-input";
 import { DatePicker } from "@/components/date-picker";
 import { useUser } from "@/context/UserProvider";
 import { Textarea } from "@/components/ui/textarea";
+import { Modal } from "@/components/dynamic/Modal";
+import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard";
+import { toast } from "sonner";
 
 
 
@@ -50,6 +53,7 @@ type formDataType = {
   fatherName: string;
   motherName: string;
   address: string;
+  signature: Blob;
 };
 
 // Children is edit icon, username and password are extracted from table and passed as default values
@@ -108,7 +112,7 @@ export const EditMembers = (props: {
   const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } = useCrop();
   const userContext = useUser()
   console.log(props);
-  
+
   const submitHandlerFunction = async (data: formDataType) => {
     afterSubmitHandleReset()
 
@@ -125,6 +129,7 @@ export const EditMembers = (props: {
     formdata.append("lastName", data.lastName.trim());
     formdata.append("firstName", data.firstName.trim());
     formdata.append("roles", data.role);
+    formdata.append("signature", data.signature);
     // Convert base64 string to blob
     if (croppedImage) {
       console.log("LJASLDJASLKDASLKDLKASJL")
@@ -146,6 +151,7 @@ export const EditMembers = (props: {
       console.log(data);
       setValue("userName", "");
       setValue("password", "");
+      toast.success('Member has been edited successfully')
       return queryClient.invalidateQueries({
         queryKey: ["membersData"],
       });
@@ -369,6 +375,30 @@ export const EditMembers = (props: {
                   </div>
                 )}
               </div>
+              {watch('role') == 'pastor' &&
+                <div className="grid gap-3">
+                  <Controller
+                    name="signature"
+                    control={control}
+                    rules={{ required: "Signature is required for a pastor" }}
+                    render={({ field }) => (
+                      <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(watch('signature') ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
+                        <SignatureCard value={(field.value && URL.createObjectURL(field.value)) ?? undefined} onChange={(value: Blob) => {
+                          // console.log(value + " ALSJLDJA");
+                          field.onChange(value);
+                          toast.success('Signature changed!')
+                        }}></SignatureCard>
+                      </Modal>
+                    )}
+                  />
+
+                  {errors.signature && (
+                    <div className="text-red-500 text-sm">
+                      {errors.signature.message}
+                    </div>
+                  )}
+                </div>
+              }
             </div>
           </div>
           <SheetFooter className="sticky bottom-0 bg-background z-10">

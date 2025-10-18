@@ -5,17 +5,24 @@ import { useEffect, useState } from "react";
 import { SignatureMaker } from '@docuseal/signature-maker-react';
 import { Button } from "../ui/button";
 
+
 interface SignatureCardProps {
     // onSignatureSave?: (base64: string) => void; // Optional callback for saving the signature
-    postSignatureMutation: UseMutationResult<AxiosResponse<any, any>, Error, any, unknown>
+    postSignatureMutation?: UseMutationResult<AxiosResponse<any, any>, Error, any, unknown>,
+    onChange?: (value: Blob) => void,
+    value: Blob | string
 }
+/**
+ * A reusable signatureCard component that handles formatting the user signature.
+ * @param {object} props.onChange - onChange ignores the postSignatureMutation callback and passes the changed value to the callback function
+ * @param {string} props.value - keeps the signatureBase64 value updated
+ */
 
-export function SignatureCard({ postSignatureMutation }: SignatureCardProps) {
-    const [signatureBase64, setSignatureBase64] = useState<string | null>(null);
+export function SignatureCard({ postSignatureMutation, onChange, value }: SignatureCardProps) {
+    const [signatureBase64, setSignatureBase64] = useState<string | null | Blob | undefined>(value);
 
     useEffect(() => {
         console.log(signatureBase64);
-
     }, [signatureBase64])
     const handleSignatureChange = (event: any) => {
         setSignatureBase64(`data:image/png;base64,${event.base64}`);
@@ -25,14 +32,16 @@ export function SignatureCard({ postSignatureMutation }: SignatureCardProps) {
 
     const handleSave = async () => {
         if (!signatureBase64) return alert("Please sign first!");
-
         // Convert base64 to Blob (simpler way using fetch)
         const blob = await (await fetch(signatureBase64)).blob();
         console.log(blob)
-
+        if (!!onChange) {
+            onChange(blob)
+            return
+        }
         const formData = new FormData();
         formData.append("signature", blob);
-        postSignatureMutation.mutate(formData)
+        postSignatureMutation?.mutate(formData);
     };
 
     return (
@@ -67,7 +76,14 @@ export function SignatureCard({ postSignatureMutation }: SignatureCardProps) {
                 </div>
                 {signatureBase64 && (
                     <div className="text-xs text-center text-muted-foreground">
-                        Signature captured! Preview: {signatureBase64.length > 50 ? `${signatureBase64.slice(0, 50)}...` : signatureBase64}
+                        Signature captured! Preview:
+                            <img
+                                src={`${signatureBase64}`}
+                                alt="Member's Signature"
+                                className="max-h-[50px] max-w-[200px] object-contain block mx-auto"
+                                onError={() => console.error('Failed to load signature image')}
+                            />
+                            {signatureBase64.length > 50 ? `${signatureBase64.slice(0, 50)}...` : signatureBase64}
                     </div>
                 )}
             </CardContent>
