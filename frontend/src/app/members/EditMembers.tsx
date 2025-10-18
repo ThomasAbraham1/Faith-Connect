@@ -89,7 +89,7 @@ export const EditMembers = (props: {
     setValue,
     reset,
     control,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<formDataType>({
     defaultValues: {
       profilePic: undefined,
@@ -129,7 +129,9 @@ export const EditMembers = (props: {
     formdata.append("lastName", data.lastName.trim());
     formdata.append("firstName", data.firstName.trim());
     formdata.append("roles", data.role);
-    formdata.append("signature", data.signature);
+    if (data.role == 'pastor') {
+      formdata.append("signature", data.signature);
+    }
     // Convert base64 string to blob
     if (croppedImage) {
       console.log("LJASLDJASLKDASLKDLKASJL")
@@ -139,6 +141,13 @@ export const EditMembers = (props: {
       // console.log(blobImage)
       formdata.append("profilePic", blobImage);
     }
+    // console.log(key as keyof formDataType)
+    // var onlyChangedData: any = {}
+    // for (const key in dirtyFields) {
+    //   const typedKey = key as keyof formDataType;
+    //   onlyChangedData[typedKey] = data[typedKey] as any
+    // }
+    // console.log(onlyChangedData)
     const member = mutation.mutate(formdata);
   };
   const queryClient = useQueryClient();
@@ -311,7 +320,7 @@ export const EditMembers = (props: {
                 <Controller
                   name="dateOfBirth"
                   control={control}
-                  rules={{ required: "Date of birth is required" }}
+                  // rules={{ required: "Date of birth is required" }}
                   render={({ field }) => (
                     <DatePicker value={field.value as any as Date} className='w-full' onChange={(value) => field.onChange(value)}></DatePicker>
                   )}
@@ -327,7 +336,7 @@ export const EditMembers = (props: {
                 <Controller
                   name="spiritualStatus"
                   control={control}
-                  rules={{ required: "Spiritual status is required" }}
+                  // rules={{ required: "Spiritual status is required" }}
                   render={({ field }) => (
                     <Select value={field.value ?? ""} onValueChange={(value) => field.onChange(value)}>
                       <SelectTrigger className=" w-full">
@@ -353,7 +362,7 @@ export const EditMembers = (props: {
                 <Controller
                   name="role"
                   control={control}
-                  rules={{ required: "Roles are required" }}
+                  // rules={{ required: "Roles are required" }}
                   render={({ field }) => (
                     <Select value={field?.value ?? ""} onValueChange={(value) => field.onChange(value)}>
                       <SelectTrigger className=" w-full">
@@ -380,7 +389,7 @@ export const EditMembers = (props: {
                   <Controller
                     name="signature"
                     control={control}
-                    rules={{ required: "Signature is required for a pastor" }}
+                    // rules={{ required: "Signature is required for a pastor" }}
                     render={({ field }) => (
                       <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(watch('signature') ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
                         <SignatureCard value={(field.value && URL.createObjectURL(field.value)) ?? undefined} onChange={(value: Blob) => {

@@ -114,7 +114,10 @@ export const AddMembers = (props: {
     formdata.append("lastName", data.lastName?.trim());
     formdata.append("firstName", data.firstName?.trim());
     formdata.append("roles", data.role?.trim());
-    formdata.append("signature", data.signature);
+    if(data.role == 'pastor'){
+      console.log('Inside if pastor block')
+      formdata.append("signature", data.signature);
+    }
     // Convert base64 string to blob
     if (croppedImage) {
       const base64 = await fetch(croppedImage);
@@ -122,7 +125,7 @@ export const AddMembers = (props: {
       console.log(blobImage);
       formdata.append("profilePic", blobImage);
     }
-    console.log(data);
+    // console.log(formdata);
     mutation.mutate(formdata);
   };
 

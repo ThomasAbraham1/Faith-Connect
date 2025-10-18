@@ -124,7 +124,7 @@ export class MembersController {
 
   )
   update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
-    if (uploadedFiles) {
+    if (uploadedFiles.profilePic) {
       updateMemberDto.profilePic = {
         profilePicPath: uploadedFiles.profilePic[0].path,
         profilePicName: uploadedFiles.profilePic[0].filename,
