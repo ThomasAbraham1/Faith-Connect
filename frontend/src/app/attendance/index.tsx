@@ -44,7 +44,7 @@ export const Attendance = () => {
         lastSunday.setHours(0, 0, 0, 0)
         return lastSunday
     }, [])
-    console.log(format(getLastSunday(), 'yyyy-MM-dd'))
+    // console.log(format(getLastSunday(), 'yyyy-MM-dd'))
     const { register, handleSubmit, control, watch, setValue, getValues, formState: { errors } } = useForm<formDataType>({
         defaultValues: {
             date: format(getLastSunday(), 'yyyy-MM-dd')
@@ -58,17 +58,18 @@ export const Attendance = () => {
         queryKey: ["membersData"],
         queryFn: async () => {
             const response = await api.get("/members");
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });
 
+    // Fetch attendance data
     const { isPending: isAttendanceQueryPending, error: AttendanceQueryError, data: attendanceQueryData, isFetching: isAttendanceQueryFetching } = useQuery({
         queryKey: ["attendanceData"],
         queryFn: async () => {
-            console.log(`/attendance/${getValues().date}`)
+            // console.log(`/attendance/${getValues().date}`)
             const response = await api.get(`/attendance/${getValues().date}`);
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });
@@ -203,9 +204,19 @@ export const Attendance = () => {
                 </div>
             }
             <form onSubmit={handleSubmit(onSubmit)}>
-                <Controller control={control} name="date" render={({ field }) =>
-                    <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => { if (value) field.onChange(format(value, 'yyyy-MM-dd')) }} />
-                } />
+                <div className="grid gap-6 sm:grid-cols-2 grid-rows-auto items-end">
+                    <div className="grid-row-1 gap-3">
+                        <Controller control={control} name="date" render={({ field }) =>
+                            <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => { if (value) field.onChange(format(value, 'yyyy-MM-dd')) }} />
+                        } />
+                    </div>
+                    <div className="grid grid-row gap-3 justify-items-end">
+                        <div className="flex gap-3">
+                            <Button type='button' size='lg' variant={'outline'}>Present</Button>
+                            <Button type="button" size='lg' variant={'outline'}>Absent</Button>
+                        </div>
+                    </div>
+                </div>
                 <DataTableDemo data={tableData} columns={columns} />
                 <Button variant={'default'} className="w-full">Submit</Button>
             </form>

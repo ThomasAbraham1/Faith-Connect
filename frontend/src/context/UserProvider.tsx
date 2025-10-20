@@ -1,7 +1,6 @@
 import api from "@/api/api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { createContext, useEffect } from "react";
-import { useLocation } from "react-router";
 import { toast } from "sonner";
 
 
@@ -38,19 +37,19 @@ const userContext = createContext<userContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
     const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(true);
-    const [church, setChurch] = React.useState<ChurchDocumentType | null>(null)
-    const [user, setUser] = React.useState<UserDocumentType | null>(null)
-    useEffect(() => {
-        console.log({ church, user })
-    }, [church, user])
-    const { data, isPending, error } = useQuery({
+    const [church, setChurch] = React.useState<ChurchDocumentType | null>(null);
+    const [user, setUser] = React.useState<UserDocumentType | null>(null);
+    // useEffect(() => {
+    //     console.log({ church, user })
+    // }, [church, user])
+    useQuery({
         queryKey: ['getUserInfo'],
         queryFn: async () => {
             try {
                 const response = await api.get('/auth/me');
                 setChurch(response.data.data.church)
                 setUser(response.data.data.user)
-                console.log(response) 
+                // console.log(response)
                 return response
             } catch (error: any) {
                 toast.error(error.response.data.data.message || 'Error fetching user data')

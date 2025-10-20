@@ -21,7 +21,7 @@ export const NavHeader = () => {
   locationArray.shift();
   // Test location array
   // const locationArray = ['dashboard', 'monkey','sanjau', 'sakthi']
-  console.log(locationArray);
+  // console.log(locationArray);
   var locationString: string = "";
 
   return (
