@@ -123,8 +123,9 @@ export const AvatarUploadButton = ({ setValue, control, children, isRequired }: 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     console.log("Hello")
     const file = event.target.files?.[0];
+    console.log(file)
     if (file) {
-      setValue("profilePic", event.target.files);
+      setValue("profilePic", file.name, { shouldDirty: true });
       setSelectedFile(file);
       setCroppedImage(null);
     }

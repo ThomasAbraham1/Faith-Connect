@@ -47,7 +47,7 @@ type formDataType = {
   dateOfBirth: string;
   spiritualStatus: 'BELIEVER' | 'NON_BELIEVER' | 'SEEKER' | 'UNDECIDED';
   profilePic?: FileList | null | Blob;
-  role: string
+  roles: string
   firstName: string;
   lastName: string;
   fatherName: string;
@@ -92,13 +92,12 @@ export const EditMembers = (props: {
     formState: { errors, dirtyFields },
   } = useForm<formDataType>({
     defaultValues: {
-      profilePic: undefined,
       userName: props.userName,
       password: props.password,
       phone: props.phone,
       dateOfBirth: props.dateOfBirth,
       spiritualStatus: props.spiritualStatus,
-      role: props.roles,
+      roles: props.roles,
       fatherName: props.fatherName,
       motherName: props.motherName,
       firstName: props.firstName,
@@ -106,7 +105,7 @@ export const EditMembers = (props: {
       address: props.address,
     },
   });
-  var profilePic = useWatch({ control, name: "profilePic" });
+  // var profilePic = useWatch({ control, name: "profilePic" });
 
   const { AvatarUploadCropperContent, DynamicCropper, handleReset, setCroppedImageFunction, afterSubmitHandleReset } = useAvatarUploadHandler(setValue, control)
   const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } = useCrop();
@@ -114,40 +113,58 @@ export const EditMembers = (props: {
   console.log(props);
 
   const submitHandlerFunction = async (data: formDataType) => {
-    afterSubmitHandleReset()
 
     // Converting react hook form data into form data which is of Multipart type
     const formdata = new FormData();
-    formdata.append("userName", data.userName.trim());
-    formdata.append("password", data.password.trim());
-    formdata.append("spiritualStatus", data.spiritualStatus.trim());
-    formdata.append("dateOfBirth", data.dateOfBirth.trim());
-    formdata.append("phone", data.phone.trim());
-    formdata.append("address", data.address.trim());
-    formdata.append("motherName", data.motherName.trim());
-    formdata.append("fatherName", data.fatherName.trim());
-    formdata.append("lastName", data.lastName.trim());
-    formdata.append("firstName", data.firstName.trim());
-    formdata.append("roles", data.role);
-    if (data.role == 'pastor') {
-      formdata.append("signature", data.signature);
-    }
-    // Convert base64 string to blob
-    if (croppedImage) {
-      console.log("LJASLDJASLKDASLKDLKASJL")
-      console.log(croppedImage)
-      const base64 = await fetch(croppedImage);
-      const blobImage = await base64.blob();
-      // console.log(blobImage)
-      formdata.append("profilePic", blobImage);
-    }
-    // console.log(key as keyof formDataType)
-    // var onlyChangedData: any = {}
-    // for (const key in dirtyFields) {
-    //   const typedKey = key as keyof formDataType;
-    //   onlyChangedData[typedKey] = data[typedKey] as any
+    // formdata.append("userName", data.userName.trim());
+    // formdata.append("password", data.password.trim());
+    // formdata.append("spiritualStatus", data.spiritualStatus.trim());
+    // formdata.append("dateOfBirth", data.dateOfBirth.trim());
+    // formdata.append("phone", data.phone.trim());
+    // formdata.append("address", data.address.trim());
+    // formdata.append("motherName", data.motherName.trim());
+    // formdata.append("fatherName", data.fatherName.trim());
+    // formdata.append("lastName", data.lastName.trim());
+    // formdata.append("firstName", data.firstName.trim());
+    // formdata.append("roles", data.role);
+    // if (data.role == 'pastor') {
+    //   formdata.append("signature", data.signature);
     // }
-    // console.log(onlyChangedData)
+    // Convert base64 string to blob
+    // if (croppedImage) {
+    //   console.log("LJASLDJASLKDASLKDLKASJL")
+    //   console.log(croppedImage)
+    //   const base64 = await fetch(croppedImage);
+    //   const blobImage = await base64.blob();
+    //   // console.log(blobImage)
+    //   formdata.append("profilePic", blobImage);
+    // }
+    // console.log(key as keyof formDataType)
+    var onlyChangedData: any = {}
+    for (const key in dirtyFields) {
+      // console.log(watch('profilePic'), dirtyFields)
+      // profilePic
+      if (croppedImage && key == 'profilePic') {
+        console.log("LJASLDJASLKDASLKDLKASJL")
+        console.log(croppedImage)
+        const base64 = await fetch(croppedImage);
+        const blobImage = await base64.blob();
+        // console.log(blobImage)
+        formdata.append("profilePic", blobImage);
+        continue
+      }
+      // Signature pic
+      if (key == 'signature' && data.roles == 'pastor') {
+        formdata.append("signature", data.signature);
+        continue
+      }
+      formdata.append(`${key}`, (data as any)[key])
+      const typedKey = key as keyof formDataType;
+      onlyChangedData[typedKey] = data[typedKey] as any
+    }
+    for (const pair of formdata.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
     const member = mutation.mutate(formdata);
   };
   const queryClient = useQueryClient();
@@ -160,11 +177,16 @@ export const EditMembers = (props: {
       console.log(data);
       setValue("userName", "");
       setValue("password", "");
+      afterSubmitHandleReset()
       toast.success('Member has been edited successfully')
       return queryClient.invalidateQueries({
         queryKey: ["membersData"],
       });
     },
+    onError: (errors) => {
+      console.log(errors)
+      toast.error(errors.response.data.message)
+    }
   });
 
   // InputFields
@@ -360,7 +382,7 @@ export const EditMembers = (props: {
 
                 <Label htmlFor="role">Roles:</Label>
                 <Controller
-                  name="role"
+                  name="roles"
                   control={control}
                   // rules={{ required: "Roles are required" }}
                   render={({ field }) => (
@@ -378,13 +400,13 @@ export const EditMembers = (props: {
                     </Select>
                   )}
                 />
-                {errors.role && (
+                {errors.roles && (
                   <div className="text-red-500 text-sm">
-                    {errors.role.message}
+                    {errors.roles.message}
                   </div>
                 )}
               </div>
-              {watch('role') == 'pastor' &&
+              {watch('roles') == 'pastor' &&
                 <div className="grid gap-3">
                   <Controller
                     name="signature"

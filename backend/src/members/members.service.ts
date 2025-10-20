@@ -45,15 +45,24 @@ export class MembersService {
   }
 
   async update(id: string, updateMemberDto: UpdateMemberDto, userSessionObject: { user: CreateMemberDto }) {
+    // check if username exists
+    if (updateMemberDto.userName) {
+      const doesUserNameExist = await this.userModel.findOne({ userName: updateMemberDto.userName });
+      if (doesUserNameExist) {
+        throw new ConflictException('Username already exists');
+      }
+    }
+
+
     console.log(id, updateMemberDto, userSessionObject)
     const userInfo: CreateMemberDto = await this.findOne(id);
     console.log(userInfo)
-    if (userInfo.profilePic) {
+    if (userInfo?.profilePic) {
       const profilePicPath = userInfo.profilePic.profilePicPath;
       this.deleteExistingPicture(profilePicPath);
     }
     const result = await this.userModel.findOneAndUpdate({ _id: id }, updateMemberDto, {
-      new: true
+      new: true,
     });
     return result
   }
