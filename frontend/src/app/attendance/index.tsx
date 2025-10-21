@@ -6,34 +6,41 @@ import { Controller, useForm } from "react-hook-form";
 import { attendanceFormSubmitHandler } from "./service";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Check, CheckCheck, Variable, X } from "lucide-react";
+import { ArrowUpDown, Check, CheckCheck, Church, Variable, X } from "lucide-react";
 import { DataTableDemo } from "@/components/dynamic/DynamicTable";
 import { RadioGroupButton } from "@/components/dynamic/RadioButton";
 import React, { useEffect, useMemo, useState } from "react";
 import { format } from 'date-fns';
+import { useUser } from "@/context/UserProvider";
+import { Input } from "@/components/ui/input";
 
 
-type tableDataShape = { _id: string, churchId: string, userName: string }
+type tableDataShape = { id: string, churchId: string, userName: string, status: string }
 type attendanceRecord = {
     memberId: string,
     status: 'PRESENT' | 'ABSENT',
     _id: string
 }
 
+type userQueryDataShape = { _id: string, churchId: string, userName: string, }
+
 type attendanceRecordsType = {
     memberId: string;
-    status: 'PRESENT' | 'ABSENT'
+    status: string
 }
 
 export type formDataType = {
     date: string;
     churchId: string;
-    records: attendanceRecordsType[]
+    records?: attendanceRecordsType[]
 }
 
+type attendanceTableDataType = Record<'churchId' | 'id' | 'status' | 'userName', string>[]
 
 export const Attendance = () => {
-    const [selectAllState, setSelectAllState] = useState<boolean | undefined>(undefined)
+    const [tableDataState, setTableDataState] = useState<attendanceTableDataType>([])
+    const userContext = useUser()
+    // const [selectAllState, setSelectAllState] = useState<boolean | undefined>(undefined)
     const getLastSunday = React.useCallback(() => {
         const today = new Date()
         const dayOfWeek = today.getDay() // 0=Sunday, 1=Mon...
@@ -44,10 +51,10 @@ export const Attendance = () => {
         lastSunday.setHours(0, 0, 0, 0)
         return lastSunday
     }, [])
-    // console.log(format(getLastSunday(), 'yyyy-MM-dd'))
     const { register, handleSubmit, control, watch, setValue, getValues, formState: { errors } } = useForm<formDataType>({
         defaultValues: {
-            date: format(getLastSunday(), 'yyyy-MM-dd')
+            date: format(getLastSunday(), 'yyyy-MM-dd'),
+            churchId: userContext.church?._id
         }
     });
 
@@ -58,7 +65,7 @@ export const Attendance = () => {
         queryKey: ["membersData"],
         queryFn: async () => {
             const response = await api.get("/members");
-            // console.log(response)
+            console.log(response)
             return response;
         },
     });
@@ -69,26 +76,13 @@ export const Attendance = () => {
         queryFn: async () => {
             // console.log(`/attendance/${getValues().date}`)
             const response = await api.get(`/attendance/${getValues().date}`);
-            // console.log(response)
+            console.log(response)
             return response;
         },
     });
-    const queryClient = useQueryClient();
-    useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ['attendanceData'] })
-    }, [watch('date')])
-
-    useEffect(() => {
-        if (!userQueryData || !attendanceQueryData) return
-        setValue('churchId', userQueryData.data.data[0]?.churchId || '');
-        setValue('records', attendanceQueryData.data.data.records ?? [])
-    }, [userQueryData, attendanceQueryData]);
-
-
-
 
     const tableData: tableDataShape[] = useMemo(() => {
-        return userQueryData?.data.data.map((value: tableDataShape) => {
+        return userQueryData?.data.data.map((value: userQueryDataShape) => {
             const record: attendanceRecord | undefined =
                 attendanceQueryData?.data.data.records?.find(
                     (r: attendanceRecord) => r.memberId === value._id
@@ -98,13 +92,45 @@ export const Attendance = () => {
                 id: value._id,
                 userName: value.userName,
                 churchId: value.churchId,
-                status: record?.status, // fallback to ABSENT
+                status: record?.status ? record?.status : '', // fallback to ABSENT
             };
         }) || [];
     }, [userQueryData?.data.data, attendanceQueryData?.data?.data?.records]);
+    const queryClient = useQueryClient();
+    useEffect(() => {
+        // if table data is set - update state
+        // if (tableData.length > 0) {
+        setTableDataState(tableData)
+        console.log(tableData)
+        // }
+        // console.log('Table data changed')
+    }, [tableData])
+
+    useEffect(() => {
+        if (userContext.church)
+            setValue('churchId', userContext.church._id)
+    }, [userContext.church])
+
+    useEffect(() => {
+        queryClient.invalidateQueries({ queryKey: ['attendanceData'] })
+    }, [watch('date')])
+
+    useEffect(() => {
+        console.log('Table Data State Variable: ', tableDataState)
+        // Passing state values to react hook form values
+        var recordsInFlightType: attendanceRecordsType[] = tableDataState.map((value, index) => {
+            return { memberId: value.id, status: value.status }
+        })
+        var fileteredArray = recordsInFlightType.filter((value, index) => value.status != '')
+        setValue('records', fileteredArray)
+        console.log(fileteredArray)
+    }, [tableDataState]);
 
 
 
+
+
+    // console.log(tableData)
     const columns: ColumnDef<tableDataShape>[] = useMemo(() => [
         {
             accessorKey: "id",
@@ -155,38 +181,49 @@ export const Attendance = () => {
             cell: ({ row }) => (
                 <div className="lowercase">
                     <Controller control={control} name="records" render={({ field }) =>
-                        <RadioGroupButton attendanceStatus={row.getValue('status')} setSelectState={setSelectAllState} selectAllState={selectAllState}
-                            onChange={(value: string) => {
-                                const records: attendanceRecordsType[] = field.value || [];
-                                // field.onChange([{ memberId: row.getValue('id'), status: value }]);
-                                let newRecord = {
-                                    memberId: row.getValue('id') as any as string, status: value as any as 'PRESENT' | 'ABSENT'
-                                }
-                                let existingRecordIndex = -1;
-                                if (records) {
-                                    existingRecordIndex = records.findIndex((value) => value.memberId == row.getValue('id'));
-                                }
-                                console.log(existingRecordIndex)
-                                let newRecords
-                                if (existingRecordIndex >= 0) {
-                                    newRecords = [...records]
-                                    newRecords[existingRecordIndex] = newRecord
-                                } else {
-                                    newRecords = [...records]
-                                    newRecords.push(newRecord)
-                                }
-                                console.log(newRecords)
-                                // field.onChange(newRecords)
-                                setValue('records', newRecords);
-                            }
+                        <RadioGroupButton attendanceStatus={row.getValue('status')}
+                            onChange={
+                                // (value: string) => {
+                                //     const records: attendanceRecordsType[] = field.value || [];
+                                //     // field.onChange([{ memberId: row.getValue('id'), status: value }]);
+                                //     let newRecord = {
+                                //         memberId: row.getValue('id') as any as string, status: value as any as 'PRESENT' | 'ABSENT'
+                                //     }
+                                //     let existingRecordIndex = -1;
+                                //     if (records) {
+                                //         existingRecordIndex = records.findIndex((value) => value.memberId == row.getValue('id'));
+                                //     }
+                                //     console.log(existingRecordIndex)
+                                //     let newRecords
+                                //     if (existingRecordIndex >= 0) {
+                                //         newRecords = [...records]
+                                //         newRecords[existingRecordIndex] = newRecord
+                                //     } else {
+                                //         newRecords = [...records]
+                                //         newRecords.push(newRecord)
+                                //     }
+                                //     console.log(newRecords)
+                                //     // field.onChange(newRecords)
+                                //     setValue('records', newRecords);
+                                // }
+                                (value: string) => {
+                                    console.log('Current row status value: ', row.getValue('status'))
+                                    console.log('State Table after changing status: ', tableDataState, " user id: ", row.getValue('id'))
+                                    const attendanceArrayIndex = tableDataState.findIndex((attendanceRecord) => attendanceRecord.id == row.getValue('id'))
+                                    console.log(attendanceArrayIndex)
+                                    setTableDataState((prev) => {
+                                        const newTableDataState = [...prev]
+                                        newTableDataState[attendanceArrayIndex].status = value
+                                        return newTableDataState
+                                    })
 
-
+                                }
                             } radioOptions={['PRESENT', 'ABSENT']} />
                     } />
                 </div>
             ),
         },
-    ], [attendanceQueryData])
+    ], [attendanceQueryData, tableDataState])
 
 
     const attendanceSubmitMutation = useMutation({
@@ -195,7 +232,10 @@ export const Attendance = () => {
         })
     })
 
-    const onSubmit = (data) => attendanceSubmitMutation.mutate(data);
+    const onSubmit = (data) => {
+        console.log(data)
+        attendanceSubmitMutation.mutate(data);
+    }
     return (
         <>
             {(isUserQueryFetching || isAttendanceQueryFetching || attendanceSubmitMutation.isPending) &&
@@ -207,17 +247,40 @@ export const Attendance = () => {
                 <div className="grid gap-6 sm:grid-cols-2 grid-rows-auto items-end">
                     <div className="grid-row-1 gap-3">
                         <Controller control={control} name="date" render={({ field }) =>
-                            <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => { if (value) field.onChange(format(value, 'yyyy-MM-dd')) }} />
+                            <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => {
+                                if (value) field.onChange(format(value, 'yyyy-MM-dd'))
+                            }
+                            }
+                            />
                         } />
                     </div>
+                    <Input {...register('churchId')} className="hidden"></Input>
                     <div className="grid grid-row gap-3 justify-items-end">
                         <div className="flex gap-3">
-                            <Button type='button' size='lg' variant={'outline'}>Present</Button>
-                            <Button type="button" size='lg' variant={'outline'}>Absent</Button>
+                            <Button type='button' size='lg' variant={'outline'} onClick={() => {
+                                setTableDataState((prev) => {
+                                    const allPresentArray = [...prev].map((attendanceRecord) => {
+                                        var newAttendanceRecord = { ...attendanceRecord }
+                                        newAttendanceRecord.status = 'PRESENT'
+                                        return newAttendanceRecord
+                                    })
+                                    return allPresentArray
+                                })
+                            }}>Present</Button>
+                            <Button type="button" size='lg' variant={'outline'} onClick={() => {
+                                setTableDataState((prev) => {
+                                    const allPresentArray = [...prev].map((attendanceRecord) => {
+                                        var newAttendanceRecord = { ...attendanceRecord }
+                                        newAttendanceRecord.status = 'ABSENT'
+                                        return newAttendanceRecord
+                                    })
+                                    return allPresentArray
+                                })
+                            }}>Absent</Button>
                         </div>
                     </div>
                 </div>
-                <DataTableDemo data={tableData} columns={columns} />
+                <DataTableDemo data={tableDataState} columns={columns} />
                 <Button variant={'default'} className="w-full">Submit</Button>
             </form>
         </>
