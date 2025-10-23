@@ -115,14 +115,14 @@ export const AddMembers = (props: {
     formdata.append("firstName", data.firstName?.trim());
     formdata.append("roles", data.role?.trim());
     if(data.role == 'pastor'){
-      console.log('Inside if pastor block')
+      // console.log('Inside if pastor block')
       formdata.append("signature", data.signature);
     }
     // Convert base64 string to blob
     if (croppedImage) {
       const base64 = await fetch(croppedImage);
       const blobImage = await base64.blob();
-      console.log(blobImage);
+      // console.log(blobImage);
       formdata.append("profilePic", blobImage);
     }
     // console.log(formdata);
@@ -140,7 +140,7 @@ export const AddMembers = (props: {
       return api.post("/members", data);
     },
     onSuccess: (data) => {
-      console.log(data);
+      // console.log(data);
       reset()
       afterSubmitHandleReset()
       return queryClient.invalidateQueries({
@@ -165,18 +165,18 @@ export const AddMembers = (props: {
   });
 
   const sheetOnOpenChange = (open: boolean) => {
-    console.log(open)
+    // console.log(open)
     if (!open) {
-      console.log("hello")
+      // console.log("hello")
       reset();
       afterSubmitHandleReset();
     }
   }
   if (!isRolesQueryPending) {
-    console.log(rolesData.data[0].name)
+    // console.log(rolesData.data[0].name)
   }
 
-  console.log("MONEy")
+  // console.log("MONEy")
   return (
     <DynamicSheet
       sheetOnOpenChange={sheetOnOpenChange}

@@ -110,7 +110,7 @@ export const EditMembers = (props: {
   const { AvatarUploadCropperContent, DynamicCropper, handleReset, setCroppedImageFunction, afterSubmitHandleReset } = useAvatarUploadHandler(setValue, control)
   const { croppedImage, setCroppedImage, selectedFile, setSelectedFile } = useCrop();
   const userContext = useUser()
-  console.log(props);
+  // console.log(props);
 
   const submitHandlerFunction = async (data: formDataType) => {
 
@@ -145,8 +145,8 @@ export const EditMembers = (props: {
       // console.log(watch('profilePic'), dirtyFields)
       // profilePic
       if (croppedImage && key == 'profilePic') {
-        console.log("LJASLDJASLKDASLKDLKASJL")
-        console.log(croppedImage)
+        // console.log("LJASLDJASLKDASLKDLKASJL")
+        // console.log(croppedImage)
         const base64 = await fetch(croppedImage);
         const blobImage = await base64.blob();
         // console.log(blobImage)
@@ -163,18 +163,18 @@ export const EditMembers = (props: {
       onlyChangedData[typedKey] = data[typedKey] as any
     }
     for (const pair of formdata.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
+      // console.log(`${pair[0]}: ${pair[1]}`);
     }
     const member = mutation.mutate(formdata);
   };
   const queryClient = useQueryClient();
-  console.log(props.roles)
+  // console.log(props.roles)
   const mutation = useMutation({
     mutationFn: (data: FormData) => {
       return api.patch(`/members/${props.id}`, data);
     },
     onSuccess: (data) => {
-      console.log(data);
+      // console.log(data);
       setValue("userName", "");
       setValue("password", "");
       afterSubmitHandleReset()
@@ -192,9 +192,9 @@ export const EditMembers = (props: {
   // InputFields
   // Sheet on change function
   const sheetOnOpenChange = (open: boolean) => {
-    console.log(open)
+    // console.log(open)
     if (!open) {
-      console.log("hello")
+      // console.log("hello")
       reset();
       afterSubmitHandleReset();
     } else {
