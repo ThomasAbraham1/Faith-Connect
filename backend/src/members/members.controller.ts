@@ -21,6 +21,7 @@ import { diskStorage } from 'multer';
 import { profile } from 'console';
 import { join } from 'path';
 import { SignatureDto } from './dto/signature.dto';
+import { DeleteMemberDto } from './dto/delete-member.dto';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('members')
@@ -143,8 +144,9 @@ export class MembersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.membersService.remove(id);
+  remove(@Param() deleteMemberDto: DeleteMemberDto) {
+    console.log(deleteMemberDto)
+    return this.membersService.remove(deleteMemberDto.id);
   }
 
   // Signature post

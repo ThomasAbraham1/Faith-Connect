@@ -10,8 +10,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
+import type { ReactNode } from "react";
 
-export const Alert = ({children, onComfirmFunction}) => {
+export const Alert = ({ children, onComfirmFunction, alertTitle, alertDescription }: { children?: ReactNode, onComfirmFunction: () => void, alertTitle?: string, alertDescription?: string }) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -19,10 +20,9 @@ export const Alert = ({children, onComfirmFunction}) => {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{alertTitle || "Are you absolutely sure?"}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            {alertDescription || "This action cannot be undone. This will permanently delete."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

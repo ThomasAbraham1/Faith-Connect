@@ -69,7 +69,7 @@ export function DynamicSheet({
   gridConfig,
   sheetOnOpenChange
 }: sheetType) {
-  console.log('gridConfig:', gridConfig)
+  // console.log('gridConfig:', gridConfig)
   return (
     <Sheet onOpenChange={sheetOnOpenChange}>
       <SheetTrigger asChild>
