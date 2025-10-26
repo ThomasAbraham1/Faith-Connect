@@ -1,5 +1,6 @@
 import { SettingsPage } from "./app/admin";
 import { Attendance } from "./app/attendance";
+import { EventCalendar } from "./app/calendar";
 import { MembersPage } from "./app/members";
 
 export const appRoutes = {
@@ -15,10 +16,16 @@ export const appRoutes = {
         label: "Attendance",
         element: <Attendance />,
     },
-    settings: 
+    settings:
     {
         path: "/dashboard/settings",
         label: "Settings",
         element: <SettingsPage />,
+    },
+    calendar:
+    {
+        path: "/dashboard/calendar",
+        label: "Calendar",
+        element: <EventCalendar />,
     }
 }

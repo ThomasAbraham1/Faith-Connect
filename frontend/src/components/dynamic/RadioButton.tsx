@@ -5,13 +5,13 @@ import {
 } from "@/components/ui/radio-group"
 import { useEffect, useRef, type Dispatch } from "react"
 
-export function RadioGroupButton({ onChange, radioOptions, selectAllState, setSelectState, attendanceStatus }: { onChange: (value: string) => void, radioOptions: string[], selectAllState: boolean | undefined, setSelectState: Dispatch<typeof selectAllState>, attendanceStatus: string }) {
+export function RadioGroupButton({ onChange, radioOptions, radioId, selectAllState, setSelectState, attendanceStatus }: { onChange: (value: string) => void, radioOptions: string[], selectAllState: boolean | undefined, setSelectState: Dispatch<typeof selectAllState>, attendanceStatus: string, radioId: string }) {
     return (
         <RadioGroup className="flex flex-row" defaultValue={attendanceStatus} onValueChange={(value) => { onChange(value) }}>
             {radioOptions.map((value, index) =>
                 <div key={index} className="flex items-center gap-3">
-                    <RadioGroupItem value={value} id={'r' + index} />
-                    <Label htmlFor={'r' + index} className="normal-case">{value}</Label>
+                    <RadioGroupItem value={value} id={'r' + radioId + index} />
+                    <Label htmlFor={'r' + radioId + index} className="normal-case">{value}</Label>
                 </div>
             )}
             {/* <div className="flex items-center gap-3">

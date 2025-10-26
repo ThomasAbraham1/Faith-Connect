@@ -181,7 +181,7 @@ export const Attendance = () => {
             cell: ({ row }) => (
                 <div className="lowercase">
                     <Controller control={control} name="records" render={({ field }) =>
-                        <RadioGroupButton attendanceStatus={row.getValue('status')}
+                        <RadioGroupButton attendanceStatus={row.getValue('status')} radioId={row.getValue('id')}
                             onChange={
                                 // (value: string) => {
                                 //     const records: attendanceRecordsType[] = field.value || [];
