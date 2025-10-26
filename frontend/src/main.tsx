@@ -27,13 +27,13 @@ const router = createBrowserRouter([
       },
       {
         path: "Signup",
-        element: <SignupForm />, 
+        element: <SignupForm />,
       },
       {
         path: "monkey",
         element: <SignupForm />,
       },
-      { 
+      {
         path: "otp/:otpMethod",
         element: <InputOTPControlled />,
       },
@@ -63,6 +63,10 @@ const router = createBrowserRouter([
             element: appRoutes.settings.element,
           },
           {
+            path: appRoutes.calendar.label,
+            element: appRoutes.calendar.element,
+          },
+          {
             path: appRoutes.events.label,
             element: appRoutes.events.element,
           },
@@ -83,14 +87,14 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ContextProvider>
-        <ThemeProvider>
-          <ToasterProvider>
-            <RouterProvider router={router} />
-          </ToasterProvider>
-        </ThemeProvider>
-      </ContextProvider>
-    </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>
+    <ContextProvider>
+      <ThemeProvider>
+        <ToasterProvider>
+          <RouterProvider router={router} />
+        </ToasterProvider>
+      </ThemeProvider>
+    </ContextProvider>
+  </QueryClientProvider>
   // </React.StrictMode>
 );

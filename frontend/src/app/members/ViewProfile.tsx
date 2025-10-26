@@ -57,7 +57,7 @@ export const ViewProfile = ({ userName, profilePicUrl, phone, churchName, spirit
     },
     onError: (error: any) => {
       console.error(error);
-      toast.error(error.response.data.data.message)
+      toast.error(error.response.data.data.message);
     },
   })
 
