@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { ChurchesService } from './churches.service';
 import { CreateChurchDto } from './dto/create-church.dto';
 import { UpdateChurchDto } from './dto/update-church.dto';
 import { Church } from './entities/church.entity';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
+@UseGuards(AuthenticatedGuard)
 @Controller('churches')
 export class ChurchesController {
   constructor(private readonly churchesService: ChurchesService) { }

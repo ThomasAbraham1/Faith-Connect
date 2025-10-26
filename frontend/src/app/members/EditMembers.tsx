@@ -145,7 +145,7 @@ export const EditMembers = (props: {
       // console.log(watch('profilePic'), dirtyFields)
       // profilePic
       if (croppedImage && key == 'profilePic') {
-        // console.log("LJASLDJASLKDASLKDLKASJL")
+        // console.log("LJASLDJASLKDASLKDLKASJL") 
         // console.log(croppedImage)
         const base64 = await fetch(croppedImage);
         const blobImage = await base64.blob();
@@ -162,7 +162,7 @@ export const EditMembers = (props: {
       const typedKey = key as keyof formDataType;
       onlyChangedData[typedKey] = data[typedKey] as any
     }
-    for (const pair of formdata.entries()) {
+    for (const pair of formdata.entries()) { 
       // console.log(`${pair[0]}: ${pair[1]}`);
     }
     const member = mutation.mutate(formdata);
