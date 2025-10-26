@@ -1,11 +1,11 @@
 import api from "@/api/api";
 import { DataTableDemo } from "@/components/dynamic/DynamicTable";
 import LoadingSpinner from "@/components/spinner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QueryClientContext, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AddMembers } from "./AddMembers";
 import { Trash2, SquarePen, CheckCheck, CheckCheckIcon, CheckIcon, CheckSquare, Check } from "lucide-react";
 import { type ColumnDef, type Row, type Table as TableType } from "@tanstack/react-table";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 import { Eye } from 'lucide-react';
 // In your component
@@ -78,6 +78,8 @@ export const MembersPage = () => {
       queryClient.invalidateQueries({
         queryKey: ["membersData"],
       })
+
+
       // Reseting table selection checks
       if (tableRef.current) {
         tableRef.current.resetRowSelection();
@@ -133,268 +135,268 @@ export const MembersPage = () => {
 
   // console.log(JSON.stringify(tableData))
 
-  const columns: ColumnDef<Member>[] = [
-    {
-      id: "select",
-      header: ({ table }) => {
-        // console.log(table.getIsSomePageRowsSelected())
-        return <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => {
-            table.toggleAllPageRowsSelected(!!value)
-            //  return console.log(table.getSelectedRowModel().rowsById)
-          }
-
-          }
-          aria-label="Select all"
-        />
-      },
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "id",
-      header: "Id",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("id")}</div>
-      ),
-    },
-    {
-      accessorKey: "username",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() =>
-              column.toggleSorting(column.getIsSorted() === "asc")
+  const columns: ColumnDef<Member>[] = useMemo(() =>
+    [
+      {
+        id: "select",
+        header: ({ table }) => {
+          // console.log(table.getIsSomePageRowsSelected())
+          return <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
             }
-          >
-            Username
-            <ArrowUpDown />
-          </Button>
-        );
+            onCheckedChange={(value) => {
+              table.toggleAllPageRowsSelected(!!value)
+              //  return console.log(table.getSelectedRowModel().rowsById)
+            }
+            }
+            aria-label="Select all"
+          />
+        },
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
       },
-      cell: ({ row }) => (
-        <div className="lowercase">{row.getValue("username")}</div>
-      ),
-    },
-    {
-      accessorKey: "password",
-      header: () => <div className="text-right">Password</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("password")}
-          </div>
-        );
+      {
+        accessorKey: "id",
+        header: "Id",
+        cell: ({ row }) => (
+          <div className="capitalize">{row.getValue("id")}</div>
+        ),
       },
-    },
-    {
-      accessorKey: "phone",
-      header: () => <div className="text-right">Phone</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("phone")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "spiritualStatus",
-      header: () => <div className="text-right">Spiritual Status</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("spiritualStatus")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "dateOfBirth",
-      header: () => <div className="text-right">Date Of Birth</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("dateOfBirth")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "profilePicUrl",
-      header: () => <div className="text-right">Profile Picture</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("profilePicUrl")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "firstName",
-      header: () => <div className="text-right">First Name</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("firstName")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "lastName",
-      header: () => <div className="text-right">Last Name</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("lastName")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "fatherName",
-      header: () => <div className="text-right">Father's Name</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("fatherName")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "motherName",
-      header: () => <div className="text-right">Mother's Name</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("motherName")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "address",
-      header: () => <div className="text-right">Address</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("address")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "role",
-      header: () => <div className="text-right">Role</div>,
-      cell: ({ row }) => {
-        return (
-          <div className="text-right font-medium">
-            {row.getValue("role")}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => {
-        return (
-          // Delete button as icon
-          <div className="text-right font-medium">
-            <Alert
-              onComfirmFunction={() => mutation.mutate(row.getValue("id"))}
+      {
+        accessorKey: "username",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
             >
-              <Button variant={"ghost"}>
-                <Trash2></Trash2>
-              </Button>
-            </Alert>
-            {/* Edit button as icon */}
-            <EditMembers
-              id={row.getValue("id")}
-              userName={row.getValue("username")}
-              password={row.getValue("password")}
-              dateOfBirth={row.getValue("dateOfBirth")}
-              address={row.getValue("address")}
-              firstName={row.getValue("firstName")}
-              lastName={row.getValue("lastName")}
-              fatherName={row.getValue("fatherName")}
-              motherName={row.getValue("motherName")}
-              phone={row.getValue("phone")}
-              spiritualStatus={row.getValue("spiritualStatus")}
-              profilePicUrl={row.getValue("profilePicUrl")}
-              roles={row.getValue("role")}
-              triggerButtonVariant={"ghost"}
-            >
-              <SquarePen></SquarePen>
-              {/* <Button onClick={async (e) => {
-                  const response = await api.get(row.getValue('profilePicUrl'), {
-                    responseType: "blob",
-                  })
-                }}>edit</Button> */}
-            </EditMembers>
-            {/* View button */}
-            <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
-              <ViewProfile userName={row.getValue("username")}
+              Username
+              <ArrowUpDown />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div className="lowercase">{row.getValue("username")}</div>
+        ),
+      },
+      {
+        accessorKey: "password",
+        header: () => <div className="text-right">Password</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("password")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "phone",
+        header: () => <div className="text-right">Phone</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("phone")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "spiritualStatus",
+        header: () => <div className="text-right">Spiritual Status</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("spiritualStatus")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "dateOfBirth",
+        header: () => <div className="text-right">Date Of Birth</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("dateOfBirth")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "profilePicUrl",
+        header: () => <div className="text-right">Profile Picture</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("profilePicUrl")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "firstName",
+        header: () => <div className="text-right">First Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("firstName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "lastName",
+        header: () => <div className="text-right">Last Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("lastName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "fatherName",
+        header: () => <div className="text-right">Father's Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("fatherName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "motherName",
+        header: () => <div className="text-right">Mother's Name</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("motherName")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "address",
+        header: () => <div className="text-right">Address</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("address")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "role",
+        header: () => <div className="text-right">Role</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-right font-medium">
+              {row.getValue("role")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => {
+          return (
+            // Delete button as icon
+            <div className="text-right font-medium">
+              <Alert
+                onComfirmFunction={() => mutation.mutate(row.getValue("id"))}
+              >
+                <Button variant={"ghost"}>
+                  <Trash2></Trash2>
+                </Button>
+              </Alert>
+              {/* Edit button as icon */}
+              <EditMembers
+                id={row.getValue("id")}
+                userName={row.getValue("username")}
+                password={row.getValue("password")}
                 dateOfBirth={row.getValue("dateOfBirth")}
-                phone={row.getValue("phone")}
                 address={row.getValue("address")}
                 firstName={row.getValue("firstName")}
                 lastName={row.getValue("lastName")}
                 fatherName={row.getValue("fatherName")}
                 motherName={row.getValue("motherName")}
+                phone={row.getValue("phone")}
                 spiritualStatus={row.getValue("spiritualStatus")}
-                churchName={userContext.church?.churchName}
-                profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
-            </Modal>
-          </div >
-        );
+                profilePicUrl={row.getValue("profilePicUrl")}
+                roles={row.getValue("role")}
+                triggerButtonVariant={"ghost"}
+              >
+                <SquarePen></SquarePen>
+                {/* <Button onClick={async (e) => {
+                  const response = await api.get(row.getValue('profilePicUrl'), {
+                    responseType: "blob",
+                  })
+                }}>edit</Button> */}
+              </EditMembers>
+              {/* View button */}
+              <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
+                <ViewProfile userName={row.getValue("username")}
+                  dateOfBirth={row.getValue("dateOfBirth")}
+                  phone={row.getValue("phone")}
+                  address={row.getValue("address")}
+                  firstName={row.getValue("firstName")}
+                  lastName={row.getValue("lastName")}
+                  fatherName={row.getValue("fatherName")}
+                  motherName={row.getValue("motherName")}
+                  spiritualStatus={row.getValue("spiritualStatus")}
+                  churchName={userContext.church?.churchName}
+                  profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
+              </Modal>
+            </div >
+          );
+        },
       },
-    },
-    // {
-    //   id: "actions",
-    //   enableHiding: false,
-    //   cell: ({ row }) => {
-    //     const payment = row.original;
+      // {
+      //   id: "actions",
+      //   enableHiding: false,
+      //   cell: ({ row }) => {
+      //     const payment = row.original;
 
-    //     return (
-    //       <DropdownMenu>
-    //         <DropdownMenuTrigger asChild>
-    //           <Button variant="ghost" className="h-8 w-8 p-0">
-    //             <span className="sr-only">Open menu</span>
-    //             <MoreHorizontal />
-    //           </Button>
-    //         </DropdownMenuTrigger>
-    //         <DropdownMenuContent align="end">
-    //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-    //           <DropdownMenuItem
-    //             onClick={() => navigator.clipboard.writeText(payment.id)}
-    //           >
-    //             Copy payment ID
-    //           </DropdownMenuItem>
-    //           <DropdownMenuSeparator />
-    //           <DropdownMenuItem>View customer</DropdownMenuItem>
-    //           <DropdownMenuItem>View payment details</DropdownMenuItem>
-    //         </DropdownMenuContent>
-    //       </DropdownMenu>
-    //     );
-    //   },
-    // },
-  ];
+      //     return (
+      //       <DropdownMenu>
+      //         <DropdownMenuTrigger asChild>
+      //           <Button variant="ghost" className="h-8 w-8 p-0">
+      //             <span className="sr-only">Open menu</span>
+      //             <MoreHorizontal />
+      //           </Button>
+      //         </DropdownMenuTrigger>
+      //         <DropdownMenuContent align="end">
+      //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+      //           <DropdownMenuItem
+      //             onClick={() => navigator.clipboard.writeText(payment.id)}
+      //           >
+      //             Copy payment ID
+      //           </DropdownMenuItem>
+      //           <DropdownMenuSeparator />
+      //           <DropdownMenuItem>View customer</DropdownMenuItem>
+      //           <DropdownMenuItem>View payment details</DropdownMenuItem>
+      //         </DropdownMenuContent>
+      //       </DropdownMenu>
+      //     );
+      //   },
+      // },
+    ], [tableData])
 
   // Members Table Header
   const tableConfig = {
@@ -417,11 +419,11 @@ export const MembersPage = () => {
 
   return (
     <>
-      {(isFetching || mutation.isPending) &&
+      {/* {(isFetching || mutation.isPending) &&
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
           <LoadingSpinner />
         </div>
-      }
+      } */}
       {/* <DynamicTable
           fetchResponse={{
             isPending: isPending,

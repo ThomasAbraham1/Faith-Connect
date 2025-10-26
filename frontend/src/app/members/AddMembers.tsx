@@ -140,7 +140,7 @@ export const AddMembers = (props: {
       return api.post("/members", data);
     },
     onSuccess: (data) => {
-      // console.log(data);
+      console.log(data);
       reset()
       afterSubmitHandleReset()
       return queryClient.invalidateQueries({
@@ -373,7 +373,7 @@ export const AddMembers = (props: {
               )}
             </div>
             {watch('role') == 'pastor' &&
-              <div className="grid gap-3">
+              <div className="grid gap-3"> 
                 <Controller
                   name="signature"
                   control={control}
@@ -385,10 +385,10 @@ export const AddMembers = (props: {
                         field.onChange(value);
                         toast.success('Signature changed!')
                       }}></SignatureCard>
-                    </Modal>
-                  )}
+                    </Modal> 
+                  )}   
                 />
-
+  
                 {errors.signature && (
                   <div className="text-red-500 text-sm">
                     {errors.signature.message}

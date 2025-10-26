@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
+  NotFoundException,
 } from '@nestjs/common';
 import { MembersService } from './members.service';
 import { CreateMemberDto } from './dto/create-member.dto';
@@ -101,8 +102,8 @@ export class MembersController {
     FileFieldsInterceptor([
       { name: 'profilePic', maxCount: 1 }, // Allow one file for profilePic
       { name: 'signature', maxCount: 1 }, // Allow one file for signature
-    ], {
-      storage: diskStorage({
+    ], { 
+      storage: diskStorage({ 
         destination: (req, file, cb) => {
           // Set destination based on file field name
           const destination =
