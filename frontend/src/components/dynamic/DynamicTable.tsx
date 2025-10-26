@@ -9,7 +9,9 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type Row,
   type SortingState,
+  type Table,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
@@ -28,27 +30,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
+  Table as TableComponent,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { Member } from "@/app/members";
 
 export function DataTableDemo({
+  ref,
   data,
   columns,
   columnVisibilityObject,
+  getSelectedRowsObject
 }: {
+  ref: React.Ref<Table<unknown>>,
   data: any;
   columns: any;
   columnVisibilityObject: {};
+  getSelectedRowsObject?: (value: Record<string, Row<unknown>> | boolean) => void
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const isMounted = React.useRef(false);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>(columnVisibilityObject);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -64,6 +72,7 @@ export function DataTableDemo({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     state: {
       sorting,
       columnFilters,
@@ -72,8 +81,25 @@ export function DataTableDemo({
       globalFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
+    autoResetPageIndex: false,
   });
 
+  //  EXPOSE TABLE VIA REF
+  React.useImperativeHandle(ref, () => (table), [table]);
+
+  if (getSelectedRowsObject) {
+    React.useEffect(() => {
+      // Only runs when dependencies change (skips initial load)
+      if (isMounted.current) {
+        // console.log(rowSelection)
+        return getSelectedRowsObject(table.getSelectedRowModel().rowsById ? table.getSelectedRowModel().rowsById : false)
+      } else {
+        isMounted.current = true
+      }
+    }, [
+      getSelectedRowsObject, rowSelection
+    ]);
+  }
   // console.log(table.getAllColumns());
   return (
     <div className="w-full">
@@ -112,7 +138,7 @@ export function DataTableDemo({
         </DropdownMenu>
       </div>
       <div className="overflow-hidden rounded-md border grid">
-        <Table className="">
+        <TableComponent className="">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -159,7 +185,7 @@ export function DataTableDemo({
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </TableComponent>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">

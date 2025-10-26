@@ -23,9 +23,9 @@ export const AppLayout = () => {
   // console.log(navigation.state)
   const navigation = useNavigation();
   const isLoading = navigation.state == "loading";
-  useEffect(() => {
-    // console.log(navigation.state);
-  });
+  // useEffect(() => {
+  //   console.log(navigation.state);
+  // });
   return (
     <SidebarProvider>
       <AppSidebar />
