@@ -232,7 +232,7 @@ export const Attendance = () => {
         })
     })
 
-    const onSubmit = (data) => {
+    const onSubmit = (data:any) => {
         console.log(data)
         attendanceSubmitMutation.mutate(data);
     }

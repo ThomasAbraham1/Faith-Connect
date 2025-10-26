@@ -13,9 +13,11 @@ function EventsPage() {
       return response;
     },
   });
-if(isFetching) return <div>Loading...</div>
-if(!isFetching)  console.log(data?.data?.data,'events data');
-if(error) return <div>Error occurred: {(error as Error).message}</div>
-  return <h1>Hello World! 1</h1>;
+  if (isFetching) return <div>Loading...</div>
+  if (error) return <div>Error occurred: {(error as Error).message}</div>
+  if (!isFetching) {
+    console.log(data?.data?.data, 'events data');
+    return (<h1>Hello World! 1</h1>);
+  }
 }
 export default EventsPage;
