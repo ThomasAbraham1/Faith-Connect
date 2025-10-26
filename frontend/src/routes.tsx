@@ -28,10 +28,11 @@ export const appRoutes = {
         path: "/dashboard/calendar",
         label: "Calendar",
         element: <EventCalendar />,
-    events:
-    {
-        path: "/dashboard/events",
-        label: "Events",
-        element: <EventsPage />,
+        events:
+        {
+            path: "/dashboard/events",
+            label: "Events",
+            element: <EventsPage />,
+        }
     }
 }
