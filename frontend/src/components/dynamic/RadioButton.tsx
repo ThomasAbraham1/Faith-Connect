@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/radio-group"
 import { useEffect, useRef, type Dispatch } from "react"
 
-export function RadioGroupButton({ onChange, radioOptions, selectAllState, setSelectState, attendanceStatus }: { onChange: (value: string) => void, radioOptions: string[], selectAllState: boolean | undefined, setSelectState: Dispatch<typeof selectAllState>, attendanceStatus: string }) {
+export function RadioGroupButton({ onChange, radioOptions,  attendanceStatus }: { onChange: (value: string) => void, radioOptions: string[], attendanceStatus: string }) {
     return (
         <RadioGroup className="flex flex-row" defaultValue={attendanceStatus} onValueChange={(value) => { onChange(value) }}>
             {radioOptions.map((value, index) =>

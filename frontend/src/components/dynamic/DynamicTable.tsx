@@ -43,13 +43,13 @@ export function DataTableDemo({
   ref,
   data,
   columns,
-  columnVisibilityObject,
+  columnVisibilityObject={},
   getSelectedRowsObject
 }: {
-  ref: React.Ref<Table<unknown>>,
+  ref?: React.Ref<Table<unknown>>,
   data: any;
   columns: any;
-  columnVisibilityObject: {};
+  columnVisibilityObject?: {};
   getSelectedRowsObject?: (value: Record<string, Row<unknown>> | boolean) => void
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -58,7 +58,7 @@ export function DataTableDemo({
   );
   const isMounted = React.useRef(false);
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(columnVisibilityObject);
+    React.useState<VisibilityState >(columnVisibilityObject);
   const [rowSelection, setRowSelection] = React.useState({});
   const [globalFilter, setGlobalFilter] = React.useState("");
   const table = useReactTable({
