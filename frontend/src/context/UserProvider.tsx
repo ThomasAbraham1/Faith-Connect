@@ -41,7 +41,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [church, setChurch] = React.useState<ChurchDocumentType | null>(null)
     const [user, setUser] = React.useState<UserDocumentType | null>(null)
     useEffect(() => {
-        console.log({ church, user })
+        // console.log({ church, user })
     }, [church, user])
     const { data, isPending, error } = useQuery({
         queryKey: ['getUserInfo'],
@@ -50,7 +50,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 const response = await api.get('/auth/me');
                 setChurch(response.data.data.church)
                 setUser(response.data.data.user)
-                console.log(response) 
+                // console.log(response) 
                 return response
             } catch (error: any) {
                 toast.error(error.response.data.data.message || 'Error fetching user data')

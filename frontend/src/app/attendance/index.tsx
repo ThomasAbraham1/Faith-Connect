@@ -44,7 +44,7 @@ export const Attendance = () => {
         lastSunday.setHours(0, 0, 0, 0)
         return lastSunday
     }, [])
-    console.log(format(getLastSunday(), 'yyyy-MM-dd'))
+    // console.log(format(getLastSunday(), 'yyyy-MM-dd'))
     const { register, handleSubmit, control, watch, setValue, getValues, formState: { errors } } = useForm<formDataType>({
         defaultValues: {
             date: format(getLastSunday(), 'yyyy-MM-dd')
@@ -58,7 +58,7 @@ export const Attendance = () => {
         queryKey: ["membersData"],
         queryFn: async () => {
             const response = await api.get("/members");
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });
@@ -66,9 +66,9 @@ export const Attendance = () => {
     const { isPending: isAttendanceQueryPending, error: AttendanceQueryError, data: attendanceQueryData, isFetching: isAttendanceQueryFetching } = useQuery({
         queryKey: ["attendanceData"],
         queryFn: async () => {
-            console.log(`/attendance/${getValues().date}`)
+            // console.log(`/attendance/${getValues().date}`)
             const response = await api.get(`/attendance/${getValues().date}`);
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });
