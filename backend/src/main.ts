@@ -10,6 +10,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
     origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com', 'http://localhost:5173'],
@@ -45,7 +46,6 @@ async function bootstrap() {
   // console.log(process.env.JWT_SECRET)
   app.use(passport.initialize());
   app.use(passport.session());
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const port = process.env.PORT || 3000; // App Engine requires 8080
   console.log(port)
   app.listen(port);

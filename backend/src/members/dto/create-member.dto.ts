@@ -28,7 +28,7 @@ interface Permission {
 
 interface profilePic {
   profilePicName: string;
-  profilePicPath: string;
+  profilePicPath: string; 
 }
 
 export class CreateMemberDto {

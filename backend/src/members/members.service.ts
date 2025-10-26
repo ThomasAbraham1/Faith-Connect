@@ -45,40 +45,78 @@ export class MembersService {
   }
 
   async update(id: string, updateMemberDto: UpdateMemberDto, userSessionObject: { user: CreateMemberDto }) {
+    // check if username exists
+    if (updateMemberDto.userName) {
+      const doesUserNameExist = await this.userModel.findOne({ userName: updateMemberDto.userName });
+      if (doesUserNameExist) {
+        throw new ConflictException('Username already exists');
+      }
+    }
+
+
     console.log(id, updateMemberDto, userSessionObject)
     const userInfo: CreateMemberDto = await this.findOne(id);
     console.log(userInfo)
-    if (userInfo.profilePic) {
-      const profilePicPath = userInfo.profilePic.profilePicPath;
+    if (userInfo?.profilePic) {
+      const profilePicPath: string[] = [userInfo.profilePic.profilePicPath];
       this.deleteExistingPicture(profilePicPath);
     }
     const result = await this.userModel.findOneAndUpdate({ _id: id }, updateMemberDto, {
-      new: true
+      new: true,
     });
     return result
   }
 
-  deleteExistingPicture(profilePicPath: string) {
-    fs.unlink(profilePicPath, (err) => {
-      if (err) {
-        console.error('Error deleting file:', err);
-        return;
+  async deleteExistingPicture(profilePicPaths: string[]) {
+    for (const filePath of profilePicPaths) {
+      try {
+        if (fs.existsSync(filePath)) {
+          await fs.promises.unlink(filePath);
+          console.log(`File deleted: ${filePath}`);
+        } else {
+          console.log(`File not found: ${filePath}`);
+          // throw new ConflictException(`Error deleting file at ${filePath}`)
+        }
+      } catch (err) {
+        console.error(`Error deleting file ${filePath}:`, err);
+        throw new ConflictException(`Error deleting file at ${filePath}`)
       }
-      console.log('File deleted successfully!');
-    })
+    }
   }
 
-  async remove(id: string) {
-    // Check for profile picture and delete it
-    const userInfo: CreateMemberDto = await this.findOne(id);
-    console.log(userInfo)
-    if (userInfo.profilePic) {
-      const profilePicPath = userInfo.profilePic.profilePicPath;
-      this.deleteExistingPicture(profilePicPath);
+  async remove(id: string[] | string) {
+    // Create session for file deletion and db deletion sync
+    const session = await this.userModel.startSession();
+    var deleteResult;
+    try {
+
+      await session.withTransaction(async () => {
+
+        // Check for profile picture and delete it
+        const userInfo: CreateMemberDto[] = await this.userModel.find({ _id: { $in: id } }, null, { session });
+
+        // Delete the records from database
+        deleteResult = await this.userModel.deleteMany({
+          _id: { $in: id },
+        }, { session });
+
+        const picturesToDelete = userInfo.filter((value) => value.profilePic).map((value) => value.profilePic.profilePicPath)
+        console.log(picturesToDelete);
+
+        // Check pictures to delete length and call file deleter
+        if (picturesToDelete.length > 0)
+          await this.deleteExistingPicture(picturesToDelete);
+      })
+      return deleteResult
     }
-    return await this.userModel.deleteOne({
-      _id: id,
-    });
+    catch (e) {
+      console.log("Transaction Error: ", e)
+      throw e
+    }
+    finally {
+      await session.endSession()
+      console.log('db session for user deletion complete')
+    }
   }
 
   deleteProfilePicture(profilePicPath: string) {
@@ -113,3 +151,4 @@ export class MembersService {
     }
   }
 }
+ 
