@@ -39,33 +39,36 @@ import {
 } from "@/components/ui/table";
 import type { Member } from "@/app/members";
 import { da } from "date-fns/locale";
+import * as lodash from "lodash";
+import { ActionsColumn } from "./ActionsColumn";
 
-export function DataTableDemo({
+export function DynamicTable1({
     ref,
     data,
     //   columns,
-    columnOptions = {HideColumns: []},
-    getSelectedRowsObject
+    columnOptions = { HideColumns: [] },
+    getSelectedRowsObject,
+    children
 }: {
     ref?: React.Ref<Table<unknown>>,
     data: any;
-    columns: any;
-    columnOptions?: any;
+    columnOptions?: { HideColumns: string[] };
     getSelectedRowsObject?: (value: Record<string, Row<unknown>> | boolean) => void
+    children?: React.ReactNode
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
     );
     const isMounted = React.useRef(false);
-    let columnVisibilityObject=columnOptions.HideColumns.map((col:string) => ({ [col]: false})).reduce((acc:any, curr:any) => ({...acc, ...curr}), {});
-    console.log('columnVisibilityObject',columnVisibilityObject);
+    let columnVisibilityObject = columnOptions.HideColumns.map((col: string) => ({ [col]: false })).reduce((acc: any, curr: any) => ({ ...acc, ...curr }), {});
+    console.log('columnVisibilityObject', columnVisibilityObject);
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>(columnVisibilityObject);
     const [rowSelection, setRowSelection] = React.useState({});
     const [globalFilter, setGlobalFilter] = React.useState("");
 
-    let columns:ColumnDef<unknown>[] = data?.length > 0 ? Object.keys(data[0]).map((key) => {
+    let columns: ColumnDef<unknown>[] = data?.length > 0 ? Object.keys(data[0]).map((key) => {
         return {
             accessorKey: key,
             header: ({ column }) => {
@@ -76,7 +79,7 @@ export function DataTableDemo({
                             column.toggleSorting(column.getIsSorted() === "asc")
                         }
                     >
-                        Username
+                        {lodash.startCase(key)}
                         <ArrowUpDown />
                     </Button>
                 );
@@ -86,6 +89,36 @@ export function DataTableDemo({
             ),
         }
     }) : [];
+
+    const childrenArray = React.Children.toArray(children);
+
+    if (childrenArray) {
+        childrenArray.find((child) => {
+            if (React.isValidElement(child) && child.type === ActionsColumn) {
+                columns.push({
+                    accessorKey: "actions",
+                    header: ({ column }) => {
+                        return (
+                            <Button
+                                variant="ghost"
+                                onClick={() =>
+                                    column.toggleSorting(column.getIsSorted() === "asc")
+                                }
+                            >
+                                {lodash.startCase("actions")}
+                                <ArrowUpDown />
+                            </Button>
+                        );
+                    },
+                    cell: ({ row }) => (
+                        child
+                    ),
+                });
+                console.log(child, 'child found');
+            }
+            console.log('childrenArray', childrenArray)
+        });
+    }
 
 
 
