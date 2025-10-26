@@ -65,7 +65,7 @@ export const Attendance = () => {
         queryKey: ["membersData"],
         queryFn: async () => {
             const response = await api.get("/members");
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });
@@ -76,7 +76,7 @@ export const Attendance = () => {
         queryFn: async () => {
             // console.log(`/attendance/${getValues().date}`)
             const response = await api.get(`/attendance/${getValues().date}`);
-            console.log(response)
+            // console.log(response)
             return response;
         },
     });

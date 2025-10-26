@@ -1,6 +1,7 @@
 import { SettingsPage } from "./app/admin";
 import { Attendance } from "./app/attendance";
 import { EventCalendar } from "./app/calendar";
+import EventsPage from "./app/events";
 import { MembersPage } from "./app/members";
 
 export const appRoutes = {
@@ -27,5 +28,10 @@ export const appRoutes = {
         path: "/dashboard/calendar",
         label: "Calendar",
         element: <EventCalendar />,
+    events:
+    {
+        path: "/dashboard/events",
+        label: "Events",
+        element: <EventsPage />,
     }
 }

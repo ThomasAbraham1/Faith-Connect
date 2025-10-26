@@ -151,6 +151,11 @@ const data = {
       url: appRoutes.attendance.path,
       icon: CalendarCheck2,
     },
+    {
+      name: appRoutes.events.label,
+      url: appRoutes.events.path,
+      icon: CalendarCheck2,
+    },
     // {
     //   name: "Sales & Marketing",
     //   url: "#",
