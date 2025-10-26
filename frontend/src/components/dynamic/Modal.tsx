@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
 
-export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant, modelTitle, modelDescription }) {
+export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant, modelTitle, modelDescription }:any) {
     const handlePrint = () => {
         window.print();
     };
