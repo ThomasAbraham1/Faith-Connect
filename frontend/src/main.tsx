@@ -62,6 +62,10 @@ const router = createBrowserRouter([
             path: appRoutes.settings.label,
             element: appRoutes.settings.element,
           },
+          {
+            path: appRoutes.events.label,
+            element: appRoutes.events.element,
+          },
         ],
       },
     ],
@@ -78,7 +82,7 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ContextProvider>
         <ThemeProvider>
@@ -88,5 +92,5 @@ createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </ContextProvider>
     </QueryClientProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

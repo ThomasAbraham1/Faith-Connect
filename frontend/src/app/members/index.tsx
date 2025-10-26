@@ -9,7 +9,6 @@ import React, { useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 import { Eye } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
-
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/dynamic/Alert";
 import { EditMembers } from "./EditMembers";
@@ -58,7 +57,7 @@ export const MembersPage = () => {
     }
   });
 
-  console.log("Hello myu man");
+  // console.log("Hello myu man");
   if (!isPending && !mutation.isPending) {
     // Take admin role ID and compare it with user data to filter members
     const roleName = userContext.church?.roles.find((role) => role.name == "admin")?.name
@@ -66,7 +65,7 @@ export const MembersPage = () => {
     // Removing admins and retrieving members only
     // Adhering to Dynamic Table data definition
     const tableData: Member[] = data?.data.data.filter((member: membersResponseObject) => {
-      console.log('member.roles:', member.roles, 'roleName:', roleName)
+      // console.log('member.roles:', member.roles, 'roleName:', roleName)
       return !member.roles.includes(roleName || '') ? true : false
     }).map(
       (value: membersResponseObject, index: number) => {
@@ -93,7 +92,7 @@ export const MembersPage = () => {
       }
     ) || [];
 
-    console.log(JSON.stringify(tableData))
+    // console.log(JSON.stringify(tableData))
 
     const columns: ColumnDef<Member>[] = [
       {

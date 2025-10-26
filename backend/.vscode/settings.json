@@ -1,0 +1,7 @@
+{
+    "workbench.editor.decorations.colors": true,
+    "workbench.colorCustomizations": {
+
+            "titleBar.activeBackground": "#ff4141"
+    }
+}
