@@ -143,9 +143,10 @@ export const AddMembers = (props: {
       console.log(data);
       reset()
       afterSubmitHandleReset()
-      return queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["membersData"],
       });
+      return data 
     },
     onError: (error: any) => toast.error(error?.response?.data?.message)
   });
@@ -167,7 +168,6 @@ export const AddMembers = (props: {
   const sheetOnOpenChange = (open: boolean) => {
     // console.log(open)
     if (!open) {
-      // console.log("hello")
       reset();
       afterSubmitHandleReset();
     }

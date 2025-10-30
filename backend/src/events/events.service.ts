@@ -20,7 +20,7 @@ export class EventsService {
     return this.eventsModel.findById(id);
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
+  update(id: string, updateEventDto: UpdateEventDto) {
     return this.eventsModel.findByIdAndUpdate(id, updateEventDto, { new: true });
   }
 
