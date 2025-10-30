@@ -162,7 +162,7 @@ export const EditMembers = (props: {
       const typedKey = key as keyof formDataType;
       onlyChangedData[typedKey] = data[typedKey] as any
     }
-    for (const pair of formdata.entries()) { 
+    for (const pair of formdata.entries()) {
       // console.log(`${pair[0]}: ${pair[1]}`);
     }
     const member = mutation.mutate(formdata);
@@ -174,14 +174,15 @@ export const EditMembers = (props: {
       return api.patch(`/members/${props.id}`, data);
     },
     onSuccess: (data) => {
-      // console.log(data);
-      setValue("userName", "");
-      setValue("password", "");
+      // // console.log(data);
+      // setValue("userName", "");
+      // setValue("password", "");
       afterSubmitHandleReset()
       toast.success('Member has been edited successfully')
-      return queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["membersData"],
       });
+      return data
     },
     onError: (errors) => {
       console.log(errors)

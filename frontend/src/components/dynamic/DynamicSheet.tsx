@@ -37,8 +37,10 @@ export type inputFieldsConfig = {
 export type sheetType = {
   sheetConfig: sheetConfig;
   gridConfig: gridConfig;
-  sheetOnOpenChange: (open: boolean) => void
+  sheetOnOpenChange?: (open: boolean) => void
   children: ReactElement;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void
 };
 
 const demoInputFields: inputFieldsConfig = [
@@ -67,13 +69,15 @@ export function DynamicSheet({
   sheetConfig = demoSheetNaming,
   children,
   gridConfig,
-  sheetOnOpenChange
+  sheetOnOpenChange,
+  open,
+  onOpenChange
 }: sheetType) {
   // console.log('gridConfig:', gridConfig)
   return (
-    <Sheet onOpenChange={sheetOnOpenChange}>
+    <Sheet open={open} onOpenChange={sheetOnOpenChange? sheetOnOpenChange : onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant={sheetConfig.triggerButtonVariant}>{sheetConfig.triggerButtonText}</Button>
+        {/* <Button variant={sheetConfig.triggerButtonVariant}>{sheetConfig.triggerButtonText}</Button> */}
       </SheetTrigger>
       <SheetContent className={`w-80 sm:w-140 overflow-y-auto`}>
         {children}
