@@ -29,6 +29,8 @@ type userContextType = {
     setChurch: (church: ChurchDocumentType | null) => void,
     setUser: (user: UserDocumentType | null) => void,
     setShdInitialUserQueryRun: (val: boolean) => void,
+    login: ()=>void,
+    logout: ()=>void
 }
 
 const userContext = createContext<userContextType | undefined>(undefined);
@@ -39,6 +41,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(true);
     const [church, setChurch] = React.useState<ChurchDocumentType | null>(null);
     const [user, setUser] = React.useState<UserDocumentType | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     // useEffect(() => {
     //     console.log({ church, user })
     // }, [church, user])
@@ -56,12 +59,20 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 throw error
             }
         },
-        enabled: shdInitialUserQueryRun,
+        enabled: isLoggedIn,
     })
+    const login = () => {
+        setIsLoggedIn(true);
+    };
 
+    const logout = () => {
+        setIsLoggedIn(false);
+        setChurch(null);
+        setUser(null);
+    };
 
     return (
-        <userContext.Provider value={{ church, setChurch, user, setUser, setShdInitialUserQueryRun }}>
+        <userContext.Provider value={{ church, setChurch, user, setUser, setShdInitialUserQueryRun, login, logout }}>
             {children}
         </userContext.Provider>
     )

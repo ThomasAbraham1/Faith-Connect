@@ -65,9 +65,7 @@ export function LoginForm({
     refresh_token: string;
   }
 
-  useEffect(() => {
-    userContext?.setShdInitialUserQueryRun(false)
-  }, [])
+
   const queryClient = useQueryClient()
   const mutation = useMutation({
     mutationFn: (data: any) => {
@@ -83,7 +81,7 @@ export function LoginForm({
       const doesDeviceExist = twofaMemoryCheckResult.data.data.doesDeviceExist;
       console.log("DoesDeviceExist:", twofaMemoryCheckResult);
       if (doesDeviceExist) {
-        userContext.setShdInitialUserQueryRun(true);
+        userContext.login();
         navigate("/dashboard");
       }
       else navigate("/otpMethod");
