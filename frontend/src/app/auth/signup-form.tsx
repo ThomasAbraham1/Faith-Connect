@@ -30,6 +30,7 @@ export function SignupForm({
   // const [phone, setPhone] = useState<Value | undefined>();
   let navigate = useNavigate();
 
+  const userContext = useUser()
   type FormFields = {
     userName: string;
     churchName: string;
@@ -54,12 +55,8 @@ export function SignupForm({
       phone: "",
     },
   });
-  const userContext = useUser()
   const { churchName, userName, email, password, phone, firstName, lastName } = watch();
   const location = useLocation();
-  useEffect(() => {
-    userContext?.login()
-  }, [])
   const mutation = useMutation({
     mutationFn: (data: any) => {
       return api.post(`/auth/signup`, data);
@@ -67,6 +64,7 @@ export function SignupForm({
     onSuccess: (data) => {
       console.log("Signup successful:", data);
       navigate("/otpMethod");
+      userContext.login()
       console.log(data);
     },
     onError: (error: any) => { throw error.response.data }
