@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { logout } from "@/services/authService";
 import { appRoutes } from "@/routes";
+import { useUser } from "@/context/UserProvider";
 
 export function NavUser({
   user,
@@ -41,12 +42,14 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const navigate = useNavigate()
+  const userContext = useUser()
 
   // Logout handler
   const logoutHandler = async () => {
     const result = await logout();
     if (result) {
       navigate("/")
+      userContext.logout()
     }
   };
 

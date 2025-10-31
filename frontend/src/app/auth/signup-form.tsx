@@ -58,7 +58,7 @@ export function SignupForm({
   const { churchName, userName, email, password, phone, firstName, lastName } = watch();
   const location = useLocation();
   useEffect(() => {
-    userContext?.setShdInitialUserQueryRun(false)
+    userContext?.login()
   }, [])
   const mutation = useMutation({
     mutationFn: (data: any) => {

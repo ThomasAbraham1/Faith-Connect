@@ -27,8 +27,9 @@ async function bootstrap() {
   if (!secret) {
     throw new Error('SESSION_SECRET environment variable is not set');
   }
-  // Sesssion intitialization
 
+
+  // Sesssion intitialization
   app.use(
     session({
       secret: secret,
@@ -36,14 +37,13 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
-        secure: isProduction ? true: false,
-        httpOnly: true, 
+        secure: isProduction ? true : false,
+        httpOnly: true,
         sameSite: isProduction ? 'none' : 'lax',
       },
     }),
   );
   app.set('trust proxy', 1);
-  // console.log(process.env.JWT_SECRET)
   app.use(passport.initialize());
   app.use(passport.session());
   const port = process.env.PORT || 3000; // App Engine requires 8080
