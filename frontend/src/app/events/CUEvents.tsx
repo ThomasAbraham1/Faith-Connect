@@ -76,25 +76,23 @@ export const CUEvents = ({
                             {...register("eventLocation", { required: `${lodash.startCase('eventLocation')}` })}
                         />
                     </HookFormField>
-                    <HookFormField errors={errors} fieldName={'eventLocation'}>
-                        <Label htmlFor="eventLocation">Location</Label>
+                    <HookFormField errors={errors} fieldName={'organizer'}>
                         <Input
-                            id="eventLocation"
-                            {...register("eventLocation", { required: `${lodash.startCase('eventDate')}` })}
+                            id="organizer"
+                            {...register("organizer", { required: `${lodash.startCase('organizer')}` })}
                         />
                         {errors.eventLocation && (
                             <p className="text-red-500 text-xs">{errors.eventLocation.message}</p>
                         )}
                     </HookFormField>
-                    <HookFormField errors={errors} fieldName={'eventLocation'}>
+                    {/* <HookFormField errors={errors} fieldName={'eventLocation'}>
                         <Label htmlFor="organizer">Organizer</Label>
                         <Input
                             id="organizer"
                             {...register("organizer")}
                         />
-                    </HookFormField>
-                    <HookFormField errors={errors} fieldName={'eventLocation'}>
-                        <Label htmlFor="description">Description</Label>
+                    </HookFormField> */}
+                    <HookFormField errors={errors} fieldName={'description'} gridProp='full' >
                         <Textarea
                             id="description"
                             {...register("description")}
