@@ -64,13 +64,31 @@ function EventsPage() {
         }}
         className="w-full"
       >Add Events</Button>
+
       <DynamicTable1<TEventsData>
         ref={tableRef}
         data={dataArray}
         columnOptions={{ HideColumns: ["id"] }}
       >
         {(row) =>
-          <ActionsColumn row={row} setEditingEvent={setEditingEvent} setIsSheetOpen={setIsSheetOpen}>
+          <ActionsColumn >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setEditingEvent(row.original);
+                setIsSheetOpen(true);
+              }}
+            >
+              <SquarePen className="h-4 w-4" />
+            </Button>
+
+            <Button variant="ghost" size="icon">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Eye className="h-4 w-4" />
+            </Button>
           </ActionsColumn>
         }
       </DynamicTable1>
