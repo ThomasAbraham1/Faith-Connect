@@ -1,10 +1,12 @@
 import { CrudSheet } from "@/components/dynamic/CrudSheet";
-import { SquarePen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { TEventsData } from "./types/events.types";
 import React, { type ReactNode } from "react";
+import { HookFormField } from "@/components/dynamic/HookFormField";
+import { HookFormBody } from "@/components/dynamic/HookFormBody";
+import * as lodash from "lodash";
 
 
 
@@ -27,7 +29,7 @@ export const CUEvents = ({
     onSuccess: externalOnSuccess
 }: AddEventsProps) => {
     const isEdit = !!event?.id;
-    console.log(event, 'event')
+    console.log(event?.eventDate, 'event')
 
     return (
         <CrudSheet<TEventsData>
@@ -53,56 +55,54 @@ export const CUEvents = ({
             }}
         >
             {({ register, control, formState: { errors } }) => (
-                <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="grid gap-3">
-                        <Label htmlFor="eventName">Event Title</Label>
+                <HookFormBody>
+                    <HookFormField fieldName={'eventName'} errors={errors}>
                         <Input
                             id="eventName"
-                            {...register("eventName", { required: "Title is required" })}
+                            type="text"
+                            {...register("eventName", { required: `${lodash.startCase('eventName')}` })}
                         />
-                        {errors.eventName && (
-                            <p className="text-red-500 text-xs">{errors.eventName.message}</p>
-                        )}
-                    </div>
-
-                    <div className="grid gap-3">
-                        <Label htmlFor="eventDate">Date</Label>
+                    </HookFormField>
+                    <HookFormField fieldName={'eventDate'} errors={errors}>
                         <Input
                             id="eventDate"
                             type="date"
-                            {...register("eventDate", { required: "Date is required" })}
+                            {...register("eventDate", { required: `${lodash.startCase('eventDate')}` })}
                         />
-                        {errors.eventDate && (
-                            <p className="text-red-500 text-xs">{errors.eventDate.message}</p>
-                        )}
-                    </div>
-                    <div className="grid gap-3">
+                    </HookFormField>
+                    <HookFormField errors={errors} fieldName={'eventLocation'}>
+                        <Input
+                            id="eventLocation"
+                            {...register("eventLocation", { required: `${lodash.startCase('eventLocation')}` })}
+                        />
+                    </HookFormField>
+                    <HookFormField errors={errors} fieldName={'eventLocation'}>
                         <Label htmlFor="eventLocation">Location</Label>
                         <Input
                             id="eventLocation"
-                            {...register("eventLocation", { required: "Location is required" })}
+                            {...register("eventLocation", { required: `${lodash.startCase('eventDate')}` })}
                         />
                         {errors.eventLocation && (
                             <p className="text-red-500 text-xs">{errors.eventLocation.message}</p>
                         )}
-                    </div>
-                    <div className="grid gap-3">
+                    </HookFormField>
+                    <HookFormField errors={errors} fieldName={'eventLocation'}>
                         <Label htmlFor="organizer">Organizer</Label>
                         <Input
                             id="organizer"
                             {...register("organizer")}
                         />
-                    </div>
-                    <div className="grid gap-2 sm:col-span-2">
+                    </HookFormField>
+                    <HookFormField errors={errors} fieldName={'eventLocation'}>
                         <Label htmlFor="description">Description</Label>
                         <Textarea
                             id="description"
                             {...register("description")}
                             rows={4}
                         />
-                    </div>
+                    </HookFormField>
 
-                </div>
+                </HookFormBody>
             )}
         </CrudSheet>
     );

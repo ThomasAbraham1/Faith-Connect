@@ -70,24 +70,7 @@ function EventsPage() {
         columnOptions={{ HideColumns: ["id"] }}
       >
         {(row) =>
-          <ActionsColumn>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setEditingEvent(row.original);
-                setIsSheetOpen(true);
-              }}
-            >
-              <SquarePen className="h-4 w-4" />
-            </Button>
-
-            <Button variant="ghost" size="icon">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Eye className="h-4 w-4" />
-            </Button>
+          <ActionsColumn row={row} setEditingEvent={setEditingEvent} setIsSheetOpen={setIsSheetOpen}>
           </ActionsColumn>
         }
       </DynamicTable1>
