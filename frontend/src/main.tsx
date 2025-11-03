@@ -15,6 +15,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToasterProvider } from "./providers/ToasterProvider.tsx";
 import { ContextProvider } from './context/Context.tsx'
 import React from "react";
+import { ModalProvider } from "./components/dynamic/ModalProvider.tsx";
 
 const router = createBrowserRouter([
   {
@@ -88,6 +89,7 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
   <QueryClientProvider client={queryClient}>
+    <ModalProvider>
     <ContextProvider>
       <ThemeProvider>
         <ToasterProvider>
@@ -95,6 +97,7 @@ createRoot(document.getElementById("root")!).render(
         </ToasterProvider>
       </ThemeProvider>
     </ContextProvider>
+    </ModalProvider>
   </QueryClientProvider>
   // </React.StrictMode>
 );
