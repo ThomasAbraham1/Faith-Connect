@@ -9,12 +9,17 @@ import { Eye, SquarePen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CUEvents } from "./CUEvents";
 import type { TEventsData } from "./types/events.types";
+import { useModal } from "@/components/dynamic/ModalProvider";
+import { AddEvents } from "./AddEvents";
 
 function EventsPage() {
   const userContext = useUser();
+  const ModalContext = useModal();
+
   const tableRef = useRef<Table<TEventsData>>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [editingEvent, setEditingEvent] = React.useState<TEventsData | null>(null);
+
 
   const { isPending, error, data, isFetching } = useQuery({
     queryKey: ["eventsData"],
@@ -40,11 +45,19 @@ function EventsPage() {
 
   console.log(editingEvent, 'editingEvent')
   console.log(data?.data?.data, "dataArray");
+
+  const OnClickEdit = async (row: any) => {
+    // setEditingEvent(row);
+    // setIsSheetOpen(true);
+    const result = await ModalContext.showModal(<AddEvents id={row.id} />);
+    console.log("User response:", result);
+
+  };
   return (
     <>
 
       {/* Add Sheet (always visible) */}
-      <CUEvents
+      {/* <CUEvents
         trigger="Add Event"
         triggerVariant="default"
         event={editingEvent}
@@ -53,7 +66,7 @@ function EventsPage() {
           setIsSheetOpen(open);
           if (!open) setEditingEvent(null);
         }}
-      />
+      /> */}
 
       <Button
         variant="default"
@@ -75,10 +88,7 @@ function EventsPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
-                setEditingEvent(row.original);
-                setIsSheetOpen(true);
-              }}
+              onClick={() => OnClickEdit(row.original)}
             >
               <SquarePen className="h-4 w-4" />
             </Button>
