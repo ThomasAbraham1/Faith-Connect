@@ -77,7 +77,7 @@ export function DynamicSheet({
   return (
     <Sheet open={open} onOpenChange={sheetOnOpenChange? sheetOnOpenChange : onOpenChange}>
       <SheetTrigger asChild>
-        {/* <Button variant={sheetConfig.triggerButtonVariant}>{sheetConfig.triggerButtonText}</Button> */}
+        <Button variant={sheetConfig.triggerButtonVariant}>{sheetConfig.triggerButtonText}</Button>
       </SheetTrigger>
       <SheetContent className={`w-80 sm:w-140 overflow-y-auto`}>
         {children}

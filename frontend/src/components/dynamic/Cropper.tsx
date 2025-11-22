@@ -12,6 +12,8 @@ import {
   ImageCropContent,
   ImageCropReset,
 } from "../ui/shadcn-io/image-crop";
+import { get } from "lodash";
+import { flushSync } from "react-dom";
 
 type CropperProps = {
   profilePic: File;
@@ -111,8 +113,9 @@ export const useAvatarUploadHandler = (
   };
 };
 
-export const AvatarUploadButton = ({ setValue, control, children, isRequired }: {
+export const AvatarUploadButton = ({ setValue, control, getValues, children, isRequired }: {
   setValue: UseFormSetValue<any>,
+  getValues: any,
   control: any,
   children: React.ReactNode,
   isRequired: boolean,
@@ -121,14 +124,23 @@ export const AvatarUploadButton = ({ setValue, control, children, isRequired }: 
   const { setSelectedFile, setCroppedImage } =
     useCrop();
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    console.log("Hello")
     const file = event.target.files?.[0];
     console.log(file)
-    if (file) {
-      setValue("profilePic", file.name, { shouldDirty: true });
+    if (!file) return;
+
+    // 1. Update RHF immediately
+    setValue("profilePic", file, { shouldDirty: true });
+
+    // 2. Force selectedFile to be set BEFORE cropper reads it
+    flushSync(() => {
       setSelectedFile(file);
-      setCroppedImage(null);
-    }
+    });
+
+    // 3. Now safely reset cropped image
+    setCroppedImage(null);
+
+    // Now the cropper will definitely see the new file
+    console.log(getValues(), 'getValues')
   };
   return (
     <>
