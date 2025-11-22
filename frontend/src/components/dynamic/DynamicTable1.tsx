@@ -15,17 +15,13 @@ import {
     useReactTable,
     type VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown,  } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -37,10 +33,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import type { Member } from "@/app/members";
-import { da } from "date-fns/locale";
 import * as lodash from "lodash";
-import { ActionsColumn } from "./ActionsColumn";
 
 export function DynamicTable1<T>({
     ref,

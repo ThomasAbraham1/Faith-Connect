@@ -28,7 +28,7 @@ type CrudSheetProps<T extends FieldValues> = {
     description?: string;
 
     /** Text (or JSX) for the trigger button */
-    trigger: ReactNode;
+    trigger: string;
 
     /** Variant for the trigger button */
     triggerVariant?:
@@ -71,25 +71,6 @@ type CrudSheetProps<T extends FieldValues> = {
 
 };
 
-/**
- * Generic Add / Edit sheet.
- *
- * Usage example (see the bottom of the file):
- *
- *   <CrudSheet
- *     id={member?.id}
- *     title={member ? "Edit member" : "Add member"}
- *     trigger={<EditIcon />}
- *     defaultValues={member ?? emptyForm}
- *     addEndpoint="/members"
- *     editEndpoint={(id) => `/members/${id}`}
- *     invalidateQueries={["membersData"]}
- *   >
- *     {({ control, register, watch, ... }) => (
- *        …your inputs here…
- *     )}
- *   </CrudSheet>
- */
 export function CrudSheet<T extends FieldValues>({
     id,
     title,
@@ -121,7 +102,7 @@ export function CrudSheet<T extends FieldValues>({
     }, [defaultValues, methods]);
     const { reset, formState, handleSubmit, setValue } = methods;
     const { dirtyFields, isSubmitting } = formState;
-    console.log(defaultValues, 'defaultValues')
+    // console.log(defaultValues, 'defaultValues');
     // -----------------------------------------------------------------
     // 1. Mutation – add or edit
     // -----------------------------------------------------------------
@@ -184,25 +165,13 @@ export function CrudSheet<T extends FieldValues>({
 
 
     const onSubmit = (data: T) => {
-        const processedData = buildFormData
-            ? buildFormData(data, dirtyFields as Partial<T>)
-            : defaultBuildData(data, dirtyFields as Partial<T>);
-        mutation.mutate(processedData);
-        console.log(processedData)
+        console.log(data)
+        // const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
+            
+        // // mutation.mutate(processedData);
+        // console.log(processedData, "PRocessed Data");
     };
 
-    // -----------------------------------------------------------------
-    // 3. Reset when sheet closes
-    // -----------------------------------------------------------------
-    // const sheetOnOpenChange = (open: boolean) => {
-    //     if (!open) {
-    //         reset();
-    //     }
-    // };
-
-    // -----------------------------------------------------------------
-    // 4. Render
-    // -----------------------------------------------------------------
     return (
         <DynamicSheet
             open={open}

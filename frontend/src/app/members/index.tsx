@@ -16,6 +16,10 @@ import { Modal } from "@/components/dynamic/Modal";
 import { ViewProfile } from "./ViewProfile";
 import { useUser } from "@/context/UserProvider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
+import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
+import { CUEvents } from "./CUEvents";
+import { CardTitle } from '@/components/ui/card';
 interface membersResponseObject {
   _id: string;
   userName: string;
@@ -87,11 +91,6 @@ export const MembersPage = () => {
     }
   });
 
-  // test
-  useEffect(() => {
-    if (isMounted.current) { console.log(selectedRowIds) }
-    else { isMounted.current = true }
-  }, [selectedRowIds])
 
 
 
@@ -133,287 +132,6 @@ export const MembersPage = () => {
     ) || [];
   }, [data, roleName])
 
-  // console.log(JSON.stringify(tableData))
-
-  const columns: ColumnDef<Member>[] = useMemo(() =>
-    [
-      {
-        id: "select",
-        header: ({ table }) => {
-          // console.log(table.getIsSomePageRowsSelected())
-          return <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) => {
-              table.toggleAllPageRowsSelected(!!value)
-              //  return console.log(table.getSelectedRowModel().rowsById)
-            }
-            }
-            aria-label="Select all"
-          />
-        },
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
-      {
-        accessorKey: "id",
-        header: "Id",
-        cell: ({ row }) => (
-          <div className="capitalize">{row.getValue("id")}</div>
-        ),
-      },
-      {
-        accessorKey: "username",
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              Username
-              <ArrowUpDown />
-            </Button>
-          );
-        },
-        cell: ({ row }) => (
-          <div className="lowercase">{row.getValue("username")}</div>
-        ),
-      },
-      {
-        accessorKey: "password",
-        header: () => <div className="text-right">Password</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("password")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "phone",
-        header: () => <div className="text-right">Phone</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("phone")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "spiritualStatus",
-        header: () => <div className="text-right">Spiritual Status</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("spiritualStatus")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "dateOfBirth",
-        header: () => <div className="text-right">Date Of Birth</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("dateOfBirth")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "profilePicUrl",
-        header: () => <div className="text-right">Profile Picture</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("profilePicUrl")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "firstName",
-        header: () => <div className="text-right">First Name</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("firstName")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "lastName",
-        header: () => <div className="text-right">Last Name</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("lastName")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "fatherName",
-        header: () => <div className="text-right">Father's Name</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("fatherName")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "motherName",
-        header: () => <div className="text-right">Mother's Name</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("motherName")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "address",
-        header: () => <div className="text-right">Address</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("address")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "role",
-        header: () => <div className="text-right">Role</div>,
-        cell: ({ row }) => {
-          return (
-            <div className="text-right font-medium">
-              {row.getValue("role")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "actions",
-        header: () => <div className="text-right">Actions</div>,
-        cell: ({ row }) => {
-          return (
-            // Delete button as icon
-            <div className="text-right font-medium">
-              <Alert
-                onComfirmFunction={() => mutation.mutate(row.getValue("id"))}
-              >
-                <Button variant={"ghost"}>
-                  <Trash2></Trash2>
-                </Button>
-              </Alert>
-              {/* Edit button as icon */}
-              <EditMembers
-                id={row.getValue("id")}
-                userName={row.getValue("username")}
-                password={row.getValue("password")}
-                dateOfBirth={row.getValue("dateOfBirth")}
-                address={row.getValue("address")}
-                firstName={row.getValue("firstName")}
-                lastName={row.getValue("lastName")}
-                fatherName={row.getValue("fatherName")}
-                motherName={row.getValue("motherName")}
-                phone={row.getValue("phone")}
-                spiritualStatus={row.getValue("spiritualStatus")}
-                profilePicUrl={row.getValue("profilePicUrl")}
-                roles={row.getValue("role")}
-                triggerButtonVariant={"ghost"}
-              >
-                <SquarePen></SquarePen>
-                {/* <Button onClick={async (e) => {
-                  const response = await api.get(row.getValue('profilePicUrl'), {
-                    responseType: "blob",
-                  })
-                }}>edit</Button> */}
-              </EditMembers>
-              {/* View button */}
-              <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
-                <ViewProfile userName={row.getValue("username")}
-                  dateOfBirth={row.getValue("dateOfBirth")}
-                  phone={row.getValue("phone")}
-                  address={row.getValue("address")}
-                  firstName={row.getValue("firstName")}
-                  lastName={row.getValue("lastName")}
-                  fatherName={row.getValue("fatherName")}
-                  motherName={row.getValue("motherName")}
-                  spiritualStatus={row.getValue("spiritualStatus")}
-                  churchName={userContext.church?.churchName}
-                  profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
-              </Modal>
-            </div >
-          );
-        },
-      },
-      // {
-      //   id: "actions",
-      //   enableHiding: false,
-      //   cell: ({ row }) => {
-      //     const payment = row.original;
-
-      //     return (
-      //       <DropdownMenu>
-      //         <DropdownMenuTrigger asChild>
-      //           <Button variant="ghost" className="h-8 w-8 p-0">
-      //             <span className="sr-only">Open menu</span>
-      //             <MoreHorizontal />
-      //           </Button>
-      //         </DropdownMenuTrigger>
-      //         <DropdownMenuContent align="end">
-      //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      //           <DropdownMenuItem
-      //             onClick={() => navigator.clipboard.writeText(payment.id)}
-      //           >
-      //             Copy payment ID
-      //           </DropdownMenuItem>
-      //           <DropdownMenuSeparator />
-      //           <DropdownMenuItem>View customer</DropdownMenuItem>
-      //           <DropdownMenuItem>View payment details</DropdownMenuItem>
-      //         </DropdownMenuContent>
-      //       </DropdownMenu>
-      //     );
-      //   },
-      // },
-    ], [tableData])
-
-  // Members Table Header
-  const tableConfig = {
-    headerFields: ["Id", "Username", "Password", "Role"],
-  };
-
-
-
-  // type headerFields = ["Id", "Username", "Password", "Role", "Permission"];
-
-
-  // console.log(tableData);
-
-  interface DataTableProps<TData> {
-    columns: ColumnDef<TData>[];
-    data: TData[];
-  }
 
 
 
@@ -439,19 +157,35 @@ export const MembersPage = () => {
           <Button variant={'destructive'}>Delete</Button>
         </Alert>
         )
-        || <AddMembers triggerButtonVariant={'default'} />
+        ||
+        < CUEvents
+          trigger="Add Member"
+          triggerVariant="default"
+        />
       }
-      {/* <DataTable
-            table={tableCreator<ColumnDef>({ data: data, columns: columns })}
-          /> */}
-      <DataTableDemo ref={tableRef} data={tableData} columns={columns} getSelectedRowsObject={getSelectedRowsObject} columnVisibilityObject={{ profilePicUrl: false, address: false }} />
+      <DynamicTable1 ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
+        {(row) =>
+          <ActionsColumn>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                // setEditingEvent(row.original);
+                // setIsSheetOpen(true);
+              }}
+            >
+              <SquarePen className="h-4 w-4" />
+            </Button>
+
+            <Button variant="ghost" size="icon">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Eye className="h-4 w-4" />
+            </Button>
+          </ActionsColumn>
+        }
+      </DynamicTable1>
     </>
   );
-  // }
-  // {response && (<Addmember trigger />)}
-  // return (
-  //   <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
-  //     <LoadingSpinner />
-  //   </div>
-  // );
 };
