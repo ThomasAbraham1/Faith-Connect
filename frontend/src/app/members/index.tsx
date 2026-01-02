@@ -3,23 +3,24 @@ import { DataTableDemo } from "@/components/dynamic/DynamicTable";
 import LoadingSpinner from "@/components/spinner";
 import { QueryClientContext, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AddMembers } from "./AddMembers";
-import { Trash2, SquarePen, CheckCheck, CheckCheckIcon, CheckIcon, CheckSquare, Check } from "lucide-react";
+import { Trash2, SquarePen, CheckCheck, CheckCheckIcon, CheckIcon, CheckSquare, Check, Eye } from "lucide-react";
 import { type ColumnDef, type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
-import { Eye } from 'lucide-react';
+
 // In your component
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/dynamic/Alert";
 import { EditMembers } from "./EditMembers";
-import { Modal } from "@/components/dynamic/Modal";
-import { ViewProfile } from "./ViewProfile";
+
 import { useUser } from "@/context/UserProvider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
 import { CUMembers } from "./CUMembers";
 import { CardTitle } from '@/components/ui/card';
+import { Modal } from "@/components/dynamic/Modal";
+import { ViewProfile } from "./ViewProfile";
 interface membersResponseObject {
   _id: string;
   userName: string;
@@ -61,7 +62,6 @@ export const MembersPage = () => {
   const tableRef = useRef<TableType<Member>>(null);
   const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
   const [editingMember, setEditingMember] = useState<Member | null>(null);
-  const [viewingMember, setViewingMember] = useState<Member | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Function to get selected row and format them for further processing
@@ -182,30 +182,6 @@ export const MembersPage = () => {
           />
         )
       }
-      {/* View Profile Modal */}
-      {viewingMember && (
-        <Modal
-          open={!!viewingMember}
-          onOpenChange={(open: boolean) => !open && setViewingMember(null)}
-          modelTitle="Member Profile"
-          triggerButtonVariant="ghost" // Hidden trigger managed by state
-        >
-          <ViewProfile
-            userName={viewingMember.userName}
-            profilePicUrl={viewingMember.profilePicUrl}
-            phone={viewingMember.phone}
-            churchName={userContext.church?.churchName}
-            spiritualStatus={viewingMember.spiritualStatus}
-            dateOfBirth={viewingMember.dateOfBirth}
-            address={viewingMember.address}
-            firstName={viewingMember.firstName}
-            lastName={viewingMember.lastName}
-            fatherName={viewingMember.fatherName}
-            motherName={viewingMember.motherName}
-          />
-        </Modal>
-      )}
-
       <DynamicTable1<Member> ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
         {(row) =>
           <ActionsColumn>
@@ -230,13 +206,19 @@ export const MembersPage = () => {
                 <Trash2 className="h-4 w-4" />
               </Button>
             </Alert>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setViewingMember(row.original)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
+            <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
+              <ViewProfile userName={row.getValue("username")}
+                dateOfBirth={row.getValue("dateOfBirth")}
+                phone={row.getValue("phone")}
+                address={row.getValue("address")}
+                firstName={row.getValue("firstName")}
+                lastName={row.getValue("lastName")}
+                fatherName={row.getValue("fatherName")}
+                motherName={row.getValue("motherName")}
+                spiritualStatus={row.getValue("spiritualStatus")}
+                churchName={userContext.church?.churchName}
+                profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
+            </Modal>
           </ActionsColumn>
         }
       </DynamicTable1>
