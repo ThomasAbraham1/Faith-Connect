@@ -166,10 +166,21 @@ export function CrudSheet<T extends FieldValues>({
 
     const onSubmit = (data: T) => {
         console.log(data)
-        // const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
-            
-        // // mutation.mutate(processedData);
-        // console.log(processedData, "PRocessed Data");
+        const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
+
+        if (processedData instanceof FormData) {
+            console.log("FormData content:");
+            processedData.forEach((value, key) => {
+                console.log(`${key}: ${value}`);
+            });
+        } else {
+            // mutation.mutate(processedData);
+            for (const [key, value] of Object.entries(processedData)) {
+                console.log(`${key}: ${value}`);
+            }
+        }
+        mutation.mutate(processedData);
+        console.log(processedData, "Processed Data");
     };
 
     return (

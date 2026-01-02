@@ -14,6 +14,7 @@ import {
 } from "../ui/shadcn-io/image-crop";
 import { get } from "lodash";
 import { flushSync } from "react-dom";
+import { dataURLtoFile } from "@/lib/utils";
 
 type CropperProps = {
   profilePic: File;
@@ -42,14 +43,25 @@ export const useAvatarUploadHandler = (
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+
+
   const setCroppedImageFunction = (cropped: string) => {
     setCroppedImage(cropped);
+
+    // Create a new File object from the cropped data URL
+    // We explicitly use .png to match the mime type usually returned by canvas.toDataURL()
+    const file = dataURLtoFile(cropped, "cropped-profile.png");
+
+    // Update the form with the new cropped file
+    setValue("profilePic", file, { shouldDirty: true });
+
     setSelectedFile(null);
   };
 
   const AvatarUploadCropperContent = () => {
     const { selectedFile, croppedImage } =
       useCrop();
+    console.log(croppedImage)
     return (
       <div className="justify-items-center-safe">
         {selectedFile && (
