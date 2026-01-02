@@ -18,7 +18,7 @@ import { useUser } from "@/context/UserProvider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
-import { CUEvents } from "./CUEvents";
+import { CUMembers } from "./CUMembers";
 import { CardTitle } from '@/components/ui/card';
 interface membersResponseObject {
   _id: string;
@@ -42,15 +42,27 @@ interface membersResponseObject {
 // Column Config
 export type Member = {
   id: string;
-  username: string;
+  userName: string;
   password: string;
+  phone: string;
+  role: string;
+  spiritualStatus: string;
+  dateOfBirth: string;
+  firstName: string;
+  lastName: string;
+  fatherName: string;
+  motherName: string;
+  address: string;
+  profilePicUrl: string | null;
 };
 
 export const MembersPage = () => {
   const userContext = useUser();
-  const tableRef = useRef<TableType<unknown>>(null);
+  const tableRef = useRef<TableType<Member>>(null);
   const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
-  const isMounted = useRef(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [viewingMember, setViewingMember] = useState<Member | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Function to get selected row and format them for further processing
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
@@ -109,12 +121,13 @@ export const MembersPage = () => {
     }).map(
       (value: membersResponseObject, index: number) => {
         // Find role name for user role IDs
+        console.log(value)
         var userRoles: string;
         // userRoles = userContext.church?.roles.filter((role) => value.roles.includes(role._id)).map((role) => role.name).join(", ") || "No Role"
         // console.log(userRoles);
         return {
           id: value._id,
-          username: value.userName,
+          userName: value.userName,
           password: value.password,
           phone: value.phone,
           role: value.roles.length > 1 ? value.roles.join(", ") : value.roles[0],
@@ -125,8 +138,7 @@ export const MembersPage = () => {
           fatherName: value.fatherName,
           motherName: value.motherName,
           address: value.address,
-          profilePicUrl: `/uploads/${value.profilePic?.profilePicName
-            }`,
+          profilePicUrl: `/uploads/${value.profilePic?.profilePicName}`,
         };
       }
     ) || [];
@@ -153,34 +165,76 @@ export const MembersPage = () => {
             ChildComponent={AddMembers}
             /> */}
       {
-        (selectedRowIds.length > 0 && <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-          <Button variant={'destructive'}>Delete</Button>
-        </Alert>
+        selectedRowIds.length > 0 ? (
+          <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+            <Button variant="destructive">Delete</Button>
+          </Alert>
+        ) : (
+          <CUMembers
+            trigger="Add Member"
+            triggerVariant="default"
+            open={isSheetOpen}
+            onOpenChange={(open: boolean) => {
+              setIsSheetOpen(open);
+              if (!open) setEditingMember(null);
+            }}
+            data={editingMember as any}
+          />
         )
-        ||
-        < CUEvents
-          trigger="Add Member"
-          triggerVariant="default"
-        />
       }
-      <DynamicTable1 ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
+      {/* View Profile Modal */}
+      {viewingMember && (
+        <Modal
+          open={!!viewingMember}
+          onOpenChange={(open: boolean) => !open && setViewingMember(null)}
+          modelTitle="Member Profile"
+          triggerButtonVariant="ghost" // Hidden trigger managed by state
+        >
+          <ViewProfile
+            userName={viewingMember.userName}
+            profilePicUrl={viewingMember.profilePicUrl}
+            phone={viewingMember.phone}
+            churchName={userContext.church?.churchName}
+            spiritualStatus={viewingMember.spiritualStatus}
+            dateOfBirth={viewingMember.dateOfBirth}
+            address={viewingMember.address}
+            firstName={viewingMember.firstName}
+            lastName={viewingMember.lastName}
+            fatherName={viewingMember.fatherName}
+            motherName={viewingMember.motherName}
+          />
+        </Modal>
+      )}
+
+      <DynamicTable1<Member> ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
         {(row) =>
           <ActionsColumn>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => {
-                // setEditingEvent(row.original);
-                // setIsSheetOpen(true);
+                const memberData = row.original as Member;
+                const mappedMember = {
+                  ...memberData,
+                  roles: memberData.role,
+                  profilePic: memberData.profilePicUrl
+                };
+                setEditingMember(mappedMember as any);
+                setIsSheetOpen(true);
               }}
             >
               <SquarePen className="h-4 w-4" />
             </Button>
-
-            <Button variant="ghost" size="icon">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon">
+            <Alert onComfirmFunction={() => mutation.mutate(row.original.id)}>
+              <Button variant="ghost" size="icon">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </Alert>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setViewingMember(row.original)}
+            >
               <Eye className="h-4 w-4" />
             </Button>
           </ActionsColumn>

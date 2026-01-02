@@ -19,7 +19,7 @@ export class MembersService {
       if (doesUserNameExist) {
         throw new ConflictException('Username already exists');
       }
-      return await this.userModel.insertOne(createMemberDto);
+      return await this.userModel.create(createMemberDto);
     } catch (error) {
       throw error;
     }
@@ -151,4 +151,3 @@ export class MembersService {
     }
   }
 }
- 
