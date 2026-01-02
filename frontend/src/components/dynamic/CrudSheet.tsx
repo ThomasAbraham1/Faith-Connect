@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import api from "@/api/api";
 import { SheetClose, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
 import type { TEventsData } from "@/app/events/types/events.types";
+import { useCrop } from "@/context/CropProvider";
 
 type CrudSheetProps<T extends FieldValues> = {
     /** Unique id when editing – undefined for “add” */
@@ -94,12 +95,13 @@ export function CrudSheet<T extends FieldValues>({
     const methods = useForm<T>(
         { defaultValues: defaultValues }
     );
+    const { setCroppedImage } = useCrop()
 
-    useEffect(() => {
-        if (defaultValues) {
-            methods.reset(defaultValues);
-        }
-    }, [defaultValues, methods]);
+        useEffect(() => {
+            if (defaultValues) {
+                methods.reset(defaultValues);
+            }
+        }, [defaultValues, methods]);
     const { reset, formState, handleSubmit, setValue } = methods;
     const { dirtyFields, isSubmitting } = formState;
     // console.log(defaultValues, 'defaultValues');
@@ -115,6 +117,7 @@ export function CrudSheet<T extends FieldValues>({
         onSuccess: () => {
             toast.success(isEdit ? "Updated successfully" : "Created successfully");
             queryClient.invalidateQueries({ queryKey: invalidateQueries });
+            setCroppedImage(null);
             reset(); // clear form
             onSuccess?.();
         },
