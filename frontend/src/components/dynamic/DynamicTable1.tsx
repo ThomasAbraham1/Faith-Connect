@@ -208,6 +208,7 @@ export function DynamicTable1<T>({
                                         onCheckedChange={(value) =>
                                             column.toggleVisibility(!!value)
                                         }
+                                        onSelect={(e) => e.preventDefault()}
                                     >
                                         {column.id}
                                     </DropdownMenuCheckboxItem>

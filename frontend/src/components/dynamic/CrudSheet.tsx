@@ -97,11 +97,11 @@ export function CrudSheet<T extends FieldValues>({
     );
     const { setCroppedImage } = useCrop()
 
-        useEffect(() => {
-            if (defaultValues) {
-                methods.reset(defaultValues);
-            }
-        }, [defaultValues, methods]);
+    useEffect(() => {
+        if (open) {
+            methods.reset(defaultValues);
+        }
+    }, [defaultValues, methods, open]);
     const { reset, formState, handleSubmit, setValue } = methods;
     const { dirtyFields, isSubmitting } = formState;
     // console.log(defaultValues, 'defaultValues');

@@ -15,9 +15,9 @@ import {
 
 export function DatePicker({ onChange, className, value }: { onChange: (value?: String) => void, className: string, value: Date }) {
     const [date, setDate] = React.useState<Date>()
-React.useEffect(()=>{
-    setDate(value)
-}, [value])
+    React.useEffect(() => {
+        setDate(value)
+    }, [value])
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -31,7 +31,15 @@ React.useEffect(()=>{
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-                <Calendar captionLayout="dropdown" mode="single" selected={date} onSelect={(value) => { const isoDate = value?.toISOString().split('T')[0]; onChange(isoDate); setDate(value) }} />
+                <Calendar captionLayout="dropdown" mode="single" selected={date} onSelect={(value) => {
+                    if (!value) return;
+                    // Adjust for timezone offset to prevent date shifting
+                    const offset = value.getTimezoneOffset();
+                    const adjustedDate = new Date(value.getTime() - (offset * 60 * 1000));
+                    const isoDate = adjustedDate.toISOString().split('T')[0];
+                    onChange(isoDate);
+                    setDate(value)
+                }} />
             </PopoverContent>
         </Popover>
     )

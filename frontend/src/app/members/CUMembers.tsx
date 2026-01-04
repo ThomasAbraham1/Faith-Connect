@@ -70,8 +70,6 @@ export const CUMembers = ({
         },
     });
 
-
-
     return (
         <>
             <CrudSheet<FormDataType>
