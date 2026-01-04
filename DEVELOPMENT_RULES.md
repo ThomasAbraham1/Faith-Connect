@@ -36,3 +36,7 @@ If you identify that a task requires a complex implementation due to constraints
 ## 4. Interaction Style
 *   **Explanation**: When introducing a new concept or library, briefly explain *why* it helps, keeping the "amateur developer" persona in mind.
 *   **Validation**: Don't just generate code; double-check that it doesn't create a future debugging nightmare.
+
+## 5. Workflow & Documentation
+*   **Work Logging**: Maintain a daily work log (e.g., `work_log_YYYY-MM-DD.md`) summarizing key changes, completed features, and bug fixes at the end of each session. This helps in tracking progress and context switching.
+*   **Module Documentation**: Upon completing a module, ensure it is documented. Update or create documentation to record the module's functionality and structure.
