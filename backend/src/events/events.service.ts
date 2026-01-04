@@ -24,7 +24,11 @@ export class EventsService {
     return this.eventsModel.findByIdAndUpdate(id, updateEventDto, { new: true });
   }
 
-  remove(id: number) {
-    return this.eventsModel.findByIdAndDelete(id);
+  remove(id: string | string[]) {
+    // return this.eventsModel.findByIdAndDelete(id);
+    // Delete the records from database
+    return this.eventsModel.deleteMany({
+      _id: { $in: id },
+    });
   }
 }

@@ -1,61 +1,21 @@
 import api from "@/api/api";
-import { DataTableDemo } from "@/components/dynamic/DynamicTable";
-import LoadingSpinner from "@/components/spinner";
-import { QueryClientContext, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AddMembers } from "./AddMembers";
-import { Trash2, SquarePen, CheckCheck, CheckCheckIcon, CheckIcon, CheckSquare, Check, Eye } from "lucide-react";
-import { type ColumnDef, type Row, type Table as TableType } from "@tanstack/react-table";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpDown } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2, SquarePen, Eye } from "lucide-react";
+import { type Row, type Table as TableType } from "@tanstack/react-table";
+import React, { useCallback, useRef, useState } from "react";
 
 // In your component
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/dynamic/Alert";
-import { EditMembers } from "./EditMembers";
 
 import { useUser } from "@/context/UserProvider";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
 import { CUMembers } from "./CUMembers";
-import { CardTitle } from '@/components/ui/card';
 import { Modal } from "@/components/dynamic/Modal";
 import { ViewProfile } from "./ViewProfile";
-interface membersResponseObject {
-  _id: string;
-  userName: string;
-  password: string;
-  roles: string[];
-  profilePic: {
-    profilePicName: string;
-    profilePicPath: string;
-  };
-  phone: string;
-  spiritualStatus: string;
-  dateOfBirth: string;
-  address: string;
-  lastName: string;
-  firstName: string;
-  motherName: string;
-  fatherName: string;
-}
+import type { membersResponseObject, Member } from "./types/members.types";
 
-// Column Config
-export type Member = {
-  id: string;
-  userName: string;
-  password: string;
-  phone: string;
-  role: string;
-  spiritualStatus: string;
-  dateOfBirth: string;
-  firstName: string;
-  lastName: string;
-  fatherName: string;
-  motherName: string;
-  address: string;
-  profilePicUrl: string | null;
-};
 
 export const MembersPage = () => {
   const userContext = useUser();
@@ -104,13 +64,8 @@ export const MembersPage = () => {
   });
 
 
-
-
-  // console.log("Hello myu man");
-  // if (!isPending && !mutation.isPending) {
   // Take admin role ID and compare it with user data to filter members
   const roleName = userContext.church?.roles.find((role) => role.name == "admin")?.name
-  // console.log('roleName:', data)
   // Removing admins and retrieving members only
   // Adhering to Dynamic Table data definition
   const tableData: Member[] = React.useMemo(() => {
@@ -123,8 +78,6 @@ export const MembersPage = () => {
         // Find role name for user role IDs
         console.log(value)
         var userRoles: string;
-        // userRoles = userContext.church?.roles.filter((role) => value.roles.includes(role._id)).map((role) => role.name).join(", ") || "No Role"
-        // console.log(userRoles);
         return {
           id: value._id,
           userName: value.userName,
@@ -144,43 +97,24 @@ export const MembersPage = () => {
     ) || [];
   }, [data, roleName])
 
-
-
-
   return (
     <>
-      {/* {(isFetching || mutation.isPending) &&
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
-          <LoadingSpinner />
-        </div>
-      } */}
-      {/* <DynamicTable
-          fetchResponse={{
-            isPending: isPending,
-            error: error,
-            data: tableData,
-            isFetching: isFetching,
-            }}
-            tableConfig={tableConfig}
-            ChildComponent={AddMembers}
-            /> */}
-      {
-        selectedRowIds.length > 0 ? (
-          <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-            <Button variant="destructive">Delete</Button>
-          </Alert>
-        ) : (
-          <CUMembers
-            trigger="Add Member"
-            triggerVariant="default"
-            open={isSheetOpen}
-            onOpenChange={(open: boolean) => {
-              setIsSheetOpen(open);
-              if (!open) setEditingMember(null);
-            }}
-            data={editingMember as any}
-          />
-        )
+      {selectedRowIds.length > 0 ? (
+        <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+          <Button variant="destructive">Delete</Button>
+        </Alert>
+      ) : (
+        <CUMembers
+          trigger="Add Member"
+          triggerVariant="default"
+          open={isSheetOpen}
+          onOpenChange={(open: boolean) => {
+            setIsSheetOpen(open);
+            if (!open) setEditingMember(null);
+          }}
+          data={editingMember as any}
+        />
+      )
       }
       <DynamicTable1<Member> ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
         {(row) =>

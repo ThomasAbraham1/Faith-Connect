@@ -1,59 +1,55 @@
 import { CrudSheet } from "@/components/dynamic/CrudSheet";
-import { SquarePen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { TEventsData } from "./types/events.types";
-import React, { type ReactNode } from "react";
-
-
+import { useMemo } from "react";
+import { Controller } from "react-hook-form";
+import { DatePicker } from "@/components/date-picker";
 
 // Optional: pass event data when editing
 type AddEventsProps = {
-    event?: TEventsData | null;
+    data?: TEventsData | null; // Renamed from event
     triggerVariant?: "default" | "outline" | "ghost";
-    trigger?: ReactNode; // Allow override
+    trigger?: string; // Aligning type to string like CUMembers
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     onSuccess?: () => void;
 };
 
 export const CUEvents = ({
-    event,
+    data, // Renamed from event
     triggerVariant,
     trigger,
     open,
     onOpenChange,
-    onSuccess: externalOnSuccess
+    onSuccess
 }: AddEventsProps) => {
-    const isEdit = !!event?.id;
-    console.log(event, 'event')
+    const isEdit = !!data?.id;
 
     return (
         <CrudSheet<TEventsData>
-            id={event?.id}
-            title={isEdit ? "Edit Event" : "Add Event"}
+            id={data?.id}
+            title={trigger!}
             description={isEdit ? "Update event details" : "Create a new event"}
-            trigger={isEdit ? "Add Events" : isEdit}
+            trigger={trigger!}
             triggerVariant={triggerVariant}
-            defaultValues={{
-                eventName: event?.eventName ?? "",
-                description: event?.description ?? "",
-                eventDate: event?.eventDate ?? "",
-                eventLocation: event?.eventLocation ?? "",
-                organizer: event?.organizer ?? ""
-            }}
+            defaultValues={useMemo(() => ({
+                eventName: data?.eventName ?? "",
+                description: data?.description ?? "",
+                eventDate: data?.eventDate ?? "",
+                eventLocation: data?.eventLocation ?? "",
+                organizer: data?.organizer ?? ""
+            }), [data])}
             addEndpoint="/events"
             editEndpoint={(id) => `/events/${id}`}
             invalidateQueries={["eventsData"]}
-            open={open} // ← controlled
-            onOpenChange={onOpenChange} // ← controlled
-            onSuccess={() => {
-                externalOnSuccess?.();
-            }}
+            open={open}
+            onOpenChange={onOpenChange}
+            onSuccess={onSuccess}
         >
             {({ register, control, formState: { errors } }) => (
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-6 px-4">
                     <div className="grid gap-3">
                         <Label htmlFor="eventName">Event Title</Label>
                         <Input
@@ -61,21 +57,31 @@ export const CUEvents = ({
                             {...register("eventName", { required: "Title is required" })}
                         />
                         {errors.eventName && (
-                            <p className="text-red-500 text-xs">{errors.eventName.message}</p>
+                            <div className="text-red-500 text-sm">{errors.eventName.message}</div>
                         )}
                     </div>
 
                     <div className="grid gap-3">
                         <Label htmlFor="eventDate">Date</Label>
-                        <Input
-                            id="eventDate"
-                            type="date"
-                            {...register("eventDate", { required: "Date is required" })}
+                        <Controller
+                            name="eventDate"
+                            control={control}
+                            rules={{ required: "Date is required" }}
+                            render={({ field }) => (
+                                <DatePicker
+                                    value={field.value ? new Date(field.value) : undefined}
+                                    className='w-full'
+                                    onChange={(value) => {
+                                        field.onChange(value);
+                                    }}
+                                />
+                            )}
                         />
                         {errors.eventDate && (
-                            <p className="text-red-500 text-xs">{errors.eventDate.message}</p>
+                            <div className="text-red-500 text-sm">{errors.eventDate.message}</div>
                         )}
                     </div>
+
                     <div className="grid gap-3">
                         <Label htmlFor="eventLocation">Location</Label>
                         <Input
@@ -83,9 +89,10 @@ export const CUEvents = ({
                             {...register("eventLocation", { required: "Location is required" })}
                         />
                         {errors.eventLocation && (
-                            <p className="text-red-500 text-xs">{errors.eventLocation.message}</p>
+                            <div className="text-red-500 text-sm">{errors.eventLocation.message}</div>
                         )}
                     </div>
+
                     <div className="grid gap-3">
                         <Label htmlFor="organizer">Organizer</Label>
                         <Input
@@ -93,7 +100,8 @@ export const CUEvents = ({
                             {...register("organizer")}
                         />
                     </div>
-                    <div className="grid gap-2 sm:col-span-2">
+
+                    <div className="grid gap-3">
                         <Label htmlFor="description">Description</Label>
                         <Textarea
                             id="description"
@@ -101,7 +109,6 @@ export const CUEvents = ({
                             rows={4}
                         />
                     </div>
-
                 </div>
             )}
         </CrudSheet>
