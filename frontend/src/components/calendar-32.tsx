@@ -13,15 +13,25 @@ import {
 } from "@/components/ui/drawer"
 import { Label } from "@/components/ui/label"
 
-export default function Calendar32({ calendarLabel, onChange, calendarDescription, getLastSunday }: { calendarLabel: string, onChange: (value?: Date) => void, calendarDescription?: string, getLastSunday: () => void }) {
+export default function Calendar32({ calendarLabel, onChange, calendarDescription, getLastSunday, filterDate }: { calendarLabel: string, onChange: (value?: Date) => void, calendarDescription?: string, getLastSunday: () => void, filterDate?: (date: Date) => boolean }) {
   const [open, setOpen] = React.useState(false)
-
-
 
   // 🔹 Function to get last Sunday (most recent)
 
   // 🔹 Initialize state with last Sunday
   const [date, setDate] = React.useState<Date | undefined>(() => getLastSunday())
+
+  const defaultFilter = (day: Date) => day.getDay() !== 0;
+  const activeFilter = filterDate ? (day: Date) => !filterDate(day) : defaultFilter; // Note: Calendar `disabled` expects true to disable. 
+  // If filterDate returns true for allowed date, we want disabled to be false.
+  // Wait, the logic request was "enables other dates selectively". 
+  // Custom filter: allow Fridays. 
+  // If filterDate returns true for Friday -> disabled should be false.
+  // User's logic in Index: return date.getDay() === dayIndex; (returns true for match)
+  // Calendar disabled prop: "MatchMatcher | MatchMatcher[] ... A matcher for disabled days."
+  // If disabled returns true, it's disabled.
+  // So if filterDate returns true (it IS the day), we want !filterDate(day). 
+  // Correct.
 
   return (
     <div className="flex flex-col gap-3">
@@ -53,7 +63,7 @@ export default function Calendar32({ calendarLabel, onChange, calendarDescriptio
               setOpen(false)
               onChange(date)
             }}
-            disabled={(day) => day.getDay() !== 0}
+            disabled={activeFilter}
             className="mx-auto [--cell-size:clamp(0px,calc(100vw/7.5),52px)]"
           />
         </DrawerContent>

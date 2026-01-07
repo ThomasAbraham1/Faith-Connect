@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, Query } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
@@ -49,6 +49,12 @@ export class AttendanceController {
   findOne(@Param('date') date: string, @Req() req: Request) {
     const churchId = (req.user as any).church._id;
     return this.attendanceService.findOne(churchId, date);
+  }
+
+  @Get('event/:eventId')
+  findOneByEvent(@Param('eventId') eventId: string, @Req() req: Request, @Query('date') date?: string) {
+    const churchId = (req.user as any).church._id;
+    return this.attendanceService.findOneByEvent(churchId, eventId, date);
   }
 
   @Patch(':id')

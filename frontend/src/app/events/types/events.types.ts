@@ -8,4 +8,8 @@ export type TEventsData = {
   eventLocation: string,
   organizer: string,
   createdDate?: string,
+  isRecurring?: boolean,
+  recurrenceType?: 'WEEKLY',
+  recurrenceDay?: string,
+  recurrenceEndDate?: string,
 }

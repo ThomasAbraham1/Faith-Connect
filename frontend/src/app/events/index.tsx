@@ -68,6 +68,10 @@ function EventsPage() {
     eventLocation: a.eventLocation,
     organizer: a.organizer,
     createdDate: a.createdAt,
+    isRecurring: a.isRecurring,
+    recurrenceType: a.recurrenceType,
+    recurrenceDay: a.recurrenceDay,
+    recurrenceEndDate: a.recurrenceEndDate,
   })) || [];
 
   console.log(editingEvent, 'editingEvent')
@@ -118,9 +122,7 @@ function EventsPage() {
                 <Trash2 className="h-4 w-4" />
               </Button>
             </Alert>
-            <Button variant="ghost" size="icon">
-              <Eye className="h-4 w-4" />
-            </Button>
+
           </ActionsColumn>
         }
       </DynamicTable1>

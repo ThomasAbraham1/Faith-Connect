@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsString } from "class-validator"
+import { IsBoolean, IsDate, IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator"
 
 export class CreateEventDto {
     @IsString()
@@ -7,13 +7,29 @@ export class CreateEventDto {
     @IsString()
     @IsNotEmpty()
     eventDate: Date
-     @IsString()
+    @IsString()
     @IsNotEmpty()
     eventLocation: string
-     @IsString()
+    @IsString()
     @IsNotEmpty()
     description: string
-     @IsString()
+    @IsString()
     @IsNotEmpty()
     organizer: string
+
+    @IsOptional()
+    @IsBoolean()
+    isRecurring?: boolean
+
+    @IsOptional()
+    @IsString()
+    recurrenceType?: string
+
+    @IsOptional()
+    @IsString()
+    recurrenceDay?: string
+
+    @IsOptional()
+    @IsDateString() // Using IsDateString because frontend sends JSON
+    recurrenceEndDate?: Date
 }

@@ -8,7 +8,7 @@ import { SignupForm } from "./app/auth/signup-form.tsx";
 import { InputOTPControlled } from "./app/auth/otpPage.tsx";
 import { OTPMethodSelection } from "./app/auth/otpMethodSelectionPage.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
-import FillerPage from "./app/dashboard/FillerPage.tsx";
+import Dashboard from "./app/dashboard/index";
 import { AppLayout } from "./components/layout/AppLayout.tsx";
 import { appRoutes } from "./routes.tsx";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
@@ -48,7 +48,7 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <FillerPage />,
+            element: <Dashboard />,
           },
           {
             path: appRoutes.members.label,

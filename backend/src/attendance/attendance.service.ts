@@ -13,7 +13,13 @@ export class AttendanceService {
     try {
       const churchId = createAttendanceDto.churchId;
       const date = createAttendanceDto.date
-      return await this.AttendanceModel.findOneAndUpdate({ churchId: churchId, date: date }, createAttendanceDto, {
+      const eventId = createAttendanceDto.eventId
+      console.log("hello")
+      const query = eventId
+        ? { churchId, eventId }
+        : { churchId, date, $or: [{ eventId: { $exists: false } }, { eventId: null }] };
+
+      return await this.AttendanceModel.findOneAndUpdate(query, createAttendanceDto, {
         upsert: true, new: true
       });
     } catch (error) {
@@ -26,7 +32,7 @@ export class AttendanceService {
     try {
       console.log("HELLO")
       const result = await this.AttendanceModel.findOne({
-        churchId: churchId, date: date
+        churchId: churchId, date: date, $or: [{ eventId: { $exists: false } }, { eventId: null }]
       });
       return result ? result : []
     } catch (error) {
@@ -38,13 +44,24 @@ export class AttendanceService {
   async findOne(churchId: string, date: string) {
     try {
       const result = await this.AttendanceModel.findOne({
-        churchId: churchId, date: date
+        churchId: churchId, date: date, $or: [{ eventId: { $exists: false } }, { eventId: null }]
       });
       return result ? result : []
 
     } catch (error) {
       console.log(error);
       return error
+    }
+  }
+
+  async findOneByEvent(churchId: string, eventId: string, date?: string) {
+    try {
+      const query = date ? { churchId, eventId, date } : { churchId, eventId };
+      const result = await this.AttendanceModel.findOne(query);
+      return result ? result : []
+    } catch (error) {
+      console.log(error);
+      return error;
     }
   }
 

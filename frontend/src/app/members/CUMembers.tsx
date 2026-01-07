@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { FormDataType } from "./types/members.types";
 import api from "@/api/api";
 import { useCRUDSheet } from "@/context/CRUDSheetProvider";
-// import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { AvatarUploadButton, useAvatarUploadHandler } from "@/components/dynamic/Cropper";
 import { useCrop } from "@/context/CropProvider";
 
@@ -112,6 +112,31 @@ export const CUMembers = ({
                 {({ register, control, setValue, getValues, formState: { errors }, watch }) => (
 
                     <div className={`grid grid-cols-1 sm:grid-cols-1 auto-cols gap-6 px-4 `}>
+                        <div className="flex justify-end">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="text-xs text-muted-foreground border-dashed"
+                                onClick={() => {
+                                    setValue('firstName', 'John');
+                                    setValue('lastName', 'Doe');
+                                    setValue('userName', 'johndoe');
+                                    setValue('password', 'password123'); // Demo password
+                                    setValue('phone', '+15550109999');
+                                    setValue('dateOfBirth', '1990-01-01');
+                                    setValue('address', '123 Maple Street');
+                                    setValue('spiritualStatus', 'SEEKER');
+                                    setValue('fatherName', 'Robert Doe');
+                                    setValue('motherName', 'Mary Doe');
+                                    // Roles might need to be fetched, but 'member' or 'visitor' if available
+                                    // setValue('roles', 'member'); 
+                                    toast.info("Demo Data Filled: Visitor 'John Doe'");
+                                }}
+                            >
+                                ✨ Demo Fill
+                            </Button>
+                        </div>
                         {(() => {
                             const {
                                 AvatarUploadCropperContent,

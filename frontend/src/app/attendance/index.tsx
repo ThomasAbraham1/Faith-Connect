@@ -13,6 +13,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { format } from 'date-fns';
 import { useUser } from "@/context/UserProvider";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import type { TEventsData } from "../events/types/events.types";
 
 
 type tableDataShape = { id: string, churchId: string, userName: string, status: string }
@@ -23,7 +31,6 @@ type attendanceRecord = {
 }
 
 type userQueryDataShape = { _id: string, churchId: string, userName: string, }
-
 type attendanceRecordsType = {
     memberId: string;
     status: string
@@ -32,53 +39,114 @@ type attendanceRecordsType = {
 export type formDataType = {
     date: string;
     churchId: string;
-    records?: attendanceRecordsType[]
+    records?: attendanceRecordsType[];
+    eventId?: string; // Add eventId to form type
 }
 
 type attendanceTableDataType = Record<'churchId' | 'id' | 'status' | 'userName', string>[]
 
 export const Attendance = () => {
     const [tableDataState, setTableDataState] = useState<attendanceTableDataType>([])
+    const [attendanceMode, setAttendanceMode] = useState<'SERVICE' | 'EVENT'>('SERVICE')
     const userContext = useUser()
-    // const [selectAllState, setSelectAllState] = useState<boolean | undefined>(undefined)
-    const getLastSunday = React.useCallback(() => {
-        const today = new Date()
-        const dayOfWeek = today.getDay() // 0=Sunday, 1=Mon...
-        const diff = dayOfWeek === 0 ? 0 : dayOfWeek // number of days since Sunday
-        const lastSunday = new Date(today)
-        lastSunday.setDate(today.getDate() - diff)
-        // Reset time for consistency
-        lastSunday.setHours(0, 0, 0, 0)
-        return lastSunday
-    }, [])
-    const { register, handleSubmit, control, watch, setValue, getValues, formState: { errors } } = useForm<formDataType>({
+
+    // Helper to get most recent occurrence of a specific day
+    const getLastOccurrence = React.useCallback((dayName?: string) => {
+        const today = new Date();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        let targetDayIndex = 0; // Default to Sunday
+        if (dayName) {
+            const index = days.indexOf(dayName);
+            if (index !== -1) targetDayIndex = index;
+        }
+
+        const currentDayIndex = today.getDay();
+        let diff = currentDayIndex - targetDayIndex;
+        if (diff < 0) {
+            diff += 7; // Go back to the previous week's occurrence
+        }
+
+        const lastDate = new Date(today);
+        lastDate.setDate(today.getDate() - diff);
+        lastDate.setHours(0, 0, 0, 0);
+        return lastDate;
+    }, []);
+
+    const { register, handleSubmit, control, watch, setValue, getValues, resetField, formState: { errors } } = useForm<formDataType>({
         defaultValues: {
-            date: format(getLastSunday(), 'yyyy-MM-dd'),
-            churchId: userContext.church?._id
+            date: format(getLastOccurrence(), 'yyyy-MM-dd'),
+            churchId: userContext.church?._id,
+            eventId: undefined
         }
     });
 
-    // Get last sunday date function
+    const selectedEventId = watch('eventId');
+    const selectedDate = watch('date');
 
-    // Query on init
     const { isPending: isUserQueryPending, error: userQueryError, data: userQueryData, isFetching: isUserQueryFetching } = useQuery({
         queryKey: ["membersData"],
         queryFn: async () => {
             const response = await api.get("/members");
-            // console.log(response)
             return response;
         },
     });
 
-    // Fetch attendance data
-    const { isPending: isAttendanceQueryPending, error: AttendanceQueryError, data: attendanceQueryData, isFetching: isAttendanceQueryFetching } = useQuery({
-        queryKey: ["attendanceData"],
+    // Fetch Events Data
+    const { data: eventsData } = useQuery({
+        queryKey: ["eventsData"],
         queryFn: async () => {
-            // console.log(`/attendance/${getValues().date}`)
-            const response = await api.get(`/attendance/${getValues().date}`);
-            // console.log(response)
+            const response = await api.get("/events");
             return response;
         },
+        enabled: attendanceMode === 'EVENT', // Only fetch events if in EVENT mode
+    });
+
+    const eventsList = useMemo(() => {
+        if (!eventsData?.data?.data) return [];
+        return eventsData.data.data.map((event: any) => ({
+            id: event._id,
+            name: event.eventName,
+            date: event.eventDate,
+            isRecurring: event.isRecurring,
+            recurrenceDay: event.recurrenceDay,
+        }));
+    }, [eventsData]);
+
+    const selectedEvent = useMemo(() => {
+        return eventsList.find((e: any) => e.id === selectedEventId);
+    }, [eventsList, selectedEventId]);
+
+    // Effect to auto-set date for Events (Single or Recurring)
+    useEffect(() => {
+        if (attendanceMode === 'EVENT' && selectedEvent) {
+            if (!selectedEvent.isRecurring && selectedEvent.date) {
+                // Single Event: Auto-set date
+                setValue('date', format(new Date(selectedEvent.date), 'yyyy-MM-dd'));
+            } else if (selectedEvent.isRecurring) {
+                // Recurring Event: Auto-set to most recent occurrence
+                const lastOccurrence = getLastOccurrence(selectedEvent.recurrenceDay);
+                setValue('date', format(lastOccurrence, 'yyyy-MM-dd'));
+            }
+        }
+    }, [selectedEvent, attendanceMode, setValue, getLastOccurrence]);
+
+
+    // Fetch attendance data
+    const { isPending: isAttendanceQueryPending, error: AttendanceQueryError, data: attendanceQueryData, isFetching: isAttendanceQueryFetching } = useQuery({
+        queryKey: ["attendanceData", attendanceMode, selectedDate, selectedEventId], // Add dependencies
+        queryFn: async () => {
+            if (attendanceMode === 'SERVICE') {
+                const response = await api.get(`/attendance/${getValues().date}`);
+                return response;
+            } else if (attendanceMode === 'EVENT' && selectedEventId) {
+                const dateQuery = selectedEvent?.isRecurring && selectedDate ? `?date=${selectedDate}` : '';
+                const response = await api.get(`/attendance/event/${selectedEventId}${dateQuery}`);
+                return response;
+            }
+            return { data: { data: { records: [] } } }; // Default empty if no event selected
+        },
+        enabled: (attendanceMode === 'SERVICE' && !!selectedDate) || (attendanceMode === 'EVENT' && !!selectedEventId && (selectedEvent?.isRecurring ? !!selectedDate : true))
     });
 
     const tableData: tableDataShape[] = useMemo(() => {
@@ -96,14 +164,10 @@ export const Attendance = () => {
             };
         }) || [];
     }, [userQueryData?.data.data, attendanceQueryData?.data?.data?.records]);
+
     const queryClient = useQueryClient();
     useEffect(() => {
-        // if table data is set - update state
-        // if (tableData.length > 0) {
         setTableDataState(tableData)
-        console.log(tableData)
-        // }
-        // console.log('Table data changed')
     }, [tableData])
 
     useEffect(() => {
@@ -112,25 +176,13 @@ export const Attendance = () => {
     }, [userContext.church])
 
     useEffect(() => {
-        queryClient.invalidateQueries({ queryKey: ['attendanceData'] })
-    }, [watch('date')])
-
-    useEffect(() => {
-        console.log('Table Data State Variable: ', tableDataState)
-        // Passing state values to react hook form values
         var recordsInFlightType: attendanceRecordsType[] = tableDataState.map((value, index) => {
             return { memberId: value.id, status: value.status }
         })
         var fileteredArray = recordsInFlightType.filter((value, index) => value.status != '')
         setValue('records', fileteredArray)
-        console.log(fileteredArray)
     }, [tableDataState]);
 
-
-
-
-
-    // console.log(tableData)
     const columns: ColumnDef<tableDataShape>[] = useMemo(() => [
         {
             accessorKey: "id",
@@ -173,8 +225,6 @@ export const Attendance = () => {
                         <p className="flex items-center">
                             Status
                         </p>
-                        {/* <Button type="button" variant={'default'} onClick={(e) => setSelectAllState(true)}><CheckCheck></CheckCheck></Button>
-                        <Button type="button" variant={'default'} onClick={(e) => setSelectAllState(false)}><X></X></Button> */}
                     </div>
                 );
             },
@@ -183,40 +233,13 @@ export const Attendance = () => {
                     <Controller control={control} name="records" render={({ field }) =>
                         <RadioGroupButton attendanceStatus={row.getValue('status')} radioId={row.getValue('id')}
                             onChange={
-                                // (value: string) => {
-                                //     const records: attendanceRecordsType[] = field.value || [];
-                                //     // field.onChange([{ memberId: row.getValue('id'), status: value }]);
-                                //     let newRecord = {
-                                //         memberId: row.getValue('id') as any as string, status: value as any as 'PRESENT' | 'ABSENT'
-                                //     }
-                                //     let existingRecordIndex = -1;
-                                //     if (records) {
-                                //         existingRecordIndex = records.findIndex((value) => value.memberId == row.getValue('id'));
-                                //     }
-                                //     console.log(existingRecordIndex)
-                                //     let newRecords
-                                //     if (existingRecordIndex >= 0) {
-                                //         newRecords = [...records]
-                                //         newRecords[existingRecordIndex] = newRecord
-                                //     } else {
-                                //         newRecords = [...records]
-                                //         newRecords.push(newRecord)
-                                //     }
-                                //     console.log(newRecords)
-                                //     // field.onChange(newRecords)
-                                //     setValue('records', newRecords);
-                                // }
                                 (value: string) => {
-                                    console.log('Current row status value: ', row.getValue('status'))
-                                    console.log('State Table after changing status: ', tableDataState, " user id: ", row.getValue('id'))
                                     const attendanceArrayIndex = tableDataState.findIndex((attendanceRecord) => attendanceRecord.id == row.getValue('id'))
-                                    console.log(attendanceArrayIndex)
                                     setTableDataState((prev) => {
                                         const newTableDataState = [...prev]
                                         newTableDataState[attendanceArrayIndex].status = value
                                         return newTableDataState
                                     })
-
                                 }
                             } radioOptions={['PRESENT', 'ABSENT']} />
                     } />
@@ -232,10 +255,19 @@ export const Attendance = () => {
         })
     })
 
-    const onSubmit = (data:any) => {
+    const onSubmit = (data: any) => {
+        if (attendanceMode === 'SERVICE') {
+            delete data.eventId;
+        } else {
+            if (!data.eventId) {
+                alert("Please select an event");
+                return;
+            }
+        }
         console.log(data)
         attendanceSubmitMutation.mutate(data);
     }
+
     return (
         <>
             {(isUserQueryFetching || isAttendanceQueryFetching || attendanceSubmitMutation.isPending) &&
@@ -244,44 +276,113 @@ export const Attendance = () => {
                 </div>
             }
             <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="grid gap-6 sm:grid-cols-2 grid-rows-auto items-end">
-                    <div className="grid-row-1 gap-3">
-                        <Controller control={control} name="date" render={({ field }) =>
-                            <Calendar32 calendarLabel={'Attendance Date'} getLastSunday={getLastSunday} onChange={(value) => {
-                                if (value) field.onChange(format(value, 'yyyy-MM-dd'))
-                            }
-                            }
-                            />
-                        } />
+                <div className="flex flex-col gap-6 mb-6">
+                    {/* Interaction Mode Toggle */}
+                    <div className="flex gap-4">
+                        <Button
+                            type="button"
+                            variant={attendanceMode === 'SERVICE' ? 'default' : 'outline'}
+                            onClick={() => {
+                                setAttendanceMode('SERVICE');
+                                resetField('eventId');
+                                setValue('date', format(getLastOccurrence(), 'yyyy-MM-dd')); // Reset to last Sunday
+                            }}
+                        >
+                            Sunday Service
+                        </Button>
+                        <Button
+                            type="button"
+                            variant={attendanceMode === 'EVENT' ? 'default' : 'outline'}
+                            onClick={() => {
+                                setAttendanceMode('EVENT');
+                            }}
+                        >
+                            Specific Event
+                        </Button>
                     </div>
-                    <Input {...register('churchId')} className="hidden"></Input>
-                    <div className="grid grid-row gap-3 justify-items-end">
-                        <div className="flex gap-3">
-                            <Button type='button' size='lg' variant={'outline'} onClick={() => {
-                                setTableDataState((prev) => {
-                                    const allPresentArray = [...prev].map((attendanceRecord) => {
-                                        var newAttendanceRecord = { ...attendanceRecord }
-                                        newAttendanceRecord.status = 'PRESENT'
-                                        return newAttendanceRecord
+
+                    <div className="grid gap-6">
+                        {/* Event Selector - Always visible if in EVENT mode */}
+                        {attendanceMode === 'EVENT' && (
+                            <div className="space-y-2 max-w-md">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Select Event</label>
+                                <Controller
+                                    control={control}
+                                    name="eventId"
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an event" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {eventsList.map((event: any) => (
+                                                    <SelectItem key={event.id} value={event.id}>
+                                                        {event.name} ({new Date(event.date).toLocaleDateString()}) - {event.isRecurring ? 'Recurring' : 'Single'}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
+                        )}
+
+                        {/* Date Picker + Buttons Row */}
+                        <div className="flex flex-wrap items-end gap-4 justify-between">
+                            <div className="w-full sm:w-auto">
+                                {attendanceMode === 'SERVICE' ? (
+                                    <Controller control={control} name="date" render={({ field }) =>
+                                        <Calendar32
+                                            calendarLabel={'Attendance Date'}
+                                            getLastSunday={() => getLastOccurrence('Sunday')}
+                                            onChange={(value) => {
+                                                if (value) field.onChange(format(value, 'yyyy-MM-dd'))
+                                            }}
+                                        />
+                                    } />
+                                ) : (
+                                    selectedEvent?.isRecurring && (
+                                        <Controller control={control} name="date" render={({ field }) =>
+                                            <Calendar32
+                                                calendarLabel={'Occurrence Date'}
+                                                getLastSunday={() => getLastOccurrence(selectedEvent.recurrenceDay)}
+                                                filterDate={(date) => {
+                                                    if (!selectedEvent.recurrenceDay) return true;
+                                                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                                    const dayIndex = days.indexOf(selectedEvent.recurrenceDay);
+                                                    if (dayIndex === -1) return true;
+                                                    return date.getDay() === dayIndex;
+                                                }}
+                                                onChange={(value) => {
+                                                    if (value) field.onChange(format(value, 'yyyy-MM-dd'))
+                                                }}
+                                            />
+                                        } />
+                                    )
+                                )}
+                            </div>
+
+                            {/* Centered Action Buttons - Now aligned right/row */}
+                            <div className="flex gap-4">
+                                <Button type='button' size='default' variant={'outline'} onClick={() => {
+                                    setTableDataState((prev) => {
+                                        return [...prev].map((r) => ({ ...r, status: 'PRESENT' }))
                                     })
-                                    return allPresentArray
-                                })
-                            }}>Present</Button>
-                            <Button type="button" size='lg' variant={'outline'} onClick={() => {
-                                setTableDataState((prev) => {
-                                    const allPresentArray = [...prev].map((attendanceRecord) => {
-                                        var newAttendanceRecord = { ...attendanceRecord }
-                                        newAttendanceRecord.status = 'ABSENT'
-                                        return newAttendanceRecord
+                                }}>Mark All Present</Button>
+                                <Button type="button" size='default' variant={'outline'} onClick={() => {
+                                    setTableDataState((prev) => {
+                                        return [...prev].map((r) => ({ ...r, status: 'ABSENT' }))
                                     })
-                                    return allPresentArray
-                                })
-                            }}>Absent</Button>
+                                }}>Mark All Absent</Button>
+                            </div>
                         </div>
+
+                        <Input {...register('churchId')} className="hidden"></Input>
                     </div>
+
                 </div>
                 <DataTableDemo data={tableDataState} columns={columns} />
-                <Button variant={'default'} className="w-full">Submit</Button>
+                <Button variant={'default'} className="w-full mt-6">Submit Attendance</Button>
             </form>
         </>
     );

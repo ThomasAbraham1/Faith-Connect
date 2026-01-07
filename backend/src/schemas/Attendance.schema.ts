@@ -19,6 +19,8 @@ export class Attendance {
     date: string
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Church', required: true })
     churchId: string
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Events', required: false })
+    eventId: string
     @Prop({ type: [{ memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, status: { type: String, enum: AttendanceStatus } }] })
     records: string;
 }

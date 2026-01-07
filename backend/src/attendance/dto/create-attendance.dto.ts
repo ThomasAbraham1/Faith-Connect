@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export enum AttendanceStatus {
     PRESENT = 'PRESENT',
@@ -27,6 +27,10 @@ export class CreateAttendanceDto {
     @IsString()
     @IsNotEmpty()
     churchId: string;
+
+    @IsString()
+    @IsOptional()
+    eventId?: string;
 
     @IsArray()
     @ValidateNested({ each: true })
