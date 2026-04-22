@@ -12,7 +12,8 @@ import {
   Settings2,
   SquareTerminal,
   CalendarCheck2,
-  Mail
+  Mail,
+  Layout
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -92,6 +93,16 @@ const data = {
       name: appRoutes.bulkEmail.label,
       url: appRoutes.bulkEmail.path,
       icon: Mail,
+    },
+    {
+      name: appRoutes.templates.label,
+      url: appRoutes.templates.path,
+      icon: Layout,
+    },
+    {
+      name: appRoutes.calendar.label,
+      url: appRoutes.calendar.path,
+      icon: CalendarCheck2,
     },
     // {
     //   name: "Sales & Marketing",
