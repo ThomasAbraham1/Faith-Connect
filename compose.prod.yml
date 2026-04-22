@@ -27,11 +27,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+      args:
+        - VITE_APP_API_URL=${VITE_APP_API_URL}
     container_name: fc-frontend
     restart: always
     ports:
       - "80:80"
-    environment:
-      - VITE_APP_API_URL=${VITE_APP_API_URL}
     depends_on:
       - backend
