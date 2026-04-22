@@ -22,8 +22,8 @@ export class ChurchesService {
     return result
   }
 
-  update(id: number, updateChurchDto: UpdateChurchDto) {
-    return `This action updates a #${id} church`;
+  async update(id: string, updateChurchDto: UpdateChurchDto) {
+    return await this.churchModel.findByIdAndUpdate(id, updateChurchDto, { new: true });
   }
 
   async remove(id: string) {

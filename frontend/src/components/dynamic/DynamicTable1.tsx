@@ -42,13 +42,15 @@ export function DynamicTable1<T>({
     //   columns,
     columnOptions = { HideColumns: [] },
     getSelectedRowsObject,
+    initialRowSelection = {},
     children
 }: {
     ref?: React.Ref<Table<T>>,
     data: any;
     columnOptions?: { HideColumns: string[] };
-    getSelectedRowsObject?: (value: Record<string, Row<unknown>> | boolean) => void
-    children: (row: Row<T>) => React.ReactNode
+    getSelectedRowsObject?: (value: Record<string, Row<T>> | boolean) => void
+    initialRowSelection?: Record<string, boolean>;
+    children?: (row: Row<T>) => React.ReactNode
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -59,7 +61,7 @@ export function DynamicTable1<T>({
     // console.log('columnVisibilityObject', columnVisibilityObject);
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>(columnVisibilityObject);
-    const [rowSelection, setRowSelection] = React.useState({});
+    const [rowSelection, setRowSelection] = React.useState(initialRowSelection);
     const [globalFilter, setGlobalFilter] = React.useState("");
 
     let columns: ColumnDef<T>[] = data?.length > 0 ? Object.keys(data[0]).map((key) => {
@@ -67,19 +69,17 @@ export function DynamicTable1<T>({
             accessorKey: key,
             header: ({ column }) => {
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === "asc")
-                        }
+                    <div 
+                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs uppercase tracking-wider"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
                         {lodash.startCase(key)}
-                        <ArrowUpDown />
-                    </Button>
+                        <ArrowUpDown className="size-3" />
+                    </div>
                 );
             },
             cell: ({ row }) => (
-                <div className="lowercase">{row.getValue(key)}</div>
+                <div className="py-2 text-sm">{row.getValue(key)}</div>
             ),
         }
     }) : [];
@@ -116,19 +116,11 @@ export function DynamicTable1<T>({
     if (children) {
         columns.push({
             accessorKey: "actions",
-            header: ({ column }) => {
-                return (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === "asc")
-                        }
-                    >
-                        {lodash.startCase("actions")}
-                        <ArrowUpDown />
-                    </Button>
-                );
-            },
+            header: () => (
+                <div className="font-bold text-xs uppercase tracking-wider py-2">
+                    Actions
+                </div>
+            ),
 
             cell: ({ row }) => (
                 children(row)

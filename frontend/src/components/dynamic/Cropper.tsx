@@ -45,41 +45,39 @@ export const useAvatarUploadHandler = (
 
 
 
-  const setCroppedImageFunction = (cropped: string) => {
+  const setCroppedImageFunction = (cropped: string, fieldName: string = "profilePic") => {
     setCroppedImage(cropped);
 
     // Create a new File object from the cropped data URL
-    // We explicitly use .png to match the mime type usually returned by canvas.toDataURL()
-    const file = dataURLtoFile(cropped, "cropped-profile.png");
+    const file = dataURLtoFile(cropped, "cropped-image.png");
 
     // Update the form with the new cropped file
-    setValue("profilePic", file, { shouldDirty: true });
+    setValue(fieldName, file, { shouldDirty: true });
 
     setSelectedFile(null);
   };
 
-  const AvatarUploadCropperContent = () => {
+  const AvatarUploadCropperContent = ({ fieldName = "profilePic" }: { fieldName?: string } = {}) => {
     const { selectedFile, croppedImage } =
       useCrop();
-    console.log(croppedImage)
     return (
       <div className="justify-items-center-safe">
         {selectedFile && (
           <DynamicCropper
             profilePic={selectedFile}
-            onCropConfirmFunction={setCroppedImageFunction}
+            onCropConfirmFunction={(cropped) => setCroppedImageFunction(cropped, fieldName)}
             onCropResetFunction={handleReset}
           />
         )}
         {croppedImage ? (
           <Avatar className="w-30 h-30">
-            <AvatarImage src={croppedImage} alt="@shadcn" />
+            <AvatarImage src={croppedImage} alt="Preview" />
             <AvatarFallback>No Preview</AvatarFallback>
           </Avatar>
         ) : (
           !selectedFile && (
             <Avatar className="w-30 h-30">
-              <AvatarImage alt="@shadcn" />
+              <AvatarImage alt="Preview" />
               <AvatarFallback>No Preview</AvatarFallback>
             </Avatar>
           )
@@ -125,23 +123,24 @@ export const useAvatarUploadHandler = (
   };
 };
 
-export const AvatarUploadButton = ({ setValue, control, getValues, children, isRequired }: {
+export const AvatarUploadButton = ({ setValue, control, getValues, children, isRequired, name = "profilePic", label = "Profile Picture:" }: {
   setValue: UseFormSetValue<any>,
   getValues: any,
   control: any,
-  children: React.ReactNode,
-  isRequired: boolean,
+  children?: React.ReactNode,
+  isRequired?: boolean,
+  name?: string,
+  label?: string
 }) => {
   const { fileInputRef } = useCrop()
   const { setSelectedFile, setCroppedImage } =
     useCrop();
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log(file)
     if (!file) return;
 
     // 1. Update RHF immediately
-    setValue("profilePic", file, { shouldDirty: true });
+    setValue(name, file, { shouldDirty: true });
 
     // 2. Force selectedFile to be set BEFORE cropper reads it
     flushSync(() => {
@@ -150,21 +149,15 @@ export const AvatarUploadButton = ({ setValue, control, getValues, children, isR
 
     // 3. Now safely reset cropped image
     setCroppedImage(null);
-
-    // Now the cropper will definitely see the new file
-    console.log(getValues(), 'getValues')
   };
   return (
     <>
-      <Label htmlFor="profilePic" > Profile Picture: </Label >
-      <Controller control={control} name="profilePic"
-        // rules={isRequired ? { required: 'Profile Picture is required' } : {}}
-
+      <Label htmlFor={name} > {label} </Label >
+      <Controller control={control} name={name}
         render={({
           field: { onChange, } }) => (
-          <Input id="profilePic" ref={fileInputRef} type="file" onChange={(e) => {
+          <Input id={name} ref={fileInputRef} type="file" onChange={(e) => {
             handleFileChange(e);
-            // onChange(e.target.files); 
           }} >
           </Input>)} />
       {children}

@@ -11,8 +11,8 @@ export class Church {
   phone: string;
   @Prop({ required: true })
   email: string;
-  // @Prop({ default: ['admiasdan', 'pastoasdr'] })
-  // roles: Role[];
+  @Prop()
+  logo: string;
   @Prop({ type: [Role], default: [{ name: 'admin', permissions: [] }, { name: 'pastor', permissions: [] }, { name: 'staff', permissions: [] }, { name: 'member', permissions: [] }] })
   roles: Role[];
 }

@@ -117,7 +117,14 @@ export const MembersPage = () => {
         />
       )
       }
-      <DynamicTable1<Member> ref={tableRef} data={tableData} getSelectedRowsObject={getSelectedRowsObject} columnOptions={{ HideColumns: ["id", 'profilePicUrl', 'address'] }}>
+      <DynamicTable1<Member>
+        ref={tableRef}
+        data={tableData}
+        getSelectedRowsObject={getSelectedRowsObject}
+        columnOptions={{
+          HideColumns: ["id", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth"]
+        }}
+      >
         {(row) =>
           <ActionsColumn>
             <Button

@@ -4,6 +4,7 @@ import { EventCalendar } from "./app/calendar";
 import EventsPage from "./app/events";
 import { MembersPage } from "./app/members";
 import { BulkEmailPage } from "./app/bulk-email";
+import { TemplatesPage } from "./app/bulk-email/TemplatesPage";
 
 export const appRoutes = {
     members:
@@ -41,5 +42,11 @@ export const appRoutes = {
         path: "/dashboard/bulk-email",
         label: "bulk-email",
         element: <BulkEmailPage />,
+    },
+    templates:
+    {
+        path: "/dashboard/templates",
+        label: "Templates",
+        element: <TemplatesPage />,
     }
 }

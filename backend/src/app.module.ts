@@ -21,10 +21,14 @@ import { SettingsModule } from './settings/settings.module';
 import { EventsModule } from './events/events.module';
 import { BulkEmailModule } from './bulk-email/bulk-email.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { TemplatesModule } from './templates/templates.module';
+
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+
     ConfigModule.forRoot({ 
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
@@ -57,6 +61,8 @@ import { RemindersModule } from './reminders/reminders.module';
     EventsModule,
     BulkEmailModule,
     RemindersModule,
+    TemplatesModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

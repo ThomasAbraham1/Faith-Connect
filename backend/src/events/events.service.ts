@@ -8,12 +8,17 @@ import { Model } from 'mongoose';
 @Injectable()
 export class EventsService {
   constructor(@InjectModel(Events.name) private readonly eventsModel: Model<Events>) { }
-  async create(createEventDto: CreateEventDto) {
-    return await this.eventsModel.insertOne(createEventDto);
+  async create(createEventDto: any) {
+    return await this.eventsModel.create(createEventDto);
   }
 
-  findAll() {
-    return this.eventsModel.find();
+  async findAll(churchId: string) {
+    try {
+      return await this.eventsModel.find({ churchId: churchId }).sort({ eventDate: -1 });
+    } catch (e) {
+      console.error("Error in EventsService.findAll:", e);
+      throw e;
+    }
   }
 
   findOne(id: number) {

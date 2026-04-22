@@ -7,4 +7,5 @@ export class CreateChurchDto {
     email: string;
     @IsNotEmpty()
     phone: string;
+    logo?: string;
 }

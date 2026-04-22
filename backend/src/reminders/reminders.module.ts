@@ -3,6 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, userSchema } from 'src/schemas/User.schema';
 import { BulkEmailModule } from 'src/bulk-email/bulk-email.module';
 import { RemindersService } from './reminders.service';
+import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
+
+import { RemindersController } from './reminders.controller';
 
 /**
  * RemindersModule encapsulates all logic for automated birthday/anniversary reminders.
@@ -11,11 +14,15 @@ import { RemindersService } from './reminders.service';
  */
 @Module({
   imports: [
-    // Register the User model so RemindersService can query MongoDB
-    MongooseModule.forFeature([{ name: User.name, schema: userSchema }]),
+    // Register the models needed for reminders and audit logging
+    MongooseModule.forFeature([
+      { name: User.name, schema: userSchema },
+      { name: EmailLog.name, schema: EmailLogSchema },
+    ]),
     // Import BulkEmailModule to get access to QueueService (which we exported there)
     BulkEmailModule,
   ],
+  controllers: [RemindersController],
   providers: [RemindersService],
 })
 export class RemindersModule {}

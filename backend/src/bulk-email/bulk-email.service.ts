@@ -61,11 +61,15 @@ export class BulkEmailService {
         continue;
       }
 
+      // Replace dynamic placeholders in subject and body
+      const personalizedSubject = this.replacePlaceholders(dto.subject, member);
+      const personalizedBody = this.replacePlaceholders(dto.body, member);
+
       // Push the email job to SQS. The QueueService will pick it up and send it.
       await this.queueService.enqueue({
         to: member.email,
-        subject: dto.subject,
-        body: dto.body,
+        subject: personalizedSubject,
+        body: personalizedBody,
       });
 
       queued++;
@@ -76,5 +80,19 @@ export class BulkEmailService {
     );
 
     return { queued, skipped, skippedNames };
+  }
+
+  /**
+   * Helper to replace placeholders like {{firstName}} with actual user data.
+   */
+  private replacePlaceholders(content: string, user: UserDocument): string {
+    if (!content) return '';
+    
+    return content
+      .replace(/{{firstName}}/g, user.firstName || '')
+      .replace(/{{lastName}}/g, user.lastName || '')
+      .replace(/{{userName}}/g, user.userName || '')
+      .replace(/{{email}}/g, user.email || '')
+      .replace(/{{phone}}/g, user.phone || '');
   }
 }

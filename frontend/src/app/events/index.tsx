@@ -57,27 +57,18 @@ function EventsPage() {
     }
   });
 
-  // if (isFetching) return <div>Loading...</div>;
-  // if (error) return <div>Error occurred: {(error as Error).message}</div>;
+  // Simplified data for debugging
+  const dataArray = React.useMemo(() => {
+    const raw = data?.data?.data || data?.data || [];
+    console.log("DEBUG - RAW DATA:", raw);
+    return Array.isArray(raw) ? raw : [];
+  }, [data]);
 
-  let dataArray: TEventsData = data?.data?.data.map((a: any) => ({
-    id: a._id,
-    eventName: a.eventName,
-    eventDate: a.eventDate,
-    description: a.description,
-    eventLocation: a.eventLocation,
-    organizer: a.organizer,
-    createdDate: a.createdAt,
-    isRecurring: a.isRecurring,
-    recurrenceType: a.recurrenceType,
-    recurrenceDay: a.recurrenceDay,
-    recurrenceEndDate: a.recurrenceEndDate,
-  })) || [];
-
-  console.log(editingEvent, 'editingEvent')
-  console.log(data?.data?.data, "dataArray");
+  if (isPending) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading events...</div>;
+  if (error) return <div className="p-8 text-center text-destructive">Error loading events: {(error as Error).message}</div>;
   return (
     <>
+      <div className="text-xs text-muted-foreground mb-2">Total events detected: {dataArray.length}</div>
       {selectedRowIds.length > 0 ? (
         <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
           <Button variant="destructive">Delete</Button>
@@ -98,11 +89,10 @@ function EventsPage() {
           data={editingEvent}
         />
       )}
-      <DynamicTable1<TEventsData>
+      <DynamicTable1<any>
         ref={tableRef}
         data={dataArray}
         getSelectedRowsObject={getSelectedRowsObject}
-        columnOptions={{ HideColumns: ["id"] }}
       >
         {(row) =>
           <ActionsColumn>
