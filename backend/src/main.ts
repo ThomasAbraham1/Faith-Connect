@@ -55,9 +55,9 @@ async function bootstrap() {
       store: store, // Tell express-session to use our MongoDB store
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
-        secure: isProduction ? true : false,
+        secure: false, // Set to false since we are on http for now
         httpOnly: true,
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: 'lax',
       },
     }),
   );
