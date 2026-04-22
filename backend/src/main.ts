@@ -11,6 +11,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
@@ -52,6 +53,7 @@ async function bootstrap() {
       secret: secret,
       resave: false,
       saveUninitialized: false,
+      proxy: true, // Enable trust for proxy headers (required for reverse proxy setup)
       store: store, // Tell express-session to use our MongoDB store
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
@@ -61,7 +63,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.set('trust proxy', 1);
+  // app.set('trust proxy', 1); // Moved to top
   // console.log(process.env.JWT_SECRET) 
   app.use(passport.initialize());
   app.use(passport.session());
