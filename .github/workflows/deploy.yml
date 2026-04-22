@@ -72,7 +72,9 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             cd ~/Faith-Connect
-            # Login to GHCR on the server using a temporary token
+            # Pull the latest code (especially the updated compose.prod.yml)
+            git pull origin demo-prototype
+            # Login to GHCR on the server
             echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
             # Pull the fresh images and restart
             sudo docker compose -f compose.prod.yml pull
