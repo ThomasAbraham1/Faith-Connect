@@ -100,7 +100,7 @@ export class AuthService {
         console.log(userInfo) 
         // userInfo.roles = ['Admin']; // Default role assignment
         console.log("So errors happening in users document")
-        const userInsertResult = await this.usersService.createUser(userInfo, session);
+        const userInsertResult = await this.usersService.createUser({ ...userInfo, email } as any, session);
         // const userInsertResult = await this.userModel.insertOne(userInfo, { session });
 
         sessionInfo = { church: churchInsertResult, user: userInsertResult };
