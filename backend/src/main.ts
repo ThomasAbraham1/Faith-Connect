@@ -14,7 +14,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const isProduction = process.env.NODE_ENV == 'production';
   app.enableCors({
-    origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com', 'http://localhost:5173'],
+    origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com', 'http://localhost:5173', 'http://13.201.3.191'],
     credentials: true,
   });
   console.log(isProduction)
