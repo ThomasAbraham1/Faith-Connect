@@ -6,6 +6,6 @@ import { OtpAuthModule } from '../otp-auth/otp-auth.module';
 @Module({
   imports: [OtpAuthModule],
   providers: [EmailService, htmlContentGenerator],
-  exports:[EmailService]
+  exports: [EmailService]
 })
-export class EmailModule {}
+export class EmailModule { }

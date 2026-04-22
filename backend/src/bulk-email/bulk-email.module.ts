@@ -31,4 +31,4 @@ import { MailerService } from './mailer.service';
   providers: [BulkEmailService, QueueService, MailerService],
   exports: [QueueService], // Added so RemindersModule can push jobs to the Queue
 })
-export class BulkEmailModule {}
+export class BulkEmailModule { }

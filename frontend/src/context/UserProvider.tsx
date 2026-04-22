@@ -36,7 +36,11 @@ const userContext = createContext<userContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
-    const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(true);
+    // Prevent the /auth/me query from running automatically on the public login/signup pages
+    const isAuthPage = typeof window !== 'undefined' &&
+        (window.location.pathname === '/' || window.location.pathname.includes('signup'));
+
+    const [shdInitialUserQueryRun, setShdInitialUserQueryRun] = React.useState(!isAuthPage);
     const [church, setChurch] = React.useState<ChurchDocumentType | null>(null);
     const [user, setUser] = React.useState<UserDocumentType | null>(null);
     // useEffect(() => {
@@ -52,7 +56,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 // console.log(response)
                 return response
             } catch (error: any) {
-                toast.error(error.response.data.data.message || 'Error fetching user data')
+                const status = error.response?.status;
+                // Don't show the error toast 401/403 (Session Expired/Forbidden) 
+                // That way, unauthenticated users can load the login/signup pages in peace!
+                if (status !== 401 && status !== 403) {
+                    toast.error(error.response?.data?.data?.message || 'Error fetching user data');
+                }
                 throw error
             }
         },

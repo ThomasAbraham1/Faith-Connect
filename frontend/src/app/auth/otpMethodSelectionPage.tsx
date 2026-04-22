@@ -30,15 +30,15 @@ export function OTPMethodSelection() {
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <CardTitle className="text-xl">Select OTP Delivery Method</CardTitle>
       <div className="flex flex-col gap-4 w-full max-w-sm">
-        <Button onClick={() => {
-          setMethod('sms');
-          handleMethodSelect("sms")
-        }}>
-          Send OTP via SMS
-          {mutation.isPending && method == 'sms' && (
-            <Spinner></Spinner>
-          )}
-        </Button>
+        <div title="Currently not available" className="cursor-not-allowed w-full">
+          <Button 
+            disabled
+            type="button"
+            className="w-full pointer-events-none"
+          >
+            Send OTP via SMS
+          </Button>
+        </div>
         <Button onClick={() => {
           setMethod('email');
           handleMethodSelect("email")

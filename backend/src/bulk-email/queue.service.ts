@@ -37,7 +37,7 @@ export class QueueService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
-  ) {}
+  ) { }
 
   /**
    * Called automatically by NestJS when the app starts.
@@ -153,7 +153,7 @@ export class QueueService implements OnModuleInit {
             await this.sleep(10000);
           } catch (err: any) {
             this.logger.error(`Failed to process message for ${message.MessageId}: ${err.message}`, err);
-            
+
             // --- SMART DROP LOGIC ---
             // If the error is permanent (4xx), we drop the job to stop the retry loop.
             // AWS SES returns 400 for things like "Email address not verified" or "Invalid address".
@@ -163,7 +163,7 @@ export class QueueService implements OnModuleInit {
             if (isPermanentFailure) {
               const recipient = job?.to || 'unknown recipient';
               this.logger.warn(`PERMANENT FAILURE: Dropping email job for ${recipient}. Reason: ${err.name}`);
-              
+
               // Delete it from the queue so it doesn't retry
               await this.sqsClient.send(
                 new DeleteMessageCommand({
