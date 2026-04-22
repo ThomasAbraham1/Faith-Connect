@@ -1,0 +1,37 @@
+services:
+  # ─── BACKEND (NESTJS) ──────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: fc-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SESSION_SECRET=${SESSION_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - MONGO_DB_URI=${MONGO_DB_URI}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+      - SES_FROM_EMAIL=${SES_FROM_EMAIL}
+    volumes:
+      - ./backend-data/uploads:/app/public/uploads
+      - ./backend-data/signatures:/app/public/signatures
+
+  # ─── FRONTEND (NGINX) ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: fc-frontend
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - VITE_APP_API_URL=${VITE_APP_API_URL}
+    depends_on:
+      - backend
