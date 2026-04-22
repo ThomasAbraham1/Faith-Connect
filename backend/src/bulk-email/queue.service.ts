@@ -132,12 +132,13 @@ export class QueueService implements OnModuleInit {
         const messages = result.Messages ?? [];
 
         for (const message of messages) {
+          let job: EmailJob | null = null;
           try {
             // Parse the JSON we stored in enqueue()
-            const job: EmailJob = JSON.parse(message.Body!);
+            job = JSON.parse(message.Body!);
 
             // Send the actual email
-            await this.mailerService.sendOne(job);
+            await this.mailerService.sendOne(job!);
 
             // Tell SQS "I've processed this — delete it from the queue" 
             await this.sqsClient.send(
@@ -150,9 +151,31 @@ export class QueueService implements OnModuleInit {
             // Small delay between sends so we don't hammer Mailtrap or SES.
             // 200ms = 5 emails/second max. Adjust as needed.
             await this.sleep(10000);
-          } catch (err) {
-            this.logger.error(`Failed to process message for ${message.MessageId}`, err);
-            // We don't delete the message — SQS will retry it after a visibility timeout.
+          } catch (err: any) {
+            this.logger.error(`Failed to process message for ${message.MessageId}: ${err.message}`, err);
+            
+            // --- SMART DROP LOGIC ---
+            // If the error is permanent (4xx), we drop the job to stop the retry loop.
+            // AWS SES returns 400 for things like "Email address not verified" or "Invalid address".
+            const httpStatus = err.$metadata?.httpStatusCode;
+            const isPermanentFailure = httpStatus && httpStatus >= 400 && httpStatus < 500 && httpStatus !== 429;
+
+            if (isPermanentFailure) {
+              const recipient = job?.to || 'unknown recipient';
+              this.logger.warn(`PERMANENT FAILURE: Dropping email job for ${recipient}. Reason: ${err.name}`);
+              
+              // Delete it from the queue so it doesn't retry
+              await this.sqsClient.send(
+                new DeleteMessageCommand({
+                  QueueUrl: this.queueUrl,
+                  ReceiptHandle: message.ReceiptHandle!,
+                }),
+              );
+            } else {
+              const recipient = job?.to || 'unknown recipient';
+              this.logger.warn(`TRANSIENT FAILURE: Keeping job for ${recipient} in queue for retry.`);
+              // We don't delete the message — SQS will retry it after a visibility timeout.
+            }
           }
         }
       } catch (err) {
