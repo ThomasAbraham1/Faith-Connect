@@ -1,9 +1,7 @@
 services:
   # ─── BACKEND (NESTJS) ──────────────────────────────────────────────────────
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
+    image: ghcr.io/thomasabraham1/faith-connect-backend:latest
     container_name: fc-backend
     restart: always
     environment:
@@ -22,14 +20,23 @@ services:
 
   # ─── FRONTEND (NGINX) ──────────────────────────────────────────────────────
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-      args:
-        - VITE_APP_API_URL=${VITE_APP_API_URL}
+    image: ghcr.io/thomasabraham1/faith-connect-frontend:latest
     container_name: fc-frontend
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  # ─── CERTBOT (SSL GENERATOR) ────────────────────────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: fc-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
