@@ -87,6 +87,7 @@ export const MembersPage = () => {
           spiritualStatus: value.spiritualStatus,
           dateOfBirth: value.dateOfBirth,
           firstName: value.firstName,
+          email: value.email,
           lastName: value.lastName,
           fatherName: value.fatherName,
           motherName: value.motherName,
@@ -147,6 +148,7 @@ export const MembersPage = () => {
                 address={row.getValue("address")}
                 firstName={row.getValue("firstName")}
                 lastName={row.getValue("lastName")}
+                email={row.getValue("email")}
                 fatherName={row.getValue("fatherName")}
                 motherName={row.getValue("motherName")}
                 spiritualStatus={row.getValue("spiritualStatus")}

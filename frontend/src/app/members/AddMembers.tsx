@@ -39,6 +39,7 @@ type formDataType = {
   password: string;
   phone: string;
   dateOfBirth: string;
+  anniversaryDate?: string;
   spiritualStatus: 'BELIEVER' | 'NON_BELIEVER' | 'SEEKER' | 'UNDECIDED';
   profilePic?: FileList | null | Blob;
   role: string;
@@ -46,6 +47,7 @@ type formDataType = {
   fatherName: string;
   motherName: string;
   address: string;
+  email: string;
   signature: Blob;
 };
 
@@ -107,14 +109,18 @@ export const AddMembers = (props: {
     formdata.append("password", data.password?.trim());
     formdata.append("spiritualStatus", data.spiritualStatus?.trim());
     formdata.append("dateOfBirth", data.dateOfBirth?.trim());
+    if (data.anniversaryDate) {
+      formdata.append("anniversaryDate", data.anniversaryDate.trim());
+    }
     formdata.append("phone", data.phone?.trim());
     formdata.append("address", data.address?.trim());
     formdata.append("motherName", data.motherName?.trim());
     formdata.append("fatherName", data.fatherName.trim());
+    formdata.append("email", data.email?.trim());
     formdata.append("lastName", data.lastName?.trim());
     formdata.append("firstName", data.firstName?.trim());
     formdata.append("roles", data.role?.trim());
-    if(data.role == 'pastor'){
+    if (data.role == 'pastor') {
       // console.log('Inside if pastor block')
       formdata.append("signature", data.signature);
     }
@@ -146,7 +152,7 @@ export const AddMembers = (props: {
       queryClient.invalidateQueries({
         queryKey: ["membersData"],
       });
-      return data 
+      return data
     },
     onError: (error: any) => toast.error(error?.response?.data?.message)
   });
@@ -291,6 +297,16 @@ export const AddMembers = (props: {
               )}
             </div>
             <div className="grid gap-3">
+              <Label htmlFor="email">Email: </Label>
+              <Input id="email"  {...register("email", {
+                // required: 'Email is required'
+              })} />{errors.email && (
+                <div className="text-red-500 text-sm">
+                  {errors.email.message}
+                </div> 
+              )}
+            </div>
+            <div className="grid gap-3">
               <Label htmlFor="address">Address: </Label>
               <Textarea id="address"  {...register("address", {
                 required: 'address is required'
@@ -315,6 +331,25 @@ export const AddMembers = (props: {
               {errors.dateOfBirth && (
                 <div className="text-red-500 text-sm">
                   {errors.dateOfBirth.message}
+                </div>
+              )}
+            </div>
+            <div className="grid gap-3">
+              <Label htmlFor="anniversaryDate">Anniversary (Optional):</Label>
+              <Controller
+                name="anniversaryDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker 
+                    value={field.value as any as Date} 
+                    className='w-full' 
+                    onChange={(value) => field.onChange(value)} 
+                  />
+                )}
+              />
+              {errors.anniversaryDate && (
+                <div className="text-red-500 text-sm">
+                  {errors.anniversaryDate.message}
                 </div>
               )}
             </div>
@@ -373,7 +408,7 @@ export const AddMembers = (props: {
               )}
             </div>
             {watch('role') == 'pastor' &&
-              <div className="grid gap-3"> 
+              <div className="grid gap-3">
                 <Controller
                   name="signature"
                   control={control}
@@ -385,10 +420,10 @@ export const AddMembers = (props: {
                         field.onChange(value);
                         toast.success('Signature changed!')
                       }}></SignatureCard>
-                    </Modal> 
-                  )}   
+                    </Modal>
+                  )}
                 />
-  
+
                 {errors.signature && (
                   <div className="text-red-500 text-sm">
                     {errors.signature.message}

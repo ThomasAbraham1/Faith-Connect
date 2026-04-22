@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -18,9 +19,12 @@ import { join } from 'path';
 import { AttendanceModule } from './attendance/attendance.module'; 
 import { SettingsModule } from './settings/settings.module';
 import { EventsModule } from './events/events.module';
+import { BulkEmailModule } from './bulk-email/bulk-email.module';
+import { RemindersModule } from './reminders/reminders.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ 
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
@@ -51,6 +55,8 @@ import { EventsModule } from './events/events.module';
     AttendanceModule,
     SettingsModule,
     EventsModule,
+    BulkEmailModule,
+    RemindersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -11,7 +11,8 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
-  CalendarCheck2
+  CalendarCheck2,
+  Mail
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -86,6 +87,11 @@ const data = {
       name: appRoutes.events.label,
       url: appRoutes.events.path,
       icon: CalendarCheck2,
+    },
+    {
+      name: appRoutes.bulkEmail.label,
+      url: appRoutes.bulkEmail.path,
+      icon: Mail,
     },
     // {
     //   name: "Sales & Marketing",

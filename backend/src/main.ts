@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import * as session from 'express-session';
+import session from 'express-session';
 import { NestExpressApplication } from "@nestjs/platform-express"
-import * as passport from 'passport';
-import * as cookieParser from 'cookie-parser';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+const MongoDBStore = require('connect-mongodb-session')(session);
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
@@ -24,26 +25,44 @@ async function bootstrap() {
   // Cookie Parser init
   app.use(cookieParser());
   const secret = process.env.SESSION_SECRET;
+  const mongoUri = process.env.MONGO_DB_URI;
+
   if (!secret) {
     throw new Error('SESSION_SECRET environment variable is not set');
   }
-  // Sesssion intitialization
+  if (!mongoUri) {
+    throw new Error('MONGO_DB_URI environment variable is not set');
+  }
+
+  // Session Store initialization
+  const store = new MongoDBStore({
+    uri: mongoUri,
+    collection: 'sessions',
+    expires: 1000 * 60 * 60 * 24 * 30, // 30 days
+  });
+
+  store.on('error', (error) => {
+    console.error('Session store error:', error);
+  });
+
+  // Session initialization
 
   app.use(
     session({
       secret: secret,
       resave: false,
       saveUninitialized: false,
+      store: store, // Tell express-session to use our MongoDB store
       cookie: {
         maxAge: 60 * 60 * 1000 * 24 * 365,
-        secure: isProduction ? true: false,
-        httpOnly: true, 
+        secure: isProduction ? true : false,
+        httpOnly: true,
         sameSite: isProduction ? 'none' : 'lax',
       },
     }),
   );
   app.set('trust proxy', 1);
-  // console.log(process.env.JWT_SECRET)
+  // console.log(process.env.JWT_SECRET) 
   app.use(passport.initialize());
   app.use(passport.session());
   const port = process.env.PORT || 3000; // App Engine requires 8080

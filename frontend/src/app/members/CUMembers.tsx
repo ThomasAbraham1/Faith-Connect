@@ -84,6 +84,7 @@ export const CUMembers = ({
                     password: data?.password,
                     phone: data?.phone,
                     dateOfBirth: data?.dateOfBirth,
+                    anniversaryDate: data?.anniversaryDate,
                     spiritualStatus: data?.spiritualStatus,
                     roles: data?.roles,
                     fatherName: data?.fatherName,
@@ -125,6 +126,7 @@ export const CUMembers = ({
                                     setValue('password', 'password123'); // Demo password
                                     setValue('phone', '+15550109999');
                                     setValue('dateOfBirth', '1990-01-01');
+                                    setValue('email', 'cta102938@gmail.com');
                                     setValue('address', '123 Maple Street');
                                     setValue('spiritualStatus', 'SEEKER');
                                     setValue('fatherName', 'Robert Doe');
@@ -229,6 +231,16 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
+                                <Label htmlFor="email">Email: </Label>
+                                <Input id="email"  {...register("email", {
+                                    required: 'Email is required'
+                                })} />{errors.email && (
+                                    <div className="text-red-500 text-sm">
+                                        {errors.email.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="grid gap-3">
                                 <Label htmlFor="address">Address: </Label>
                                 <Textarea id="address"  {...register("address", {
                                     required: 'address is required'
@@ -253,6 +265,27 @@ export const CUMembers = ({
                                 {errors.dateOfBirth && (
                                     <div className="text-red-500 text-sm">
                                         {errors.dateOfBirth.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="grid gap-3">
+                                <Label htmlFor="anniversaryDate">Anniversary (Optional):</Label>
+                                <Controller
+                                    name="anniversaryDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <DatePicker 
+                                            value={field.value as any as Date} 
+                                            className='w-full' 
+                                            onChange={(value) => {
+                                                field.onChange(value)
+                                            }}
+                                        />
+                                    )}
+                                />
+                                {errors.anniversaryDate && (
+                                    <div className="text-red-500 text-sm">
+                                        {errors.anniversaryDate.message}
                                     </div>
                                 )}
                             </div>

@@ -23,6 +23,22 @@ services:
         - action: rebuild
           path: package.json
           target: /app/package.json
+
+  # LocalStack mimics AWS services locally.
+  # We only enable SQS (for email queuing).
+  # Port 4566 is LocalStack's default - your NestJS app talks to this.
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs          # Only run the SQS service, nothing else
+      - DEFAULT_REGION=us-east-1
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+    volumes:
+      - localstack_data:/var/lib/localstack
+
   # mongodb:
   #   image: mongo:latest
   #   container_name: mongo-rs
@@ -34,5 +50,8 @@ services:
   #   # environment:
   #   #   MONGO_INITDB_ROOT_USERNAME: admin_user
   #   #   MONGO_INITDB_ROOT_PASSWORD: admin_password
+
 volumes:
   mongodb_data:
+  localstack_data:
+

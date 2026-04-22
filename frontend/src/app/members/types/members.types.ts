@@ -8,6 +8,8 @@ export type FormDataType = {
     spiritualStatus: 'BELIEVER' | 'NON_BELIEVER' | 'SEEKER' | 'UNDECIDED';
     profilePic?: FileList | null | Blob;
     roles: string;
+    anniversaryDate: string;
+    email: string;
     lastName: string;
     fatherName: string;
     motherName: string;
@@ -25,6 +27,7 @@ export interface membersResponseObject {
         profilePicPath: string;
     };
     phone: string;
+    email?: string;
     spiritualStatus: string;
     dateOfBirth: string;
     address: string;
@@ -40,6 +43,7 @@ export type Member = {
     userName: string;
     password: string;
     phone: string;
+    email?: string;
     role: string;
     spiritualStatus: string;
     dateOfBirth: string;

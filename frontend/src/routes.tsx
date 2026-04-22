@@ -3,6 +3,7 @@ import { Attendance } from "./app/attendance";
 import { EventCalendar } from "./app/calendar";
 import EventsPage from "./app/events";
 import { MembersPage } from "./app/members";
+import { BulkEmailPage } from "./app/bulk-email";
 
 export const appRoutes = {
     members:
@@ -34,5 +35,11 @@ export const appRoutes = {
         path: "/dashboard/events",
         label: "Events",
         element: <EventsPage />,
+    },
+    bulkEmail:
+    {
+        path: "/dashboard/bulk-email",
+        label: "bulk-email",
+        element: <BulkEmailPage />,
     }
 }

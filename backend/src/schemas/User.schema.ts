@@ -32,10 +32,14 @@ export class User {
   firstName: string;
   @Prop({})
   phone: string;
+  @Prop({})
+  email: string;
   @Prop({ enum: Object.values(SpiritualStatus) })
   spiritualStatus: SpiritualStatus;
   @Prop({})
   dateOfBirth: string;
+  @Prop({})
+  anniversaryDate: string;
   @Prop({ ref: 'Role' })
   roles: string[];
   @Prop({ type: ProfilePic })

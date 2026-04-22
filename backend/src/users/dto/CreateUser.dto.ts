@@ -16,9 +16,10 @@ interface Role {
 interface Permission {
   name: string;
 }
-export class CreateUserDto{
+export class CreateUserDto {
   userName: string;
+  email: string;
   password: string;
   churchId: Types.ObjectId;
-  roles: string[]; 
+  roles: string[];
 };

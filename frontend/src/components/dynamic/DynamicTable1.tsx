@@ -113,25 +113,28 @@ export function DynamicTable1<T>({
     // if (childrenArray) {
     //     childrenArray.find((child) => {
     // if (React.isValidElement(child) && child.type === ActionsColumn) {
-    columns.push({
-        accessorKey: "actions",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() =>
-                        column.toggleSorting(column.getIsSorted() === "asc")
-                    }
-                >
-                    {lodash.startCase("actions")}
-                    <ArrowUpDown />
-                </Button>
-            );
-        },
-        cell: ({ row }) => (
-            children(row)
-        ),
-    });
+    if (children) {
+        columns.push({
+            accessorKey: "actions",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() =>
+                            column.toggleSorting(column.getIsSorted() === "asc")
+                        }
+                    >
+                        {lodash.startCase("actions")}
+                        <ArrowUpDown />
+                    </Button>
+                );
+            },
+
+            cell: ({ row }) => (
+                children(row)
+            ),
+        });
+    }
     // console.log(children, 'child found');
     //         }
     //         console.log('childrenArray', childrenArray)

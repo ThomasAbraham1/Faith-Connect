@@ -70,6 +70,10 @@ const router = createBrowserRouter([
             path: appRoutes.events.label,
             element: appRoutes.events.element,
           },
+          {
+            path: appRoutes.bulkEmail.label,
+            element: appRoutes.bulkEmail.element,
+          },
         ],
       },
     ],
