@@ -64,13 +64,26 @@ export function DynamicTable1<T>({
     const [rowSelection, setRowSelection] = React.useState(initialRowSelection);
     const [globalFilter, setGlobalFilter] = React.useState("");
 
-    let columns: ColumnDef<T>[] = data?.length > 0 ? Object.keys(data[0]).map((key) => {
+    const priorityKeys = ["firstName", "lastName", "userName", "email", "phone", "eventName", "eventDate", "eventLocation", "status"];
+
+    let sortedKeys = data?.length > 0 ? Object.keys(data[0]).sort((a, b) => {
+        const indexA = priorityKeys.indexOf(a);
+        const indexB = priorityKeys.indexOf(b);
+
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+
+        return 0;
+    }) : [];
+
+    let columns: ColumnDef<T>[] = sortedKeys.map((key) => {
         return {
             accessorKey: key,
             header: ({ column }) => {
                 return (
                     <div 
-                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs uppercase tracking-wider"
+                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs tracking-wider"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
                         {lodash.startCase(key)}
@@ -78,11 +91,17 @@ export function DynamicTable1<T>({
                     </div>
                 );
             },
-            cell: ({ row }) => (
-                <div className="py-2 text-sm">{row.getValue(key)}</div>
-            ),
+            cell: ({ row }) => {
+                const value = row.getValue(key);
+                const displayValue = (typeof value === "string" && !["email", "userName"].includes(key)) 
+                    ? lodash.startCase(value) 
+                    : value;
+                return (
+                    <div className="py-2 text-sm">{displayValue}</div>
+                );
+            },
         }
-    }) : [];
+    });
 
     columns.unshift({
         id: "select",
@@ -117,7 +136,7 @@ export function DynamicTable1<T>({
         columns.push({
             accessorKey: "actions",
             header: () => (
-                <div className="font-bold text-xs uppercase tracking-wider py-2">
+                <div className="font-bold text-xs tracking-wider py-2">
                     Actions
                 </div>
             ),
@@ -219,7 +238,7 @@ export function DynamicTable1<T>({
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className={header.column.id == "actions" ? "sticky right-0 bg-background  z-10" : ""}>
+                                        <TableHead key={header.id} className={`${header.column.id == "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""} font-bold text-xs tracking-wider`}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -240,7 +259,7 @@ export function DynamicTable1<T>({
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-background z-10" : ""}>
+                                        <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""}>
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()

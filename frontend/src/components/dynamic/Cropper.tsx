@@ -151,15 +151,16 @@ export const AvatarUploadButton = ({ setValue, control, getValues, children, isR
     setCroppedImage(null);
   };
   return (
-    <>
-      <Label htmlFor={name} > {label} </Label >
+    <div className="grid gap-2">
+      <Label htmlFor={name}>{label}</Label>
       <Controller control={control} name={name}
         render={({
           field: { onChange, } }) => (
           <Input id={name} ref={fileInputRef} type="file" onChange={(e) => {
             handleFileChange(e);
-          }} >
-          </Input>)} />
+          }} />
+        )} />
       {children}
-    </>)
+    </div>
+  )
 }

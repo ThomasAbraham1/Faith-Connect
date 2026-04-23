@@ -62,11 +62,7 @@ const router = createBrowserRouter([
             path: appRoutes.settings.label,
             element: appRoutes.settings.element,
           },
-          {
-            path: appRoutes.calendar.label,
-            element: appRoutes.calendar.element,
-          },
-          {
+          { 
             path: appRoutes.events.label,
             element: appRoutes.events.element,
           },

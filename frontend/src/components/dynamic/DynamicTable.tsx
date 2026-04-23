@@ -144,13 +144,14 @@ export function DataTableDemo({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className={header.column.id == "actions" ? "sticky right-0 bg-background  z-10" : ""}>
+                    <TableHead key={header.id} className={`${header.column.id == "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""} font-bold text-xs tracking-wider`}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                        
                     </TableHead>
                   );
                 })}
@@ -165,7 +166,7 @@ export function DataTableDemo({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-background z-10" : ""}>
+                    <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

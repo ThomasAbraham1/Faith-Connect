@@ -24,7 +24,7 @@ export const SettingsPage = () => {
   const { setCroppedImage } = useCrop();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register, handleSubmit, control, setValue, getValues, formState: { errors } } = useForm<ChurchSettingsFormData>({
+  const { register, handleSubmit, control, setValue, getValues, formState: { errors }, reset } = useForm<ChurchSettingsFormData>({
     defaultValues: {
       churchName: church?.churchName || "",
       email: church?.email || "",
@@ -36,18 +36,36 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     if (church?.logo) {
-      setCroppedImage(`/uploads/${church.logo}`);
+      console.log(church.logo)
+      const logoUrl = church.logo.startsWith('http')
+        ? church.logo
+        : `/uploads/${church.logo}`;
+      setCroppedImage(logoUrl);
     }
   }, [church, setCroppedImage]);
 
+  // Add
+  useEffect(() => {
+  if (church) {
+    reset({
+      churchName: church.churchName,
+      email: church.email,
+      phone: church.phone,
+      logo: church.logo
+    });
+    console.log(church)
+  }
+}, [church, reset]);
+
   const onSubmit = async (data: ChurchSettingsFormData) => {
     setIsSubmitting(true);
+    console.log(getValues('logo'))
     try {
       const formData = new FormData();
       formData.append("churchName", data.churchName);
       formData.append("email", data.email);
       formData.append("phone", data.phone);
-      
+
       if (data.logo) {
         formData.append("logo", data.logo);
       }
@@ -56,7 +74,7 @@ export const SettingsPage = () => {
         headers: { "Content-Type": "multipart/form-data" }
       });
 
-      setChurch(response.data);
+      setChurch(response.data.data);  
       toast.success("Church settings updated successfully!");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update church settings");
@@ -93,10 +111,10 @@ export const SettingsPage = () => {
                     <Label htmlFor="churchName">Church Name</Label>
                     <div className="relative">
                       <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        id="churchName" 
+                      <Input
+                        id="churchName"
                         className="pl-10"
-                        {...register("churchName", { required: "Church name is required" })} 
+                        {...register("churchName", { required: "Church name is required" })}
                       />
                     </div>
                     {errors.churchName && <p className="text-xs text-red-500">{errors.churchName.message}</p>}
@@ -107,11 +125,11 @@ export const SettingsPage = () => {
                       <Label htmlFor="email">Public Email</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          id="email" 
+                        <Input
+                          id="email"
                           type="email"
                           className="pl-10"
-                          {...register("email", { required: "Email is required" })} 
+                          {...register("email", { required: "Email is required" })}
                         />
                       </div>
                       {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
@@ -120,10 +138,10 @@ export const SettingsPage = () => {
                       <Label htmlFor="phone">Phone Number</Label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          id="phone" 
+                        <Input
+                          id="phone"
                           className="pl-10"
-                          {...register("phone", { required: "Phone is required" })} 
+                          {...register("phone", { required: "Phone is required" })}
                         />
                       </div>
                       {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
@@ -150,9 +168,9 @@ export const SettingsPage = () => {
               <CardContent className="flex flex-col items-center justify-center space-y-6 py-10">
                 <AvatarUploadCropperContent fieldName="logo" />
                 <div className="w-full max-w-xs">
-                  <AvatarUploadButton 
-                    setValue={setValue} 
-                    getValues={getValues} 
+                  <AvatarUploadButton
+                    setValue={setValue}
+                    getValues={getValues}
                     control={control}
                     name="logo"
                     label="Church Logo"

@@ -136,7 +136,7 @@ export const TemplatesPage = () => {
   if (isLoading) return <div className="p-10 text-center">Loading templates...</div>;
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
@@ -150,7 +150,7 @@ export const TemplatesPage = () => {
       </div>
 
       {!isEditing ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {templates?.length === 0 ? (
             <Card className="col-span-full border-dashed p-10 text-center">
               <CardDescription>No templates found. Click "New Template" to get started.</CardDescription>

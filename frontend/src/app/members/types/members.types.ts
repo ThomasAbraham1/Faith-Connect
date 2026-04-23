@@ -6,7 +6,7 @@ export type FormDataType = {
     phone: string;
     dateOfBirth: string;
     spiritualStatus: 'BELIEVER' | 'NON_BELIEVER' | 'SEEKER' | 'UNDECIDED';
-    profilePic?: FileList | null | Blob;
+    profilePic?: FileList | null | Blob | string;
     roles: string;
     anniversaryDate: string;
     email: string;

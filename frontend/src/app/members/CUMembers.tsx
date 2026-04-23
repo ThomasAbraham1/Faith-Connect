@@ -43,12 +43,15 @@ export const CUMembers = ({
     // onSuccess
 }: AddMembersProps) => {
     const isEdit = !!data?.id;
-    const { setCroppedImage } = useCrop();
+    const { setCroppedImage } = useCrop(); 
 
     useEffect(() => {
 
-        if (isEdit && data?.profilePic) {
-            setCroppedImage(`${import.meta.env.VITE_APP_API_URL}${data.profilePic}`)
+        if (isEdit && data?.profilePic && typeof data.profilePic === 'string') {
+            const picUrl = data.profilePic.startsWith('http')
+                ? data.profilePic
+                : `${import.meta.env.VITE_APP_API_URL}${data.profilePic}`;
+            setCroppedImage(picUrl)
         } else if (!isEdit) {
             setCroppedImage(null);
         }
@@ -91,6 +94,7 @@ export const CUMembers = ({
                     motherName: data?.motherName,
                     firstName: data?.firstName,
                     lastName: data?.lastName,
+                    email: data?.email,
                     address: data?.address,
                 }), [data])}
 

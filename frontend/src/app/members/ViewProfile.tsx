@@ -70,7 +70,7 @@ export const ViewProfile = ({ userName, profilePicUrl, phone, churchName, spirit
         <CardHeader className="flex flex-col items-center gap-2">
           <Avatar className="h-28 w-28 border shadow-md">
             <AvatarImage
-              src={`${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
+              src={profilePicUrl?.startsWith('http') ? profilePicUrl : `${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
               alt="Profile picture"
             />
             <AvatarFallback className="text-lg font-semibold">NA</AvatarFallback>
@@ -231,7 +231,9 @@ export const ViewProfile = ({ userName, profilePicUrl, phone, churchName, spirit
               <div className="border-b border-gray-400 mt-4 mb-3 h-16 flex items-center justify-center">
                 {data?.data?.data?.signature?.signaturePicName ? (
                   <img
-                    src={`${import.meta.env.VITE_APP_API_URL}/signatures/${data.data.data.signature.signaturePicName}`}
+                    src={data.data.data.signature.signaturePicPath?.startsWith('http') 
+                      ? data.data.data.signature.signaturePicPath 
+                      : `${import.meta.env.VITE_APP_API_URL}/signatures/${data.data.data.signature.signaturePicName}`}
                     alt="Member's Signature"
                     className="signature-img"
                     onError={() => console.error('Failed to load signature image')}

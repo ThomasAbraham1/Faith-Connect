@@ -7,6 +7,7 @@ import React, { useCallback, useRef, useState } from "react";
 // In your component
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/dynamic/Alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 import { useUser } from "@/context/UserProvider";
 import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
@@ -92,79 +93,93 @@ export const MembersPage = () => {
           fatherName: value.fatherName,
           motherName: value.motherName,
           address: value.address,
-          profilePicUrl: `/uploads/${value.profilePic?.profilePicName}`,
+          profilePicUrl: value.profilePic?.profilePicPath?.startsWith('http') 
+            ? value.profilePic.profilePicPath 
+            : `/uploads/${value.profilePic?.profilePicName}`,
         };
       }
     ) || [];
   }, [data, roleName])
 
   return (
-    <>
-      {selectedRowIds.length > 0 ? (
-        <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-          <Button variant="destructive">Delete</Button>
-        </Alert>
-      ) : (
-        <CUMembers
-          trigger="Add Member"
-          triggerVariant="default"
-          open={isSheetOpen}
-          onOpenChange={(open: boolean) => {
-            setIsSheetOpen(open);
-            if (!open) setEditingMember(null);
-          }}
-          data={editingMember as any}
-        />
-      )
-      }
-      <DynamicTable1<Member>
-        ref={tableRef}
-        data={tableData}
-        getSelectedRowsObject={getSelectedRowsObject}
-        columnOptions={{
-          HideColumns: ["id", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth"]
-        }}
-      >
-        {(row) =>
-          <ActionsColumn>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                const memberData = row.original as Member;
-                const mappedMember = {
-                  ...memberData,
-                  roles: memberData.role,
-                  profilePic: memberData.profilePicUrl
-                };
-                setEditingMember(mappedMember as any);
-                setIsSheetOpen(true);
-              }}
-            >
-              <SquarePen className="h-4 w-4" />
-            </Button>
-            <Alert onComfirmFunction={() => mutation.mutate(row.original.id)}>
-              <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </Alert>
-            <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
-              <ViewProfile userName={row.getValue("username")}
-                dateOfBirth={row.getValue("dateOfBirth")}
-                phone={row.getValue("phone")}
-                address={row.getValue("address")}
-                firstName={row.getValue("firstName")}
-                lastName={row.getValue("lastName")}
-                email={row.getValue("email")}
-                fatherName={row.getValue("fatherName")}
-                motherName={row.getValue("motherName")}
-                spiritualStatus={row.getValue("spiritualStatus")}
-                churchName={userContext.church?.churchName}
-                profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
-            </Modal>
-          </ActionsColumn>
-        }
-      </DynamicTable1>
-    </>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Members</h2>
+        <p className="text-muted-foreground text-sm">
+          Manage your church members.
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="mb-4">
+            {selectedRowIds.length > 0 ? (
+              <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+                <Button variant="destructive">Delete Selected</Button>
+              </Alert>
+            ) : (
+              <CUMembers
+                trigger="Add Member"
+                triggerVariant="default"
+                open={isSheetOpen}
+                onOpenChange={(open: boolean) => {
+                  setIsSheetOpen(open);
+                  if (!open) setEditingMember(null);
+                }}
+                data={editingMember as any}
+              />
+            )}
+          </div>
+          <DynamicTable1<Member>
+            ref={tableRef}
+            data={tableData}
+            getSelectedRowsObject={getSelectedRowsObject}
+            columnOptions={{
+              HideColumns: ["id", "churchId", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth"]
+            }}
+          >
+            {(row) =>
+              <ActionsColumn>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const memberData = row.original as Member;
+                    const mappedMember = {
+                      ...memberData,
+                      roles: memberData.role,
+                      profilePic: memberData.profilePicUrl
+                    };
+                    setEditingMember(mappedMember as any);
+                    setIsSheetOpen(true);
+                  }}
+                >
+                  <SquarePen className="h-4 w-4" />
+                </Button>
+                <Alert onComfirmFunction={() => mutation.mutate(row.original.id)}>
+                  <Button variant="ghost" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </Alert>
+                <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
+                  <ViewProfile userName={row.getValue("username")}
+                    dateOfBirth={row.getValue("dateOfBirth")}
+                    phone={row.getValue("phone")}
+                    address={row.getValue("address")}
+                    firstName={row.getValue("firstName")}
+                    lastName={row.getValue("lastName")}
+                    email={row.getValue("email")}
+                    fatherName={row.getValue("fatherName")}
+                    motherName={row.getValue("motherName")}
+                    spiritualStatus={row.getValue("spiritualStatus")}
+                    churchName={userContext.church?.churchName}
+                    profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
+                </Modal>
+              </ActionsColumn>
+            }
+          </DynamicTable1>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

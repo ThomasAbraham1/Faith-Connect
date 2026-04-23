@@ -10,7 +10,9 @@ import { ArrowUpDown, Check, CheckCheck, Church, Variable, X } from "lucide-reac
 import { DataTableDemo } from "@/components/dynamic/DynamicTable";
 import { RadioGroupButton } from "@/components/dynamic/RadioButton";
 import React, { useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 import { format } from 'date-fns';
+import { Card, CardContent } from "@/components/ui/card";
 import { useUser } from "@/context/UserProvider";
 import { Input } from "@/components/ui/input";
 import {
@@ -185,51 +187,33 @@ export const Attendance = () => {
 
     const columns: ColumnDef<tableDataShape>[] = useMemo(() => [
         {
-            accessorKey: "id",
-            header: "Id",
-            cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("id")}</div>
-            ),
-        },
-        {
-            accessorKey: "churchId",
-            header: "Church Id",
-            cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("churchId")}</div>
-            ),
-        },
-        {
             accessorKey: "userName",
             header: ({ column }) => {
                 return (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === "asc")
-                        }
+                    <div 
+                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs tracking-wider"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     >
                         Username
-                        <ArrowUpDown />
-                    </Button>
+                        <ArrowUpDown className="size-3" />
+                    </div>
                 );
             },
             cell: ({ row }) => (
-                <div className="lowercase">{row.getValue("userName")}</div>
+                <div className="py-2 text-sm">{row.getValue("userName")}</div>
             ),
         },
         {
             accessorKey: "status",
             header: ({ column }) => {
                 return (
-                    <div className="flex gap-1.5">
-                        <p className="flex items-center">
-                            Status
-                        </p>
+                    <div className="font-bold text-xs tracking-wider py-2">
+                        Status
                     </div>
                 );
             },
             cell: ({ row }) => (
-                <div className="lowercase">
+                <div className="py-2 text-sm">
                     <Controller control={control} name="records" render={({ field }) =>
                         <RadioGroupButton attendanceStatus={row.getValue('status')} radioId={row.getValue('id')}
                             onChange={
@@ -244,6 +228,20 @@ export const Attendance = () => {
                             } radioOptions={['PRESENT', 'ABSENT']} />
                     } />
                 </div>
+            ),
+        },
+        {
+            accessorKey: "id",
+            header: "Id",
+            cell: ({ row }) => (
+                <div className="py-2 text-sm">{row.getValue("id")}</div>
+            ),
+        },
+        {
+            accessorKey: "churchId",
+            header: "Church Id",
+            cell: ({ row }) => (
+                <div className="py-2 text-sm">{row.getValue("churchId")}</div>
             ),
         },
     ], [attendanceQueryData, tableDataState])
@@ -269,121 +267,137 @@ export const Attendance = () => {
     }
 
     return (
-        <>
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-3xl font-bold tracking-tight">Attendance</h2>
+                <p className="text-muted-foreground text-sm">
+                    Manage service and event attendance records.
+                </p>
+            </div>
             {(isUserQueryFetching || isAttendanceQueryFetching || attendanceSubmitMutation.isPending) &&
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
                     <LoadingSpinner />
                 </div>
             }
             <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex flex-col gap-6 mb-6">
-                    {/* Interaction Mode Toggle */}
-                    <div className="flex gap-4">
-                        <Button
-                            type="button"
-                            variant={attendanceMode === 'SERVICE' ? 'default' : 'outline'}
-                            onClick={() => {
-                                setAttendanceMode('SERVICE');
-                                resetField('eventId');
-                                setValue('date', format(getLastOccurrence(), 'yyyy-MM-dd')); // Reset to last Sunday
-                            }}
-                        >
-                            Sunday Service
-                        </Button>
-                        <Button
-                            type="button"
-                            variant={attendanceMode === 'EVENT' ? 'default' : 'outline'}
-                            onClick={() => {
-                                setAttendanceMode('EVENT');
-                            }}
-                        >
-                            Specific Event
-                        </Button>
-                    </div>
-
-                    <div className="grid gap-6">
-                        {/* Event Selector - Always visible if in EVENT mode */}
-                        {attendanceMode === 'EVENT' && (
-                            <div className="space-y-2 max-w-md">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Select Event</label>
-                                <Controller
-                                    control={control}
-                                    name="eventId"
-                                    render={({ field }) => (
-                                        <Select onValueChange={field.onChange} value={field.value}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select an event" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {eventsList.map((event: any) => (
-                                                    <SelectItem key={event.id} value={event.id}>
-                                                        {event.name} ({new Date(event.date).toLocaleDateString()}) - {event.isRecurring ? 'Recurring' : 'Single'}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                            </div>
-                        )}
-
-                        {/* Date Picker + Buttons Row */}
-                        <div className="flex flex-wrap items-end gap-4 justify-between">
-                            <div className="w-full sm:w-auto">
-                                {attendanceMode === 'SERVICE' ? (
-                                    <Controller control={control} name="date" render={({ field }) =>
-                                        <Calendar32
-                                            calendarLabel={'Attendance Date'}
-                                            getLastSunday={() => getLastOccurrence('Sunday')}
-                                            onChange={(value) => {
-                                                if (value) field.onChange(format(value, 'yyyy-MM-dd'))
-                                            }}
-                                        />
-                                    } />
-                                ) : (
-                                    selectedEvent?.isRecurring && (
-                                        <Controller control={control} name="date" render={({ field }) =>
-                                            <Calendar32
-                                                calendarLabel={'Occurrence Date'}
-                                                getLastSunday={() => getLastOccurrence(selectedEvent.recurrenceDay)}
-                                                filterDate={(date) => {
-                                                    if (!selectedEvent.recurrenceDay) return true;
-                                                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                                                    const dayIndex = days.indexOf(selectedEvent.recurrenceDay);
-                                                    if (dayIndex === -1) return true;
-                                                    return date.getDay() === dayIndex;
-                                                }}
-                                                onChange={(value) => {
-                                                    if (value) field.onChange(format(value, 'yyyy-MM-dd'))
-                                                }}
-                                            />
-                                        } />
-                                    )
-                                )}
-                            </div>
-
-                            {/* Centered Action Buttons - Now aligned right/row */}
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col gap-6 mb-6">
+                            {/* Interaction Mode Toggle */}
                             <div className="flex gap-4">
-                                <Button type='button' size='default' variant={'outline'} onClick={() => {
-                                    setTableDataState((prev) => {
-                                        return [...prev].map((r) => ({ ...r, status: 'PRESENT' }))
-                                    })
-                                }}>Mark All Present</Button>
-                                <Button type="button" size='default' variant={'outline'} onClick={() => {
-                                    setTableDataState((prev) => {
-                                        return [...prev].map((r) => ({ ...r, status: 'ABSENT' }))
-                                    })
-                                }}>Mark All Absent</Button>
+                                <Button
+                                    type="button"
+                                    variant={attendanceMode === 'SERVICE' ? 'default' : 'outline'}
+                                    onClick={() => {
+                                        setAttendanceMode('SERVICE');
+                                        resetField('eventId');
+                                        setValue('date', format(getLastOccurrence(), 'yyyy-MM-dd')); // Reset to last Sunday
+                                    }}
+                                >
+                                    Sunday Service
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={attendanceMode === 'EVENT' ? 'default' : 'outline'}
+                                    onClick={() => {
+                                        setAttendanceMode('EVENT');
+                                    }}
+                                >
+                                    Specific Event
+                                </Button>
                             </div>
+
+                            <div className="grid gap-6">
+                                {/* Event Selector - Always visible if in EVENT mode */}
+                                {attendanceMode === 'EVENT' && (
+                                    <div className="space-y-2 max-w-md">
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Select Event</label>
+                                        <Controller
+                                            control={control}
+                                            name="eventId"
+                                            render={({ field }) => (
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select an event" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {eventsList.map((event: any) => (
+                                                            <SelectItem key={event.id} value={event.id}>
+                                                                {event.name} ({new Date(event.date).toLocaleDateString()}) - {event.isRecurring ? 'Recurring' : 'Single'}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Date Picker + Buttons Row */}
+                                <div className="flex flex-wrap items-end gap-4 justify-between">
+                                    <div className="w-full sm:w-auto">
+                                        {attendanceMode === 'SERVICE' ? (
+                                            <Controller control={control} name="date" render={({ field }) =>
+                                                <Calendar32
+                                                    calendarLabel={'Attendance Date'}
+                                                    getLastSunday={() => getLastOccurrence('Sunday')}
+                                                    onChange={(value) => {
+                                                        if (value) field.onChange(format(value, 'yyyy-MM-dd'))
+                                                    }}
+                                                />
+                                            } />
+                                        ) : (
+                                            selectedEvent?.isRecurring && (
+                                                <Controller control={control} name="date" render={({ field }) =>
+                                                    <Calendar32
+                                                        calendarLabel={'Occurrence Date'}
+                                                        getLastSunday={() => getLastOccurrence(selectedEvent.recurrenceDay)}
+                                                        filterDate={(date) => {
+                                                            if (!selectedEvent.recurrenceDay) return true;
+                                                            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                                                            const dayIndex = days.indexOf(selectedEvent.recurrenceDay);
+                                                            if (dayIndex === -1) return true;
+                                                            return date.getDay() === dayIndex;
+                                                        }}
+                                                        onChange={(value) => {
+                                                            if (value) field.onChange(format(value, 'yyyy-MM-dd'))
+                                                        }}
+                                                    />
+                                                } />
+                                            )
+                                        )}
+                                    </div>
+
+                                    {/* Centered Action Buttons - Now aligned right/row */}
+                                    <div className="flex gap-4">
+                                        <Button type='button' size='default' variant={'outline'} onClick={() => {
+                                            setTableDataState((prev) => {
+                                                return [...prev].map((r) => ({ ...r, status: 'PRESENT' }))
+                                            })
+                                        }}>Mark All Present</Button>
+                                        <Button type="button" size='default' variant={'outline'} onClick={() => {
+                                            setTableDataState((prev) => {
+                                                return [...prev].map((r) => ({ ...r, status: 'ABSENT' }))
+                                            })
+                                        }}>Mark All Absent</Button>
+                                    </div>
+                                </div>
+
+                                <Input {...register('churchId')} className="hidden"></Input>
+                            </div>
+
                         </div>
-
-                        <Input {...register('churchId')} className="hidden"></Input>
-                    </div>
-
-                </div>
-                <DataTableDemo data={tableDataState} columns={columns} />
-                <Button variant={'default'} className="w-full mt-6">Submit Attendance</Button>
+                        <DataTableDemo 
+                            data={tableDataState} 
+                            columns={columns} 
+                            columnVisibilityObject={{
+                                id: false, churchId: false
+                            }}
+                        />
+                        <Button variant={'default'} className="w-full mt-6">Submit Attendance</Button>
+                    </CardContent>
+                </Card>
             </form>
-        </>
+        </div>
     );
 }

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CUEvents } from "./CUEvents";
 import type { TEventsData } from "./types/events.types";
 import { Alert } from "@/components/dynamic/Alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 function EventsPage() {
   const userContext = useUser();
@@ -67,56 +68,74 @@ function EventsPage() {
   if (isPending) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading events...</div>;
   if (error) return <div className="p-8 text-center text-destructive">Error loading events: {(error as Error).message}</div>;
   return (
-    <>
-      <div className="text-xs text-muted-foreground mb-2">Total events detected: {dataArray.length}</div>
-      {selectedRowIds.length > 0 ? (
-        <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-          <Button variant="destructive">Delete</Button>
-        </Alert>
-      ) : (
-        <CUEvents
-          trigger="Add Event"
-          triggerVariant="default"
-          open={isSheetOpen}
-          onOpenChange={(open: boolean) => {
-            setIsSheetOpen(open);
-            if (!open) setEditingEvent(null);
-          }}
-          onSuccess={() => {
-            setIsSheetOpen(false);
-            setEditingEvent(null);
-          }}
-          data={editingEvent}
-        />
-      )}
-      <DynamicTable1<any>
-        ref={tableRef}
-        data={dataArray}
-        getSelectedRowsObject={getSelectedRowsObject}
-      >
-        {(row) =>
-          <ActionsColumn>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setEditingEvent(row.original);
-                setIsSheetOpen(true);
-              }}
-            >
-              <SquarePen className="h-4 w-4" />
-            </Button>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Events</h2>
+        <p className="text-muted-foreground text-sm">
+          Manage your church events.
+        </p>
+      </div>
 
-            <Alert onComfirmFunction={() => mutation.mutate(row.original.id || "")}>
-              <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </Alert>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center mb-4">
+            {/* <div className="text-xs text-muted-foreground">Total events detected: {dataArray.length}</div> */}
+            <div>
+              {selectedRowIds.length > 0 ? (
+                <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+                  <Button variant="destructive">Delete Selected</Button>
+                </Alert>
+              ) : (
+                <CUEvents
+                  trigger="Add Event"
+                  triggerVariant="default"
+                  open={isSheetOpen}
+                  onOpenChange={(open: boolean) => {
+                    setIsSheetOpen(open);
+                    if (!open) setEditingEvent(null);
+                  }}
+                  onSuccess={() => {
+                    setIsSheetOpen(false);
+                    setEditingEvent(null);
+                  }}
+                  data={editingEvent}
+                />
+              )}
+            </div>
+          </div>
+          <DynamicTable1<any>
+            ref={tableRef}
+            data={dataArray}
+            getSelectedRowsObject={getSelectedRowsObject}
+            columnOptions={{
+              HideColumns: ["id", "churchId", "_id"]
+            }}
+          >
+            {(row) =>
+              <ActionsColumn>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditingEvent(row.original);
+                    setIsSheetOpen(true);
+                  }}
+                >
+                  <SquarePen className="h-4 w-4" />
+                </Button>
 
-          </ActionsColumn>
-        }
-      </DynamicTable1>
-    </>
+                <Alert onComfirmFunction={() => mutation.mutate(row.original.id || "")}>
+                  <Button variant="ghost" size="icon">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </Alert>
+
+              </ActionsColumn>
+            }
+          </DynamicTable1>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 export default EventsPage;

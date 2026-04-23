@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Outlet, useNavigation } from "react-router";
+import { Outlet, useNavigation, useLocation } from "react-router";
 import LoadingSpinner from "../spinner";
 import { useEffect, useState } from "react";
 import { NavHeader } from "./NavHeader";
@@ -23,6 +23,7 @@ export const AppLayout = () => {
   // const navigation =useNavigation()
   // console.log(navigation.state)
   const navigation = useNavigation();
+  const location = useLocation();
   const isLoading = navigation.state == "loading";
   // useEffect(() => {
   //   console.log(navigation.state);
@@ -62,7 +63,9 @@ export const AppLayout = () => {
                 <LoadingSpinner />
               </div> : <></>
             }
+          <div key={location.pathname} className="animate-in fade-in duration-500 h-full">
             <Outlet></Outlet>
+          </div>
           </>
         </div>
       </SidebarInset>

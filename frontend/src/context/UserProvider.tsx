@@ -14,6 +14,7 @@ type ChurchDocumentType = {
     churchName: string,
     phone: string,
     email: string,
+    logo?: string,
     roles: Role[],
 }
 type UserDocumentType = {
@@ -54,7 +55,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 setChurch(response.data.data.church)
                 setUser(response.data.data.user)
                 // console.log(response)
-                return response
+                return response 
             } catch (error: any) {
                 const status = error.response?.status;
                 // Don't show the error toast 401/403 (Session Expired/Forbidden) 
