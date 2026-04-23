@@ -13,7 +13,7 @@ export class AppController {
 
   @Get('/sessionTest')
   findAll(@Session() session: Record<string, any>) {
-    session.visits = session.visits ? session.visits + 1 : 1;
+    session.visits = session.visits ? session.visits + 1 : 1; 
     console.log(session)
   }
 }
