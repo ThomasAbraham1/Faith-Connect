@@ -12,8 +12,8 @@ export class StorageService {
     this.s3 = new S3Client({ 
       region: this.configService.get<string>('AWS_REGION') || 'ap-south-1', 
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+        accessKeyId: this.configService.get<string>('AWS_S3_ACCESS_KEY_ID') || this.configService.get<string>('AWS_ACCESS_KEY_ID') || '',
+        secretAccessKey: this.configService.get<string>('AWS_S3_SECRET_ACCESS_KEY') || this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
       },
     });
   }

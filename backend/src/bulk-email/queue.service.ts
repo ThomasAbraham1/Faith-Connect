@@ -6,7 +6,6 @@ import {
   SendMessageCommand,
   ReceiveMessageCommand,
   DeleteMessageCommand,
-  GetQueueUrlCommand,
 } from '@aws-sdk/client-sqs';
 import { EmailJob, MailerService } from './mailer.service';
 
@@ -75,29 +74,14 @@ export class QueueService implements OnModuleInit {
     const queueName = this.configService.get<string>('SQS_QUEUE_NAME') || 'bulk-email-queue';
 
     try {
-      // First, attempt to get the existing queue URL to avoid permission errors on CreateQueue in production
-      const getResult = await this.sqsClient.send(
-        new GetQueueUrlCommand({ QueueName: queueName }),
+      const result = await this.sqsClient.send(
+        new CreateQueueCommand({ QueueName: queueName }),
       );
-      this.queueUrl = getResult.QueueUrl!;
-      this.logger.log(`SQS queue ready (found existing): ${this.queueUrl}`);
-    } catch (error: any) {
-      if (error.name === 'QueueDoesNotExist') {
-        this.logger.log(`Queue ${queueName} not found. Attempting to create it...`);
-        try {
-          const createResult = await this.sqsClient.send(
-            new CreateQueueCommand({ QueueName: queueName }),
-          );
-          this.queueUrl = createResult.QueueUrl!;
-          this.logger.log(`SQS queue ready (created new): ${this.queueUrl}`);
-        } catch (createError) {
-          this.logger.error('Failed to create SQS queue', createError);
-          throw createError;
-        }
-      } else {
-        this.logger.error('Failed to get SQS queue URL', error);
-        throw error;
-      }
+      this.queueUrl = result.QueueUrl!;
+      this.logger.log(`SQS queue ready: ${this.queueUrl}`);
+    } catch (error) {
+      this.logger.error('Failed to create/find SQS queue', error);
+      throw error;
     }
   }
 
