@@ -5,13 +5,17 @@ import { UpdateChurchDto } from './dto/update-church.dto';
 import { Church } from './entities/church.entity';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { join } from 'path';
+import { memoryStorage } from 'multer';
+import sharp from 'sharp';
+import { StorageService } from 'src/storage/storage.service';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('churches')
 export class ChurchesController {
-  constructor(private readonly churchesService: ChurchesService) { }
+  constructor(
+    private readonly churchesService: ChurchesService,
+    private readonly storageService: StorageService,
+  ) { }
 
   @Post()
   create(@Body() createChurchDto: CreateChurchDto) {
@@ -39,25 +43,64 @@ export class ChurchesController {
   @Patch('my-church')
   @UseInterceptors(
     FileInterceptor('logo', {
-      storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'public', 'uploads'),
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          const extension = file.originalname.split('.').pop();
-          cb(null, `${randomName}.${extension}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  updateMyChurch(@Req() req, @Body() updateChurchDto: UpdateChurchDto, @UploadedFile() logo) {
+  async updateMyChurch(@Req() req, @Body() updateChurchDto: UpdateChurchDto, @UploadedFile() logo) {
     const churchId = req.user.church._id;
+    
     if (logo) {
-      updateChurchDto.logo = logo.filename;
+      try {
+        // 1. Process with sharp (Resize + WebP)
+        const optimizedBuffer = await sharp(logo.buffer)
+          .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        // 2. Upload to S3
+        const key = `churches/${churchId}/${Date.now()}.webp`;
+        const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+        console.log('Uploaded to S3:', url);
+
+        // 3. (Optional) Cleanup old logo from S3 if it exists and is an S3 URL
+        const oldChurch = await this.churchesService.findOne(req.user.church.churchName);
+        if (oldChurch?.logo && oldChurch.logo.startsWith('https://')) {
+          try {
+            await this.storageService.deleteFile(oldChurch.logo);
+          } catch (deleteError) {
+            console.error('Failed to delete old logo from S3:', deleteError);
+          }
+        }
+
+        updateChurchDto.logo = url;
+      } catch (err) {
+        console.error('Image processing or upload failed:', err);
+        throw new Error('Failed to process or upload church logo. Please try again.');
+      }
     }
-    return this.churchesService.update(churchId, updateChurchDto);
+    
+    console.log('Updating church:', churchId);
+    console.log('Update payload:', updateChurchDto);
+    
+    const result = await this.churchesService.update(churchId, updateChurchDto);
+    console.log('Update result:', result);
+
+    // Refresh the user session so /auth/me returns the latest data
+    if (req.user) {
+      req.user.church = result;
+      await new Promise<void>((resolve, reject) => {
+        req.login(req.user, (err) => {
+          if (err) {
+            console.error('Session refresh failed:', err);
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+      console.log('Session refreshed successfully');
+    }
+
+    return result;
   }
 
   @Patch(':id')

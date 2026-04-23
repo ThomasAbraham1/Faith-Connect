@@ -3,10 +3,12 @@ import { ChurchesService } from './churches.service';
 import { ChurchesController } from './churches.controller';
 import { DatabaseModule } from 'src/database/database.module';
 
+import { StorageModule } from 'src/storage/storage.module';
+
 @Module({
   controllers: [ChurchesController],
   providers: [ChurchesService],
   exports: [ChurchesService], 
-  imports:[DatabaseModule]
+  imports:[DatabaseModule, StorageModule]
 })
 export class ChurchesModule {}

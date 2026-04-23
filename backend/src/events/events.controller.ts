@@ -11,8 +11,9 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) { }
 
   @Post()
-  create(@Body() createEventDto) {
-    // console.log(createEventDto)
+  create(@Req() req, @Body() createEventDto) {
+    createEventDto.churchId = req.user.church._id
+    console.log(createEventDto)
     return this.eventsService.create(createEventDto);
   }
 

@@ -18,8 +18,9 @@ import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { profile } from 'console';
+import { memoryStorage } from 'multer';
+import sharp from 'sharp';
+import { StorageService } from 'src/storage/storage.service';
 import { join } from 'path';
 import { SignatureDto } from './dto/signature.dto';
 import { DeleteMemberDto } from './dto/delete-member.dto';
@@ -27,63 +28,65 @@ import { DeleteMemberDto } from './dto/delete-member.dto';
 @UseGuards(AuthenticatedGuard)
 @Controller('members')
 export class MembersController {
-  constructor(private readonly membersService: MembersService) { }
+  constructor(
+    private readonly membersService: MembersService,
+    private readonly storageService: StorageService,
+  ) { }
 
-  @Post()
   @UseInterceptors(...[
     FileFieldsInterceptor([
       { name: 'profilePic', maxCount: 1 }, // Allow one file for profilePic
       { name: 'signature', maxCount: 1 }, // Allow one file for signature
     ], {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          // Set destination based on file field name
-          const destination =
-            file.fieldname === 'profilePic'
-              ? join(__dirname, '..', '..', 'public', 'uploads')
-              : join(__dirname, '..', '..', 'public', 'signatures');
-          cb(null, destination);
-        },
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          // Preserve original file extension
-          const extension = file.originalname.split('.').pop();
-          cb(null, `${randomName}.${extension}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   ]
   )
-  create(
+  @Post()
+  async create(
     @Req() req,
     @UploadedFiles() uploadedFiles,
     @Body() createMemberDto: CreateMemberDto,
   ) {
-    console.log(createMemberDto);
-    // Get church ID from session so as to insert member into correct church record
     const churchId = req.user.church._id;
-    console.log(uploadedFiles);
     createMemberDto.churchId = churchId;
+
     if (uploadedFiles.profilePic) {
-      createMemberDto.profilePic = {
-        profilePicPath: uploadedFiles.profilePic[0].path,
-        profilePicName: uploadedFiles.profilePic[0].filename,
-      };
-    }
-    // Add signature file to data object
-    if (uploadedFiles.signature) {
-      const signature: SignatureDto = {
-        signaturePicName: uploadedFiles.signature[0].filename,
-        signaturePicPath: uploadedFiles.signature[0].path
+      try {
+        const file = uploadedFiles.profilePic[0];
+        const optimizedBuffer = await sharp(file.buffer)
+          .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        const key = `members/${churchId}/profile-${Date.now()}.webp`;
+        const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+        
+        createMemberDto.profilePic = {
+          profilePicPath: url,
+          profilePicName: url.split('/').pop() || '',
+        };
+      } catch (err) {
+        console.error('Profile pic processing failed:', err);
       }
-      createMemberDto.signature = signature
     }
-    // const createMemberDtoEdited = { ...createMemberDto, churchId: churchId };
+
+    if (uploadedFiles.signature) {
+      try {
+        const file = uploadedFiles.signature[0];
+        const key = `members/${churchId}/signature-${Date.now()}-${file.originalname}`;
+        const url = await this.storageService.uploadFile(file.buffer, key, file.mimetype);
+        
+        createMemberDto.signature = {
+          signaturePicName: url.split('/').pop() || '',
+          signaturePicPath: url
+        }
+      } catch (err) {
+        console.error('Signature upload failed:', err);
+      }
+    }
+
     return this.membersService.create(createMemberDto);
-    // return createMemberDto
   }
 
   @Get()
@@ -103,42 +106,64 @@ export class MembersController {
       { name: 'profilePic', maxCount: 1 }, // Allow one file for profilePic
       { name: 'signature', maxCount: 1 }, // Allow one file for signature
     ], {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          // Set destination based on file field name
-          const destination =
-            file.fieldname === 'profilePic'
-              ? join(__dirname, '..', '..', 'public', 'uploads')
-              : join(__dirname, '..', '..', 'public', 'signatures');
-          cb(null, destination);
-        },
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          // Preserve original file extension
-          const extension = file.originalname.split('.').pop();
-          cb(null, `${randomName}.${extension}`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
-
   )
-  update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
+  async update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
+    const churchId = req.user.church._id;
+    const existingMember = await this.membersService.findOne(id);
+
     if (uploadedFiles.profilePic) {
-      updateMemberDto.profilePic = {
-        profilePicPath: uploadedFiles.profilePic[0].path,
-        profilePicName: uploadedFiles.profilePic[0].filename,
-      };
-    }
-    // Add signature file to data object
-    if (uploadedFiles.signature) {
-      const signature: SignatureDto = {
-        signaturePicName: uploadedFiles.signature[0].filename,
-        signaturePicPath: uploadedFiles.signature[0].path
+      try {
+        const file = uploadedFiles.profilePic[0];
+        const optimizedBuffer = await sharp(file.buffer)
+          .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        const key = `members/${churchId}/profile-${Date.now()}.webp`;
+        const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+
+        // Cleanup old profile pic if it was on S3
+        if (existingMember?.profilePic?.profilePicPath?.startsWith('https://')) {
+          try {
+            await this.storageService.deleteFile(existingMember.profilePic.profilePicPath);
+          } catch (e) {
+            console.error('Failed to delete old profile pic:', e);
+          }
+        }
+        
+        updateMemberDto.profilePic = {
+          profilePicPath: url,
+          profilePicName: url.split('/').pop() || '',
+        };
+      } catch (err) {
+        console.error('Profile pic update failed:', err);
       }
-      updateMemberDto.signature = signature
+    }
+
+    if (uploadedFiles.signature) {
+      try {
+        const file = uploadedFiles.signature[0];
+        const key = `members/${churchId}/signature-${Date.now()}-${file.originalname}`;
+        const url = await this.storageService.uploadFile(file.buffer, key, file.mimetype);
+
+        // Cleanup old signature if it was on S3
+        if (existingMember?.signature?.signaturePicPath?.startsWith('https://')) {
+          try {
+            await this.storageService.deleteFile(existingMember.signature.signaturePicPath);
+          } catch (e) {
+            console.error('Failed to delete old signature:', e);
+          }
+        }
+        
+        updateMemberDto.signature = {
+          signaturePicName: url.split('/').pop() || '',
+          signaturePicPath: url
+        }
+      } catch (err) {
+        console.error('Signature update failed:', err);
+      }
     }
 
     return this.membersService.update(id, updateMemberDto, req.user);
@@ -154,30 +179,38 @@ export class MembersController {
   @Post('settings/signature')
   @UseInterceptors(
     FileInterceptor('signature', {
-      storage: diskStorage({
-        destination: join(__dirname, '..', '..', 'public', 'signatures'),
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${file.originalname}.png`);
-        },
-      }),
+      storage: memoryStorage(),
     }),
   )
-  createSignature(@Body() createSignatureDto, @UploadedFile() signature) {
-    console.log(__dirname, join(__dirname, '..', '..', 'public', 'uploads'))
-    console.log(signature);
+  async createSignature(@Body() createSignatureDto, @UploadedFile() signature, @Req() req) {
     const userId = createSignatureDto?.userId;
-    const signaturePath = signature?.path;
-    const signaturePicName = signature?.filename;
-    const signatureInfo: SignatureDto = {
-      signaturePicName: signaturePicName,
-      signaturePicPath: signaturePath
+    const churchId = req.user.church._id;
+
+    if (signature) {
+      try {
+        const key = `members/${churchId}/signature-settings-${Date.now()}-${signature.originalname}`;
+        const url = await this.storageService.uploadFile(signature.buffer, key, signature.mimetype);
+
+        // Find existing signature for cleanup
+        const existingMember = await this.membersService.findSignature(userId);
+        if (existingMember?.signature?.signaturePicPath?.startsWith('https://')) {
+          try {
+            await this.storageService.deleteFile(existingMember.signature.signaturePicPath);
+          } catch (e) {
+            console.error('Failed to delete old signature:', e);
+          }
+        }
+
+        const signatureInfo: SignatureDto = {
+          signaturePicName: url.split('/').pop() || '',
+          signaturePicPath: url
+        }
+        return this.membersService.createSignature(signatureInfo, userId);
+      } catch (err) {
+        console.error('Signature upload failed:', err);
+        throw err;
+      }
     }
-    return this.membersService.createSignature(signatureInfo, userId)
-    // return this.settingsService.createSignature(createSettingDto);
   }
 
   // find signature

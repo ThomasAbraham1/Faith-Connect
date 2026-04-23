@@ -112,7 +112,7 @@ export class DashboardService {
       ...newMembers.map(m => ({
         type: 'MEMBER',
         title: `${m.firstName} ${m.lastName || ''}`,
-        description: `New Member joined as ${m.spiritualStatus || 'Member'}`,
+        description: `New Member joined as ${m.spiritualStatus || ''} ${m.roles}`,
         timestamp: (m as any).createdAt,
         status: m.spiritualStatus,
       })),
@@ -129,8 +129,9 @@ export class DashboardService {
         description: `Event created for ${new Date(e.eventDate).toLocaleDateString()}`,
         timestamp: (e as any).createdAt,
       })),
-    ];
-
+    ];  
+    console.log("Recent Activity Debug:");
+    console.log("- activities:", activities); 
     return activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
   }
 }

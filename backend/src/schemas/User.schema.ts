@@ -1,5 +1,5 @@
 import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, Model } from 'mongoose';
+import mongoose, { HydratedDocument, Model  } from 'mongoose';
 import { ProfilePic } from './ProfilePic.schema';
 import { Church, ChurchDocument, ChurchSchema } from './Church.schema';
 import { Signature, SignatureSchema } from './Signature.schema';
@@ -49,12 +49,16 @@ export class User {
 }
 export const userSchema = SchemaFactory.createForClass(User);
 
+userSchema.index({ churchId: 1, userName: 1 }, { unique: true });
+
 
 userSchema.path('roles').validate({
   validator: async function (value: string) {
     const UserModel = this.constructor as mongoose.Model<UserDocument>;
     if (value.includes('pastor')) {
+      const churchId = (this as any).churchId;
       const user = await UserModel.findOne({
+        churchId,
         roles: {
           $in: ['pastor']
         }
@@ -84,6 +88,7 @@ userSchema.pre('findOneAndUpdate', async function (next) {
     // // only 1 pastor allowed check - when pastor is going to be the updated role value
     if (updatedValues?.roles == 'pastor') {
       const count = await this.model.countDocuments({
+        churchId: docToUpdate.churchId,
         roles: {
           $in: ['pastor']
         }

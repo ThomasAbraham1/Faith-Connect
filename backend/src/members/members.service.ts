@@ -15,9 +15,12 @@ export class MembersService {
   ) { }
   async create(createMemberDto: CreateMemberDto) {
     try {
-      const doesUserNameExist = await this.userModel.findOne({ userName: createMemberDto.userName });
+      const doesUserNameExist = await this.userModel.findOne({ 
+        userName: createMemberDto.userName,
+        churchId: createMemberDto.churchId 
+      });
       if (doesUserNameExist) {
-        throw new ConflictException('Username already exists');
+        throw new ConflictException('Username already exists within this church');
       }
       return await this.userModel.create(createMemberDto);
     } catch (error) {
@@ -46,16 +49,22 @@ export class MembersService {
 
   async update(id: string, updateMemberDto: UpdateMemberDto, userSessionObject: { user: CreateMemberDto }) {
     // check if username exists
-    if (updateMemberDto.userName) {
-      const doesUserNameExist = await this.userModel.findOne({ userName: updateMemberDto.userName });
+    const userInfo = await this.findOne(id);
+    if (!userInfo) throw new NotFoundException('Member not found');
+
+    // check if username exists within the same church
+    if (updateMemberDto.userName && updateMemberDto.userName !== userInfo.userName) {
+      const doesUserNameExist = await this.userModel.findOne({ 
+        userName: updateMemberDto.userName, 
+        churchId: userInfo.churchId 
+      });
       if (doesUserNameExist) {
-        throw new ConflictException('Username already exists');
+        throw new ConflictException('Username already exists within this church');
       }
     }
 
 
     console.log(id, updateMemberDto, userSessionObject)
-    const userInfo: CreateMemberDto = await this.findOne(id);
     console.log(userInfo)
     if (userInfo?.profilePic) {
       const profilePicPath: string[] = [userInfo.profilePic.profilePicPath];
