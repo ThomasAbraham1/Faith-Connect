@@ -74,6 +74,14 @@ const router = createBrowserRouter([
             path: appRoutes.templates.label,
             element: appRoutes.templates.element,
           },
+          {
+            path: appRoutes.groups.label,
+            element: appRoutes.groups.element,
+          },
+          {
+            path: `${appRoutes.groups.label}/:groupId`,
+            element: appRoutes.groups.element,
+          },
         ],
       },
     ],

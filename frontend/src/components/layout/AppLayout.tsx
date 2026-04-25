@@ -17,39 +17,13 @@ import { Outlet, useNavigation, useLocation } from "react-router";
 import LoadingSpinner from "../spinner";
 import { useEffect, useState } from "react";
 import { NavHeader } from "./NavHeader";
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useIsFetching } from '@tanstack/react-query';
 
 export const AppLayout = () => {
-  // const navigation =useNavigation()
-  // console.log(navigation.state)
   const navigation = useNavigation();
   const location = useLocation();
-  const isLoading = navigation.state == "loading";
-  // useEffect(() => {
-  //   console.log(navigation.state);
-  // });
-  const queryClient = useQueryClient();
-  const [isFetching, setisFetching] = useState(true);
-
-  const getisFetching = () => {
-    const queries = queryClient.getQueryCache().getAll();
-    return queries.some(query =>
-      query.state.fetchStatus === 'fetching'
-    );
-  };
-
-  useEffect(() => {
-    // Update statuses immediately on mount
-    setisFetching(getisFetching());
-
-    // Subscribe to query cache updates
-    const unsubscribe = queryClient.getQueryCache().subscribe(() => {
-      setisFetching(getisFetching());
-    });
-    console.log(isFetching)
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [queryClient.getQueryCache().getAll()]);
+  const isNavigating = navigation.state == "loading";
+  const isFetching = useIsFetching();
   
   return (
     <SidebarProvider>

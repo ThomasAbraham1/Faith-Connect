@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router";
 import { Fragment } from "react/jsx-runtime";
+import { useBreadcrumbs } from "@/context/BreadcrumbProvider";
+
 export const NavHeader = () => {
   const location = useLocation();
+  const { labels } = useBreadcrumbs();
   const locationArray = location.pathname.split("/");
   //   removing the empty value in the first index of locationArray
   locationArray.shift();
@@ -38,16 +41,16 @@ export const NavHeader = () => {
           <BreadcrumbList>
             {locationArray.map((location, index) => {
               locationString += `/${location}`;
-              // Capitalizing the first letter of location string
-              location = location.charAt(0).toUpperCase() + location.slice(1);
+              
+              // Check for custom label, otherwise capitalize first letter
+              const label = labels[location] || (location.charAt(0).toUpperCase() + location.slice(1));
+              
               if (index != locationArray.length - 1) {
                 return (
                   <Fragment key={index}>
-                    <BreadcrumbItem key={index} className="hidden md:block">
+                    <BreadcrumbItem className="hidden md:block">
                     <Link to={locationString}>
-                      {/* <BreadcrumbLink> */}
-                        {location}
-                      {/* </BreadcrumbLink> */}
+                        {label}
                     </Link>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
@@ -57,7 +60,7 @@ export const NavHeader = () => {
               locationString = "";
               return (
                 <BreadcrumbItem key={index} className="hidden md:block">
-                  <BreadcrumbPage>{location}</BreadcrumbPage>
+                  <BreadcrumbPage>{label}</BreadcrumbPage>
                 </BreadcrumbItem>
               );
             })}

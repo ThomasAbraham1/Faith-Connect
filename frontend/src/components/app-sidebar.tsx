@@ -179,6 +179,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Users,
       },
       {
+        name: appRoutes.groups.label,
+        url: appRoutes.groups.path,
+        icon: Users,
+      },
+      {
         name: appRoutes.attendance.label,
         url: appRoutes.attendance.path,
         icon: CalendarCheck2,

@@ -39,7 +39,7 @@ export interface membersResponseObject {
 
 // Column Config
 export type Member = {
-    id: string;
+    _id: string;
     userName: string;
     password: string;
     phone: string;

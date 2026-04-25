@@ -9,6 +9,7 @@ import { Otp, otpSchema } from 'src/schemas/Otp.schema';
 import { Role, RoleSchema } from 'src/schemas/Role.schema';
 import { Twofa, TwofaSchema } from 'src/schemas/Twofa.schema';
 import { User, userSchema } from 'src/schemas/User.schema';
+import { Group, GroupSchema } from 'src/schemas/Group.schema';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { User, userSchema } from 'src/schemas/User.schema';
       { name: Church.name, schema: ChurchSchema },
       { name: Attendance.name, schema: AttendanceSchema },
       { name: Events.name, schema: EventsSchema },
+      { name: Group.name, schema: GroupSchema },
     ]),
   ],
   exports: [MongooseModule], // This module now exports all configured models
