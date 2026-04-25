@@ -104,8 +104,8 @@ export const MembersPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Members</h2>
-        <p className="text-muted-foreground text-sm">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Members</h2>
+        <p className="text-muted-foreground text-xs md:text-sm">
           Manage your church members.
         </p>
       </div>

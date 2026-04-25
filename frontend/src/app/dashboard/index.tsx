@@ -6,10 +6,12 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
 import api from "@/api/api"
-import { Users, UserPlus, TrendingUp, Calendar, ArrowUpRight, Cake, Heart, MailCheck } from "lucide-react"
+import { Users, UserPlus, TrendingUp, Calendar, ArrowUpRight, Cake, Heart, MailCheck, IndianRupee } from "lucide-react"
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: todayStats } = useQuery({
     queryKey: ['today-stats'],
     queryFn: async () => {
@@ -64,23 +66,45 @@ export default function Dashboard() {
       icon: TrendingUp,
     },
     {
-      title: "Sunday Avg.",
-      value: summaryStats?.data?.avgAttendance?.toString() || "0",
-      change: "Last 4 Sundays",
-      icon: Calendar,
+      title: "Ministry Budget Health",
+      value: `₹${(summaryStats?.data?.totalSpent || 0).toLocaleString()}`,
+      change: `of ₹${(summaryStats?.data?.totalAllocated || 0).toLocaleString()} allocated`,
+      icon: IndianRupee,
+      customContent: (
+        <div className="mt-2 space-y-1">
+          <div className="flex justify-between text-[10px] font-medium opacity-70">
+            <span>{((summaryStats?.data?.totalSpent / (summaryStats?.data?.totalAllocated || 1)) * 100).toFixed(0)}% spent</span>
+            <span>{summaryStats?.data?.ministryCount || 0} Ministries</span>
+          </div>
+          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${
+                (summaryStats?.data?.totalSpent / (summaryStats?.data?.totalAllocated || 1)) >= 1 ? 'bg-destructive' :
+                (summaryStats?.data?.totalSpent / (summaryStats?.data?.totalAllocated || 1)) >= 0.8 ? 'bg-amber-500' : 'bg-primary'
+              }`}
+              style={{ width: `${Math.min((summaryStats?.data?.totalSpent / (summaryStats?.data?.totalAllocated || 1)) * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+      ),
+      link: "/dashboard/Groups?category=MINISTRY"
     },
   ]
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-8 pt-6">
+    <div className="flex flex-1 flex-col gap-4 md:gap-8 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
 
       {/* Top Stats Row */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => (
-          <Card key={index} className={stat.highlight ? "border-primary/50 bg-primary/5" : ""}>
+          <Card 
+            key={index} 
+            className={`${stat.highlight ? "border-primary/50 bg-primary/5" : ""} ${stat.link ? "cursor-pointer hover:border-primary/30 transition-colors" : ""}`}
+            onClick={() => stat.link && navigate(stat.link)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
@@ -92,6 +116,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground">
                 {stat.change}
               </p>
+              {stat.customContent}
             </CardContent>
           </Card>
         ))}

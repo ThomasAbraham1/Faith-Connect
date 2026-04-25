@@ -21,6 +21,9 @@ export class Group {
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
   members: mongoose.Types.ObjectId[];
+
+  @Prop({ type: Number, default: 0 })
+  allocatedBudget: number;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

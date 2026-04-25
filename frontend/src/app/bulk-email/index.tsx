@@ -173,8 +173,8 @@ export const BulkEmailPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Bulk Email</h2>
-        <p className="text-muted-foreground text-sm">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Bulk Email</h2>
+        <p className="text-muted-foreground text-xs md:text-sm">
           Send personalized rich-text emails to your church members.
         </p>
       </div>

@@ -23,6 +23,7 @@ import { BulkEmailModule } from './bulk-email/bulk-email.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { TemplatesModule } from './templates/templates.module';
 import { GroupsModule } from './groups/groups.module';
+import { ExpensesModule } from './expenses/expenses.module';
 
 import { DashboardModule } from './dashboard/dashboard.module';
 
@@ -65,6 +66,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     TemplatesModule,
     DashboardModule,
     GroupsModule,
+    ExpensesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

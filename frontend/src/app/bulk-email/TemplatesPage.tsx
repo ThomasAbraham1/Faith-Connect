@@ -139,11 +139,11 @@ export const TemplatesPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
-          <p className="text-muted-foreground">Create and manage your rich text email templates with dynamic variables.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Email Templates</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Create and manage your rich text email templates with dynamic variables.</p>
         </div>
         {!isEditing && (
-          <Button onClick={() => { resetForm(); setIsEditing(true); }} className="gap-2">
+          <Button onClick={() => { resetForm(); setIsEditing(true); }} className="gap-2 h-9 text-xs md:text-sm md:h-10">
             <Plus className="h-4 w-4" /> New Template
           </Button>
         )}

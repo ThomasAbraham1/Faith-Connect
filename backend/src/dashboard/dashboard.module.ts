@@ -6,6 +6,8 @@ import { User, userSchema } from 'src/schemas/User.schema';
 import { Attendance, AttendanceSchema } from 'src/schemas/Attendance.schema';
 import { Events, EventsSchema } from 'src/schemas/Events.schema';
 import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
+import { Group, GroupSchema } from 'src/schemas/Group.schema';
+import { Expense, ExpenseSchema } from 'src/schemas/Expense.schema';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
       { name: Attendance.name, schema: AttendanceSchema },
       { name: Events.name, schema: EventsSchema },
       { name: EmailLog.name, schema: EmailLogSchema },
+      { name: Group.name, schema: GroupSchema },
+      { name: Expense.name, schema: ExpenseSchema },
     ]),
   ],
   controllers: [DashboardController],

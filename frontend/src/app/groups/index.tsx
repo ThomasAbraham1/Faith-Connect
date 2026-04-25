@@ -11,7 +11,7 @@ export const GroupsPage: React.FC = () => {
 
   if (groupId) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <GroupDetail 
           groupId={groupId} 
           onBack={() => navigate("/dashboard/Groups")} 
@@ -21,7 +21,7 @@ export const GroupsPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <GroupsList 
         onGroupClick={(group) => navigate(`/dashboard/Groups/${group._id}`)} 
       />

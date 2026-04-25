@@ -8,4 +8,7 @@ export class UpdateGroupDto {
   @IsEnum(['REGION', 'MINISTRY'])
   @IsOptional()
   category?: string;
+
+  @IsOptional()
+  allocatedBudget?: number;
 }

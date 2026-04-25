@@ -29,8 +29,8 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Groups</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Groups</h2>
+          <p className="text-sm md:text-base text-muted-foreground">
             Manage and organize your congregation into regions and ministries.
           </p>
         </div>
@@ -83,7 +83,7 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
                         <ChevronRight className="h-4 w-4" />
                       </div>
                     </div>
-                    <CardTitle className="text-2xl font-bold mt-4 tracking-tight">
+                    <CardTitle className="text-xl md:text-2xl font-bold mt-4 tracking-tight">
                       {group.name}
                     </CardTitle>
                   </CardHeader>

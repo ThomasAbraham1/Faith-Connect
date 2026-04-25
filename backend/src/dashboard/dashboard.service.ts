@@ -5,6 +5,8 @@ import { User, UserDocument } from 'src/schemas/User.schema';
 import { Attendance } from 'src/schemas/Attendance.schema';
 import { Events } from 'src/schemas/Events.schema';
 import { EmailLog, EmailLogDocument } from 'src/schemas/EmailLog.schema';
+import { Group, GroupDocument } from 'src/schemas/Group.schema';
+import { Expense, ExpenseDocument } from 'src/schemas/Expense.schema';
 
 @Injectable()
 export class DashboardService {
@@ -13,6 +15,8 @@ export class DashboardService {
     @InjectModel(Attendance.name) private attendanceModel: Model<Attendance>,
     @InjectModel(Events.name) private eventsModel: Model<Events>,
     @InjectModel(EmailLog.name) private emailLogModel: Model<EmailLogDocument>,
+    @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+    @InjectModel(Expense.name) private expenseModel: Model<ExpenseDocument>,
   ) { }
 
   async getSummaryStats(churchId: string) {
@@ -29,41 +33,24 @@ export class DashboardService {
       eventDate: { $gte: new Date() },
     });
 
-    console.log("Dashboard Stats Debug:");
-    console.log("- churchId:", churchId);
-    console.log("- totalMembers:", totalMembers);
-    console.log("- upcomingEvents:", upcomingEvents);
+    // Budget Aggregation
+    const ministryGroups = await this.groupModel.find({ churchId, category: 'MINISTRY' });
+    const totalAllocated = ministryGroups.reduce((sum, g) => sum + (g.allocatedBudget || 0), 0);
+    const groupIds = ministryGroups.map(g => g._id);
 
-    // Avg Sunday Attendance (Last 4)
-    const recentSundayAttendance = await this.attendanceModel
-      .find({
-        churchId,
-        $or: [{ eventId: { $exists: false } }, { eventId: null }],
-      })
-      .sort({ date: -1 })
-      .limit(4);
-
-    let avgAttendance = 0;
-    if (recentSundayAttendance.length > 0) {
-      const totalPresent = recentSundayAttendance.reduce((acc, curr) => {
-        try {
-          const records = typeof curr.records === 'string' ? JSON.parse(curr.records) : curr.records;
-          const presentCount = Array.isArray(records)
-            ? records.filter(r => r && r.status === 'PRESENT').length
-            : 0;
-          return acc + presentCount;
-        } catch (e) {
-          return acc;
-        }
-      }, 0);
-      avgAttendance = Math.round(totalPresent / recentSundayAttendance.length);
-    }
+    const expenseAgg = await this.expenseModel.aggregate([
+      { $match: { groupId: { $in: groupIds } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+    const totalSpent = expenseAgg[0]?.total || 0;
 
     return {
       totalMembers,
       newMembers,
       activeEvents: upcomingEvents,
-      avgAttendance,
+      totalAllocated,
+      totalSpent,
+      ministryCount: ministryGroups.length,
     };
   }
 
