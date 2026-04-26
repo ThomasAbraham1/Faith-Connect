@@ -22,8 +22,7 @@ import type { membersResponseObject, Member } from "./types/members.types";
 export const MembersPage = () => {
   const userContext = useUser();
   const tableRef = useRef<TableType<Member>>(null);
-  const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
-  const [selectedRows, setSelectedRows] = useState<Member[]>([]);
+  const [selection, setSelection] = useState<{ ids: string[], rows: Member[] }>({ ids: [], rows: [] });
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -32,8 +31,7 @@ export const MembersPage = () => {
     const selectedRowsObject = value as Record<string, Row<Member>>
     const rows = Object.values(selectedRowsObject).map((val) => val.original);
     const arrayOfIds = rows.map((r) => r.id);
-    setSelectedRowIds(arrayOfIds);
-    setSelectedRows(rows);
+    setSelection({ ids: arrayOfIds as string[], rows });
   }, [])
 
   // Query
@@ -117,8 +115,8 @@ export const MembersPage = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="mb-4">
-            <div className={selectedRowIds.length > 0 ? "flex gap-2" : "hidden"}>
-              <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+            <div className={selection.ids.length > 0 ? "flex gap-2" : "hidden"}>
+              <Alert onComfirmFunction={() => mutation.mutate(selection.ids)}>
                 <Button variant="destructive">Delete Selected</Button>
               </Alert>
               <SendWhatsApp 
@@ -130,12 +128,12 @@ export const MembersPage = () => {
                 }
                 triggerVariant="outline"
                 triggerClassName="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
-                phoneNumbers={selectedRows.map(r => r.phone)}
-                names={selectedRows.map(r => `${r.firstName} ${r.lastName}`)}
+                phoneNumbers={selection.rows.map(r => r.phone)}
+                names={selection.rows.map(r => `${r.firstName} ${r.lastName}`)}
               />
             </div>
             
-            <div className={selectedRowIds.length > 0 ? "hidden" : "block"}>
+            <div className={selection.ids.length > 0 ? "hidden" : "block"}>
               <CUMembers
                 trigger="Add Member"
                 triggerVariant="default"

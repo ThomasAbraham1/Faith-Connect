@@ -24,7 +24,7 @@ export class WhatsappService {
   }
 
   async sendBulkMessages(phones: string[], contentSid: string, contentVariables: string) {
-    const results = [];
+    const results: any[] = [];
     for (const phone of phones) {
       const res = await this.sendMessage(phone, contentSid, contentVariables);
       results.push({ phone, ...res });
