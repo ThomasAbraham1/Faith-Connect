@@ -117,25 +117,25 @@ export const MembersPage = () => {
       <Card>
         <CardContent className="pt-6">
           <div className="mb-4">
-            {selectedRowIds.length > 0 ? (
-              <div className="flex gap-2">
-                <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-                  <Button variant="destructive">Delete Selected</Button>
-                </Alert>
-                <SendWhatsApp 
-                  triggerContent={
-                    <>
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Send WhatsApp to Selected
-                    </>
-                  }
-                  triggerVariant="outline"
-                  triggerClassName="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
-                  phoneNumbers={selectedRows.map(r => r.phone)}
-                  names={selectedRows.map(r => `${r.firstName} ${r.lastName}`)}
-                />
-              </div>
-            ) : (
+            <div className={selectedRowIds.length > 0 ? "flex gap-2" : "hidden"}>
+              <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+                <Button variant="destructive">Delete Selected</Button>
+              </Alert>
+              <SendWhatsApp 
+                triggerContent={
+                  <>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send WhatsApp to Selected
+                  </>
+                }
+                triggerVariant="outline"
+                triggerClassName="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+                phoneNumbers={selectedRows.map(r => r.phone)}
+                names={selectedRows.map(r => `${r.firstName} ${r.lastName}`)}
+              />
+            </div>
+            
+            <div className={selectedRowIds.length > 0 ? "hidden" : "block"}>
               <CUMembers
                 trigger="Add Member"
                 triggerVariant="default"
@@ -146,7 +146,7 @@ export const MembersPage = () => {
                 }}
                 data={editingMember as any}
               />
-            )}
+            </div>
           </div>
           <DynamicTable1<Member>
             ref={tableRef}
