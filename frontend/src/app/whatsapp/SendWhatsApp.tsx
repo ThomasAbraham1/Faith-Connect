@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { MessageSquare, Send, X, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import axios from 'axios';
+import api from '@/api/api';
 
 interface SendWhatsAppProps {
   triggerContent: React.ReactNode;
@@ -44,7 +44,7 @@ export const SendWhatsApp: React.FC<SendWhatsAppProps> = ({
     try {
       const contentVariables = JSON.stringify({ "1": var1, "2": var2 });
       
-      const response = await axios.post('/api/whatsapp/send', {
+      const response = await api.post('/whatsapp/send', {
         phones: phoneNumbers,
         contentSid,
         contentVariables
