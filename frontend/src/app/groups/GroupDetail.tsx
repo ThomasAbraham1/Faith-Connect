@@ -15,6 +15,7 @@ import { FinancialsView } from "./FinancialsView";
 import { useBreadcrumbs } from "@/context/BreadcrumbProvider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users as UsersIcon, IndianRupee, Landmark, Plus, FileText, Download, Wallet } from "lucide-react";
+import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
 
 interface GroupDetailProps {
   groupId: string;
@@ -104,10 +105,16 @@ export const GroupDetail: React.FC<GroupDetailProps> = ({ groupId, onBack }) => 
             <Trash2 className="h-4 w-4" />
           </Button>
  
-          <Button className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 group h-9 px-3 text-xs md:text-sm">
-            <MessageSquare className="h-4 w-4 mr-1 md:mr-2 group-hover:scale-110 transition-transform" />
-            Send WhatsApp
-          </Button>
+          <SendWhatsApp 
+            trigger={
+              <Button className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 group h-9 px-3 text-xs md:text-sm">
+                <MessageSquare className="h-4 w-4 mr-1 md:mr-2 group-hover:scale-110 transition-transform" />
+                Send WhatsApp
+              </Button>
+            }
+            phoneNumbers={[...group.leaders, ...group.members].map(m => m.phone)}
+            names={[...group.leaders, ...group.members].map(m => `${m.firstName} ${m.lastName}`)}
+          />
         </div>
       </div>
 

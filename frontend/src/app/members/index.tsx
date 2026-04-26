@@ -1,6 +1,7 @@
 import api from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2, SquarePen, Eye } from "lucide-react";
+import { SquarePen, Trash2, Eye, MessageSquare } from "lucide-react";
+import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
 import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 
@@ -22,14 +23,17 @@ export const MembersPage = () => {
   const userContext = useUser();
   const tableRef = useRef<TableType<Member>>(null);
   const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
+  const [selectedRows, setSelectedRows] = useState<Member[]>([]);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Function to get selected row and format them for further processing
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
     const selectedRowsObject = value as Record<string, Row<Member>>
-    const arrayOfIds = Object.values(selectedRowsObject).map((value) => value.original.id)
-    setSelectedRowIds(arrayOfIds)
+    const rows = Object.values(selectedRowsObject).map((val) => val.original);
+    const arrayOfIds = rows.map((r) => r.id);
+    setSelectedRowIds(arrayOfIds);
+    setSelectedRows(rows);
   }, [])
 
   // Query
@@ -114,9 +118,21 @@ export const MembersPage = () => {
         <CardContent className="pt-6">
           <div className="mb-4">
             {selectedRowIds.length > 0 ? (
-              <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-                <Button variant="destructive">Delete Selected</Button>
-              </Alert>
+              <div className="flex gap-2">
+                <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+                  <Button variant="destructive">Delete Selected</Button>
+                </Alert>
+                <SendWhatsApp 
+                  trigger={
+                    <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Send WhatsApp to Selected
+                    </Button>
+                  }
+                  phoneNumbers={selectedRows.map(r => r.phone)}
+                  names={selectedRows.map(r => `${r.firstName} ${r.lastName}`)}
+                />
+              </div>
             ) : (
               <CUMembers
                 trigger="Add Member"
@@ -161,6 +177,15 @@ export const MembersPage = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </Alert>
+                <SendWhatsApp 
+                  trigger={
+                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  }
+                  phoneNumbers={[row.original.phone]}
+                  names={[`${row.original.firstName} ${row.original.lastName}`]}
+                />
                 <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
                   <ViewProfile userName={row.getValue("username")}
                     dateOfBirth={row.getValue("dateOfBirth")}

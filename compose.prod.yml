@@ -18,7 +18,9 @@ services:
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - AWS_S3_ACCESS_KEY_ID=${AWS_S3_ACCESS_KEY_ID}
       - AWS_S3_SECRET_ACCESS_KEY=${AWS_S3_SECRET_ACCESS_KEY}
-      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM}
     volumes:
       - ./backend-data/uploads:/app/public/uploads
       - ./backend-data/signatures:/app/public/signatures
