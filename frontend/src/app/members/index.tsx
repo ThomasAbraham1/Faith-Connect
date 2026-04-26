@@ -123,12 +123,14 @@ export const MembersPage = () => {
                   <Button variant="destructive">Delete Selected</Button>
                 </Alert>
                 <SendWhatsApp 
-                  trigger={
-                    <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800">
+                  triggerContent={
+                    <>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Send WhatsApp to Selected
-                    </Button>
+                    </>
                   }
+                  triggerVariant="outline"
+                  triggerClassName="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
                   phoneNumbers={selectedRows.map(r => r.phone)}
                   names={selectedRows.map(r => `${r.firstName} ${r.lastName}`)}
                 />
@@ -178,11 +180,9 @@ export const MembersPage = () => {
                   </Button>
                 </Alert>
                 <SendWhatsApp 
-                  trigger={
-                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50/50">
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  }
+                  triggerContent={<MessageSquare className="h-4 w-4" />}
+                  triggerVariant="ghost"
+                  triggerClassName="text-green-600 hover:text-green-700 hover:bg-green-50/50 h-9 w-9 p-0"
                   phoneNumbers={[row.original.phone]}
                   names={[`${row.original.firstName} ${row.original.lastName}`]}
                 />

@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
 
-export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant, modelTitle, modelDescription }:any) {
+export function Modal({ open, onOpenChange, children, triggerButtonContent, triggerButtonVariant, triggerClassName, modelTitle, modelDescription }:any) {
     const handlePrint = () => {
         window.print();
     };
@@ -10,7 +10,7 @@ export function Modal({ open, onOpenChange, children, triggerButtonContent, trig
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button variant={triggerButtonVariant}>{triggerButtonContent}</Button>
+                <Button variant={triggerButtonVariant} className={triggerClassName}>{triggerButtonContent}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-md p-6 print:block print:shadow-none print:border-none">
                 <DialogHeader className="print:hidden ">

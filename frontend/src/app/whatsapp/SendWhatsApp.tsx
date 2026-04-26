@@ -9,14 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import axios from 'axios';
 
 interface SendWhatsAppProps {
-  trigger: React.ReactNode;
+  triggerContent: React.ReactNode;
+  triggerVariant?: "default" | "outline" | "ghost" | "secondary" | "destructive" | "link";
+  triggerClassName?: string;
   phoneNumbers: string[];
   names?: string[];
   onSuccess?: () => void;
 }
 
 export const SendWhatsApp: React.FC<SendWhatsAppProps> = ({ 
-  trigger, 
+  triggerContent,
+  triggerVariant = "outline",
+  triggerClassName = "",
   phoneNumbers, 
   names = [],
   onSuccess 
@@ -69,8 +73,9 @@ export const SendWhatsApp: React.FC<SendWhatsAppProps> = ({
     <Modal
       open={isOpen}
       onOpenChange={setIsOpen}
-      triggerButtonContent={trigger}
-      triggerButtonVariant="ghost"
+      triggerButtonContent={triggerContent}
+      triggerButtonVariant={triggerVariant}
+      triggerClassName={triggerClassName}
       modelTitle="Send WhatsApp Message"
       modelDescription="Send a templated WhatsApp message via Twilio."
     >

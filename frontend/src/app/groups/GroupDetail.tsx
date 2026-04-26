@@ -106,12 +106,14 @@ export const GroupDetail: React.FC<GroupDetailProps> = ({ groupId, onBack }) => 
           </Button>
  
           <SendWhatsApp 
-            trigger={
-              <Button variant="outline" className="h-9 px-3 text-xs md:text-sm border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 transition-all">
+            triggerContent={
+              <>
                 <MessageSquare className="h-4 w-4 mr-1 md:mr-2" />
                 Send WhatsApp
-              </Button>
+              </>
             }
+            triggerVariant="outline"
+            triggerClassName="h-9 px-3 text-xs md:text-sm border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 transition-all"
             phoneNumbers={[...group.leaders, ...group.members].map(m => m.phone)}
             names={[...group.leaders, ...group.members].map(m => `${m.firstName} ${m.lastName}`)}
           />
