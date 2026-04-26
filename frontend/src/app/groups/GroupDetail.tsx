@@ -107,8 +107,8 @@ export const GroupDetail: React.FC<GroupDetailProps> = ({ groupId, onBack }) => 
  
           <SendWhatsApp 
             trigger={
-              <Button className="bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 group h-9 px-3 text-xs md:text-sm">
-                <MessageSquare className="h-4 w-4 mr-1 md:mr-2 group-hover:scale-110 transition-transform" />
+              <Button variant="outline" className="h-9 px-3 text-xs md:text-sm border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 transition-all">
+                <MessageSquare className="h-4 w-4 mr-1 md:mr-2" />
                 Send WhatsApp
               </Button>
             }

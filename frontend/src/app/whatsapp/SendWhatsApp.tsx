@@ -77,13 +77,13 @@ export const SendWhatsApp: React.FC<SendWhatsAppProps> = ({
       <div className="space-y-6 py-4">
         {/* Recipients */}
         <div className="space-y-2">
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
             Recipients ({phoneNumbers.length})
           </Label>
-          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border rounded-md bg-muted/30">
+          <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2.5 border rounded-lg bg-muted/20">
             {phoneNumbers.length > 0 ? (
               phoneNumbers.map((phone, i) => (
-                <Badge key={i} variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200">
+                <Badge key={i} variant="secondary" className="font-medium text-[10px] py-0 px-2 h-5">
                   {names[i] ? `${names[i]} (${phone})` : phone}
                 </Badge>
               ))
@@ -94,49 +94,47 @@ export const SendWhatsApp: React.FC<SendWhatsAppProps> = ({
         </div>
 
         {/* Template Info */}
-        <div className="grid gap-4 p-4 border rounded-lg bg-green-50/50 border-green-100">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="contentSid" className="text-green-800 font-medium">Template SID</Label>
+            <Label htmlFor="contentSid">Template SID</Label>
             <Input 
               id="contentSid" 
               value={contentSid} 
               onChange={(e) => setContentSid(e.target.value)}
-              className="bg-white border-green-200 focus-visible:ring-green-500"
+              className="font-mono text-xs"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 pt-1">
             <div className="space-y-2">
-              <Label htmlFor="var1" className="text-green-800 font-medium">Variable {"{1}"} (Date)</Label>
+              <Label htmlFor="var1" className="text-muted-foreground">Variable {"{1}"} (Date)</Label>
               <Input 
                 id="var1" 
                 value={var1} 
                 onChange={(e) => setVar1(e.target.value)}
                 placeholder="e.g. 12/1"
-                className="bg-white border-green-200 focus-visible:ring-green-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="var2" className="text-green-800 font-medium">Variable {"{2}"} (Time)</Label>
+              <Label htmlFor="var2" className="text-muted-foreground">Variable {"{2}"} (Time)</Label>
               <Input 
                 id="var2" 
                 value={var2} 
                 onChange={(e) => setVar2(e.target.value)}
                 placeholder="e.g. 3pm"
-                className="bg-white border-green-200 focus-visible:ring-green-500"
               />
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isSending}>
+          <Button variant="ghost" onClick={() => setIsOpen(false)} disabled={isSending}>
             Cancel
           </Button>
           <Button 
             onClick={handleSend} 
             disabled={isSending || phoneNumbers.length === 0}
-            className="bg-green-600 hover:bg-green-700 text-white min-w-[120px]"
+            className="min-w-[120px]"
           >
             {isSending ? (
               <>

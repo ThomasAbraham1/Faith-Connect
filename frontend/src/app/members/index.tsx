@@ -124,7 +124,7 @@ export const MembersPage = () => {
                 </Alert>
                 <SendWhatsApp 
                   trigger={
-                    <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                    <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800">
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Send WhatsApp to Selected
                     </Button>
@@ -179,7 +179,7 @@ export const MembersPage = () => {
                 </Alert>
                 <SendWhatsApp 
                   trigger={
-                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                    <Button variant="ghost" size="icon" className="text-green-600 hover:text-green-700 hover:bg-green-50/50">
                       <MessageSquare className="h-4 w-4" />
                     </Button>
                   }
