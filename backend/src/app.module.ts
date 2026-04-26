@@ -34,7 +34,16 @@ import { DashboardModule } from './dashboard/dashboard.module';
 
     ConfigModule.forRoot({ 
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
+    }),
+    TwilioModule.forRootAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        accountSid: configService.get('TWILIO_ACCOUNT_SID'),
+        authToken: configService.get('TWILIO_AUTH_TOKEN'),
+      }),
+      inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({ rootPath: join(__dirname, '..', 'public') }),
     MongooseModule.forRootAsync({

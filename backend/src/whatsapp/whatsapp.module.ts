@@ -4,12 +4,7 @@ import { WhatsappService } from './whatsapp.service';
 import { TwilioModule } from 'nestjs-twilio';
 
 @Module({
-  imports: [
-    TwilioModule.forRoot({
-      accountSid: process.env.TWILIO_ACCOUNT_SID,
-      authToken: process.env.TWILIO_AUTH_TOKEN,
-    }),
-  ],
+  imports: [],
   controllers: [WhatsappController],
   providers: [WhatsappService],
   exports: [WhatsappService],
