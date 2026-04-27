@@ -64,7 +64,7 @@ const MemoizedTableRow = React.memo(({ row }: { row: Row<any> }) => {
             data-state={row.getIsSelected() && "selected"}
         >
             {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""}>
+                <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/100 group-data-[state=selected]:bg-muted z-10" : ""}>
                     {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

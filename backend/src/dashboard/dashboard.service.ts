@@ -95,6 +95,19 @@ export class DashboardService {
       .sort({ createdAt: -1 })
       .limit(5);
 
+    // 4. Budgets (Ministries created)
+    const newMinistries = await this.groupModel
+      .find({ churchId, category: 'MINISTRY' })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // 5. New Expenses
+    const newExpenses = await this.expenseModel
+      .find({ churchId })
+      .populate('groupId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
     const activities = [
       ...newMembers.map(m => ({
         type: 'MEMBER',
@@ -114,6 +127,18 @@ export class DashboardService {
         type: 'EVENT',
         title: e.eventName,
         description: `Event created for ${new Date(e.eventDate).toLocaleDateString()}`,
+        timestamp: (e as any).createdAt,
+      })),
+      ...newMinistries.map(m => ({
+        type: 'BUDGET',
+        title: m.name,
+        description: `Ministry budget allocated: ₹${(m.allocatedBudget || 0).toLocaleString()}`,
+        timestamp: (m as any).createdAt,
+      })),
+      ...newExpenses.map(e => ({
+        type: 'EXPENSE',
+        title: `₹${e.amount.toLocaleString()} spent`,
+        description: `Expense logged for ${(e.groupId as any)?.name || 'Ministry'} - ${e.description}`,
         timestamp: (e as any).createdAt,
       })),
     ];  

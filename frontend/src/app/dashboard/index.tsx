@@ -8,7 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import api from "@/api/api"
-import { Users, UserPlus, TrendingUp, Calendar, ArrowUpRight, Cake, Heart, MailCheck, IndianRupee } from "lucide-react"
+import { Users, UserPlus, TrendingUp, Calendar, ArrowUpRight, Cake, Heart, MailCheck, IndianRupee, Wallet, Receipt } from "lucide-react"
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -216,10 +216,16 @@ export default function Dashboard() {
                   <div key={index} className="flex items-center">
                     <span className={`relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full items-center justify-center border font-bold ${
                       activity.type === 'MEMBER' ? 'bg-green-100 text-green-700' :
-                      activity.type === 'EMAIL' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                      activity.type === 'EMAIL' ? 'bg-blue-100 text-blue-700' : 
+                      activity.type === 'EVENT' ? 'bg-purple-100 text-purple-700' :
+                      activity.type === 'BUDGET' ? 'bg-cyan-100 text-cyan-700' :
+                      activity.type === 'EXPENSE' ? 'bg-rose-100 text-rose-700' : 'bg-muted text-muted-foreground'
                     }`}>
                       {activity.type === 'MEMBER' ? <Users className="h-4 w-4" /> :
-                       activity.type === 'EMAIL' ? <MailCheck className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
+                       activity.type === 'EMAIL' ? <MailCheck className="h-4 w-4" /> : 
+                       activity.type === 'EVENT' ? <Calendar className="h-4 w-4" /> :
+                       activity.type === 'BUDGET' ? <Wallet className="h-4 w-4" /> :
+                       activity.type === 'EXPENSE' ? <Receipt className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
                     </span>
                     <div className="ml-4 space-y-1">
                       <p className="text-sm font-medium leading-none">{activity.title}</p>
