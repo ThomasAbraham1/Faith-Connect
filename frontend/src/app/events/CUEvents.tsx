@@ -35,13 +35,16 @@ export const CUEvents = ({
     onOpenChange,
     onSuccess
 }: AddEventsProps) => {
-    const isEdit = !!data?.id;
+    const eventId = data?.id || (data as any)?._id;
+    const isEdit = !!eventId;
     const { setCroppedImage } = useCrop();
 
     // When editing, pre-load the existing cover image into the cropper preview
     useEffect(() => {
         if (isEdit && (data as any)?.coverImageUrl) {
-            setCroppedImage((data as any).coverImageUrl);
+            const url = (data as any).coverImageUrl;
+            const fullUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_APP_API_URL}${url}`;
+            setCroppedImage(fullUrl);
         } else if (!isEdit) {
             setCroppedImage(null);
         }
@@ -49,7 +52,7 @@ export const CUEvents = ({
 
     return (
         <CrudSheet<TEventsData>
-            id={data?.id}
+            id={eventId}
             title={trigger!}
             description={isEdit ? "Update event details" : "Create a new event"}
             trigger={trigger!}

@@ -53,7 +53,11 @@ function EventsPage() {
 
   const dataArray = React.useMemo(() => {
     const raw = data?.data?.data || data?.data || [];
-    return Array.isArray(raw) ? raw : [];
+    const list = Array.isArray(raw) ? raw : [];
+    return list.map((item: any) => ({
+      ...item,
+      id: item._id || item.id
+    }));
   }, [data]);
 
   if (isPending) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading events...</div>;
