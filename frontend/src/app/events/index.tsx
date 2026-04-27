@@ -11,7 +11,7 @@ import { CUEvents } from "./CUEvents";
 import type { TEventsData } from "./types/events.types";
 import { Alert } from "@/components/dynamic/Alert";
 import { Card, CardContent } from "@/components/ui/card";
-import { EventDetail } from "./EventDetail";
+import { useNavigate } from "react-router-dom";
 
 function EventsPage() {
   const userContext = useUser();
@@ -19,7 +19,7 @@ function EventsPage() {
   const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TEventsData | null>(null);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
     const selectedRowsObject = value as Record<string, Row<TEventsData>>
@@ -55,11 +55,6 @@ function EventsPage() {
     const raw = data?.data?.data || data?.data || [];
     return Array.isArray(raw) ? raw : [];
   }, [data]);
-
-  // --- Event Detail view ---
-  if (selectedEventId) {
-    return <EventDetail eventId={selectedEventId} onBack={() => setSelectedEventId(null)} />;
-  }
 
   if (isPending) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading events...</div>;
   if (error) return <div className="p-8 text-center text-destructive">Error loading events: {(error as Error).message}</div>;
@@ -112,7 +107,7 @@ function EventsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setSelectedEventId(row.original._id || row.original.id)}
+                  onClick={() => navigate(`/dashboard/Events/${row.original._id || row.original.id}/registrations`)}
                 >
                   <Eye className="h-4 w-4" />
                 </Button>

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, MapPin, Briefcase, ChevronRight, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { useParams } from 'react-router-dom';
 import { CUGroup } from "./CUGroup";
 
 interface GroupsListProps {
@@ -16,6 +17,7 @@ interface GroupsListProps {
 export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
   const [category, setCategory] = React.useState<GroupCategory>("REGION");
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+    const { category: URLcategory } = useParams();
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ["groups", category],

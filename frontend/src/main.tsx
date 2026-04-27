@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "./app/dashboard/index";
 import { AppLayout } from "./components/layout/AppLayout.tsx";
 import { appRoutes } from "./routes.tsx";
+import { EventDetailRoute } from "./app/events/EventDetailRoute.tsx";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToasterProvider } from "./providers/ToasterProvider.tsx";
 import { ContextProvider } from './context/Context.tsx'
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
           { 
             path: appRoutes.events.label,
             element: appRoutes.events.element,
+          },
+          {
+            path: `${appRoutes.events.label}/:eventId/registrations`,
+            element: <EventDetailRoute />,
           },
           {
             path: appRoutes.bulkEmail.label,

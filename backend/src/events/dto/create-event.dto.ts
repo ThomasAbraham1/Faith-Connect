@@ -32,4 +32,8 @@ export class CreateEventDto {
     @IsOptional()
     @IsDateString() // Using IsDateString because frontend sends JSON
     recurrenceEndDate?: Date
+
+    @IsOptional()
+    @IsBoolean()
+    registrationOpen?: boolean;
 }

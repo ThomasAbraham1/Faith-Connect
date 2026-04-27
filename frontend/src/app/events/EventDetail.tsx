@@ -49,7 +49,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     queryKey: ['event-registrations', eventId],
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}/registrations`);
-      return res.data || [];
+      return res.data.data.data || [];
     },
     enabled: activeTab === 'registrants',
   });
