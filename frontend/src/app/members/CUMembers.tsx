@@ -162,6 +162,18 @@ export const CUMembers = ({
                 editEndpoint={(id) => `/members/${id}`}
                 invalidateQueries={["membersData"]}
                 open={open ?? sheetOpen}
+                buildFormData={(data) => {
+                    const cleanData = { ...data };
+                    if (cleanData.householdId === 'none') {
+                        cleanData.householdId = null;
+                        cleanData.householdRole = null;
+                    }
+                    if (cleanData.householdId === '__new__') {
+                        // Don't send __new__ as an ID to the member update endpoint
+                        delete cleanData.householdId;
+                    }
+                    return cleanData;
+                }}
                 onOpenChange={(newOpen) => {
                     if (onOpenChange) {
                         onOpenChange(newOpen);
