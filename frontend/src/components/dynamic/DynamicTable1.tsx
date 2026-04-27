@@ -36,10 +36,31 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import * as lodash from "lodash";
 
+const FormattedCell = React.memo(({ value, columnKey }: { value: any, columnKey: string }) => {
+    let displayValue: any = value;
+    
+    const isDateKey = columnKey.toLowerCase().includes('date') || columnKey.endsWith('At');
+    if (isDateKey && typeof value === "string") {
+        const parsed = new Date(value);
+        if (!isNaN(parsed.getTime())) {
+            displayValue = parsed.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    } else if (typeof value === "string" && !["email", "userName", "household", "householdRole"].includes(columnKey)) {
+        displayValue = lodash.startCase(value);
+    }
+
+    return (
+        <div className="py-2 text-sm">{displayValue}</div>
+    );
+});
+
 export function DynamicTable1<T>({
     ref,
     data,
-    //   columns,
     columnOptions = { HideColumns: [] },
     getSelectedRowsObject,
     initialRowSelection = {},
@@ -65,6 +86,13 @@ export function DynamicTable1<T>({
     const [globalFilter, setGlobalFilter] = React.useState("");
 
     const priorityKeys = ["firstName", "lastName", "userName", "email", "phone", "eventName", "eventDate", "eventLocation", "status"];
+
+    const childrenRef = React.useRef(children);
+    React.useEffect(() => {
+        childrenRef.current = children;
+    }, [children]);
+
+    const hasChildren = !!children;
 
     const columns = React.useMemo(() => {
         let sortedKeys = data?.length > 0 ? Object.keys(data[0]).sort((a, b) => {
@@ -93,26 +121,7 @@ export function DynamicTable1<T>({
                     );
                 },
                 cell: ({ row }) => {
-                    const value = row.getValue(key);
-                    let displayValue: any = value;
-                    
-                    const isDateKey = key.toLowerCase().includes('date') || key.endsWith('At');
-                    if (isDateKey && typeof value === "string") {
-                        const parsed = new Date(value);
-                        if (!isNaN(parsed.getTime())) {
-                            displayValue = parsed.toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        }
-                    } else if (typeof value === "string" && !["email", "userName"].includes(key)) {
-                        displayValue = lodash.startCase(value);
-                    }
-
-                    return (
-                        <div className="py-2 text-sm">{displayValue}</div>
-                    );
+                    return <FormattedCell value={row.getValue(key)} columnKey={key} />;
                 },
             }
         });
@@ -140,7 +149,7 @@ export function DynamicTable1<T>({
             enableHiding: false,
         });
 
-        if (children) {
+        if (hasChildren) {
             cols.push({
                 accessorKey: "actions",
                 header: () => (
@@ -148,14 +157,17 @@ export function DynamicTable1<T>({
                         Actions
                     </div>
                 ),
-                cell: ({ row }) => (
-                    children(row)
-                ),
+                cell: ({ row }) => {
+                    if (childrenRef.current) {
+                        return childrenRef.current(row);
+                    }
+                    return null;
+                },
             });
         }
 
         return cols;
-    }, [data, children]);
+    }, [data, hasChildren]);
     // console.log(children, 'child found');
     //         }
     //         console.log('childrenArray', childrenArray)

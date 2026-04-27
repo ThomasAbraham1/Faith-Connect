@@ -48,7 +48,7 @@ export const HouseholdPanel: React.FC<HouseholdPanelProps> = ({ memberId }) => {
     queryKey: ['household', memberId],
     queryFn: async () => {
       const res = await api.get(`/households?memberId=${memberId}`);
-      return res.data || null;
+      return res.data?.data || null;
     },
   });
 
@@ -57,7 +57,7 @@ export const HouseholdPanel: React.FC<HouseholdPanelProps> = ({ memberId }) => {
     queryKey: ['households'],
     queryFn: async () => {
       const res = await api.get('/households');
-      return res.data || [];
+      return res.data?.data || [];
     },
     enabled: joinOpen,
   });
