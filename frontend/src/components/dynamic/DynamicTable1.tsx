@@ -58,10 +58,10 @@ const FormattedCell = React.memo(({ value, columnKey }: { value: any, columnKey:
     );
 });
 
-const MemoizedTableRow = React.memo(({ row }: { row: Row<any> }) => {
+const MemoizedTableRow = React.memo(({ row, isSelected }: { row: Row<any>, isSelected: boolean }) => {
     return (
         <TableRow
-            data-state={row.getIsSelected() && "selected"}
+            data-state={isSelected && "selected"}
         >
             {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/100 group-data-[state=selected]:bg-muted z-10" : ""}>
@@ -74,8 +74,8 @@ const MemoizedTableRow = React.memo(({ row }: { row: Row<any> }) => {
         </TableRow>
     );
 }, (prevProps, nextProps) => {
-    // Only re-render if selection state changes or underlying data reference changes
-    return prevProps.row.getIsSelected() === nextProps.row.getIsSelected() && 
+    // Re-render if selection state changes or underlying data reference changes
+    return prevProps.isSelected === nextProps.isSelected && 
            prevProps.row.original === nextProps.row.original;
 });
 
@@ -297,7 +297,7 @@ export function DynamicTable1<T>({
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <MemoizedTableRow key={row.id} row={row} />
+                                <MemoizedTableRow key={row.id} row={row} isSelected={row.getIsSelected()} />
                             ))
                         ) : (
                             <TableRow>
