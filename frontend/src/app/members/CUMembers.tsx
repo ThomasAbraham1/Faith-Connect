@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Modal } from "@/components/dynamic/Modal";
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FormDataType } from "./types/members.types";
 import api from "@/api/api";
 import { useCRUDSheet } from "@/context/CRUDSheetProvider";
@@ -62,6 +62,8 @@ export const CUMembers = ({
         }
     }, [isEdit, data]);
 
+    const queryClient = useQueryClient();
+
     // After member create/edit, handle household assignment
     const handleMemberSaved = async (memberId: string) => {
         const targetId = memberId || data?.id;
@@ -82,6 +84,9 @@ export const CUMembers = ({
                 await api.patch(`/members/${targetId}`, { householdRole });
                 toast.success('Household updated!');
             }
+            // Refresh data so the table and dropdowns see the new household assignment
+            queryClient.invalidateQueries({ queryKey: ["membersData"] });
+            queryClient.invalidateQueries({ queryKey: ["households"] });
         } catch (e) {
             toast.error('Member saved, but household assignment failed');
         }
