@@ -111,6 +111,7 @@ export class MembersController {
   )
   async update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
     const churchId = req.user.church._id;
+    console.log('updateMemberDto', updateMemberDto)
     const existingMember = await this.membersService.findOne(id);
     if (!existingMember) throw new NotFoundException('Member not found');
 

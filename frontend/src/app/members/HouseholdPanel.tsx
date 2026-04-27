@@ -92,6 +92,7 @@ export const HouseholdPanel: React.FC<HouseholdPanelProps> = ({ memberId }) => {
       await api.patch(`/members/${memberId}`, { householdRole: selectedRole });
       toast.success('Joined family!');
       queryClient.invalidateQueries({ queryKey: ['household', memberId] });
+      queryClient.invalidateQueries({ queryKey: ['membersData'] });
       setJoinOpen(false);
     },
     onError: () => toast.error('Failed to join family'),
