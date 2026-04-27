@@ -162,7 +162,7 @@ export const CUMembers = ({
                 editEndpoint={(id) => `/members/${id}`}
                 invalidateQueries={["membersData"]}
                 open={open ?? sheetOpen}
-                buildFormData={(data) => {
+                preSubmitTransform={(data) => {
                     const cleanData = { ...data };
                     if (cleanData.householdId === 'none') {
                         cleanData.householdId = null;

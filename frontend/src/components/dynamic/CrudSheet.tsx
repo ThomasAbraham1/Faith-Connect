@@ -58,7 +58,10 @@ type CrudSheetProps<T extends FieldValues> = {
     children: (form: UseFormReturn<T>) => ReactNode;
 
     /** Optional: customise how FormData is built (advanced) */
-    buildFormData?: (data: T, dirty: Partial<T>) => FormData;
+    buildFormData?: (data: T, dirty: Partial<T>) => FormData | T;
+
+    /** Optional: transform the data object before it's processed into FormData/JSON */
+    preSubmitTransform?: (data: T) => T;
 
     /** Optional: custom success / error handlers */
     onSuccess?: (response?: any) => void;
@@ -87,6 +90,7 @@ export function CrudSheet<T extends FieldValues>({
     onOpenChange,
     children,
     buildFormData,
+    preSubmitTransform,
     onSuccess,
     onError,
     suppressToast = false,
@@ -173,8 +177,12 @@ export function CrudSheet<T extends FieldValues>({
 
 
     const onSubmit = async (data: T) => {
-        console.log(data)
-        const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
+        // Allow custom transformation before building the final request payload
+        const transformedData = preSubmitTransform ? preSubmitTransform(data) : data;
+        
+        const processedData = buildFormData 
+            ? buildFormData(transformedData, dirtyFields as Partial<T>) 
+            : defaultBuildData(transformedData, dirtyFields as Partial<T>);
 
         try {
             await mutation.mutateAsync(processedData);
