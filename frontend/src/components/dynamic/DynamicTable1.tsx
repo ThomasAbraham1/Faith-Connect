@@ -58,6 +58,27 @@ const FormattedCell = React.memo(({ value, columnKey }: { value: any, columnKey:
     );
 });
 
+const MemoizedTableRow = React.memo(({ row }: { row: Row<any> }) => {
+    return (
+        <TableRow
+            data-state={row.getIsSelected() && "selected"}
+        >
+            {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""}>
+                    {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                    )}
+                </TableCell>
+            ))}
+        </TableRow>
+    );
+}, (prevProps, nextProps) => {
+    // Only re-render if selection state changes or underlying data reference changes
+    return prevProps.row.getIsSelected() === nextProps.row.getIsSelected() && 
+           prevProps.row.original === nextProps.row.original;
+});
+
 export function DynamicTable1<T>({
     ref,
     data,
@@ -276,19 +297,7 @@ export function DynamicTable1<T>({
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className={cell.column.id === "actions" ? "sticky right-0 bg-card group-hover:bg-muted/50 group-data-[state=selected]:bg-muted z-10" : ""}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
+                                <MemoizedTableRow key={row.id} row={row} />
                             ))
                         ) : (
                             <TableRow>
