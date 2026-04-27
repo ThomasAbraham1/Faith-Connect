@@ -161,7 +161,7 @@ export const MembersPage = () => {
             data={tableData}
             getSelectedRowsObject={getSelectedRowsObject}
             columnOptions={{
-              HideColumns: ["id", "churchId", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth", "anniversaryDate", "userName"]
+              HideColumns: ["id", "churchId", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth", "anniversaryDate", "userName", "rawHouseholdId", "rawHouseholdRole"]
             }}
           >
             {(row) =>
