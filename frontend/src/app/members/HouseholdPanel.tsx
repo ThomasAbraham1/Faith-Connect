@@ -31,6 +31,13 @@ const ROLE_COLORS: Record<string, string> = {
   DEPENDENT: 'bg-amber-500/10 text-amber-600 border-amber-200',
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  PRIMARY: 'Head of Family',
+  SPOUSE: 'Spouse',
+  CHILD: 'Child',
+  DEPENDENT: 'Dependent',
+};
+
 interface HouseholdPanelProps {
   memberId: string;
 }
@@ -237,7 +244,7 @@ export const HouseholdPanel: React.FC<HouseholdPanelProps> = ({ memberId }) => {
                 variant="outline"
                 className={`text-[10px] px-1 py-0 ${ROLE_COLORS[member.householdRole] || ''}`}
               >
-                {member.householdRole || 'Member'}
+                {ROLE_LABELS[member.householdRole] || 'Member'}
               </Badge>
             </div>
             {member._id !== memberId && (
