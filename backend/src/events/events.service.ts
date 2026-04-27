@@ -38,8 +38,8 @@ export class EventsService {
   async findPublic(id: string) {
     const event = await this.eventsModel.findById(id).lean();
     if (!event) throw new NotFoundException('Event not found');
-    const church = await this.churchModel.findById(event.churchId).select('name').lean();
-    return { ...event, churchName: church?.name };
+    const church = await this.churchModel.findById(event.churchId).select('churchName').lean();
+    return { ...event, churchName: church?.churchName };
   }
 
   update(id: string, updateEventDto: UpdateEventDto) {
