@@ -85,7 +85,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
           <div className="relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
-
+            
             <div className="relative p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
               {/* Profile Image with Ring */}
               <div className="relative">
@@ -108,7 +108,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
                   <h2 className="text-3xl font-black tracking-tight text-foreground">{fullName}</h2>
                   <p className="text-primary/70 font-medium tracking-wide">@{userName}</p>
                 </div>
-
+                
                 <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
                   {spiritualStatus && (
                     <Badge variant="outline" className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusColor}`}>
@@ -144,7 +144,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
                 <Card className="border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
                   <div className="p-4 bg-muted/20 border-b border-border/20">
                     <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
-                      <Phone className="h-3 w-3" /> Contact Information
+                       <Phone className="h-3 w-3" /> Contact Information
                     </h3>
                   </div>
                   <CardContent className="p-4 space-y-1 divide-y divide-border/10">
@@ -158,20 +158,20 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
                 <Card className="border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
                   <div className="p-4 bg-muted/20 border-b border-border/20">
                     <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
-                      <Calendar className="h-3 w-3" /> Important Dates
+                       <Calendar className="h-3 w-3" /> Important Dates
                     </h3>
                   </div>
                   <CardContent className="p-4 space-y-1 divide-y divide-border/10">
-                    <InfoRow
-                      icon={Cake}
-                      label="Date of Birth"
-                      value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null}
+                    <InfoRow 
+                      icon={Cake} 
+                      label="Date of Birth" 
+                      value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null} 
                       subValue={dateOfBirth ? `${new Date().getFullYear() - new Date(dateOfBirth).getFullYear()} Years Old` : undefined}
                     />
-                    <InfoRow
-                      icon={Heart}
-                      label="Marriage Anniversary"
-                      value={anniversaryDate ? new Date(anniversaryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null}
+                    <InfoRow 
+                      icon={Heart} 
+                      label="Marriage Anniversary" 
+                      value={anniversaryDate ? new Date(anniversaryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null} 
                     />
                   </CardContent>
                 </Card>
@@ -180,13 +180,13 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
                 <Card className="md:col-span-2 border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
                   <div className="p-4 bg-muted/20 border-b border-border/20">
                     <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
-                      <Users className="h-3 w-3" /> Parents & Lineage
+                       <Users className="h-3 w-3" /> Parents & Lineage
                     </h3>
                   </div>
                   <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 divide-y md:divide-y-0 divide-border/10">
                     <InfoRow icon={User2} label="Father's Name" value={fatherName} />
                     <div className="md:border-l md:border-border/10 md:pl-8">
-                      <InfoRow icon={User2} label="Mother's Name" value={motherName} />
+                       <InfoRow icon={User2} label="Mother's Name" value={motherName} />
                     </div>
                   </CardContent>
                 </Card>
@@ -194,21 +194,21 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
             </TabsContent>
 
             <TabsContent value="family" className="mt-6 animate-in slide-in-from-bottom-4 duration-500 pb-4">
-              <div className="w-full">
+               <div className="w-full">
                 {memberId ? (
                   <HouseholdPanel memberId={memberId} />
                 ) : (
                   <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 rounded-3xl border border-dashed border-border/50 bg-muted/20">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                      <Home className="h-8 w-8 text-muted-foreground/30" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-muted-foreground">No Family Data</p>
-                      <p className="text-xs text-muted-foreground/60 max-w-[200px]">This member hasn't been assigned to a family yet.</p>
-                    </div>
+                     <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                        <Home className="h-8 w-8 text-muted-foreground/30" />
+                     </div>
+                     <div className="space-y-1">
+                        <p className="font-bold text-muted-foreground">No Family Data</p>
+                        <p className="text-xs text-muted-foreground/60 max-w-[200px]">This member hasn't been assigned to a family yet.</p>
+                     </div>
                   </div>
                 )}
-              </div>
+               </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -220,17 +220,17 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
               <Loader2 className="h-4 w-4 animate-spin mr-2" /> Initializing...
             </Button>
           ) : data?.data?.data?.signature ? (
-            <Button
-              className="rounded-xl px-8 h-12 gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+            <Button 
+              className="rounded-xl px-8 h-12 gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95" 
               onClick={() => window.print()}
             >
               <Printer className="h-5 w-5" /> Print Membership Certificate
             </Button>
           ) : (
-            <Modal
-              triggerButtonContent={<><Printer className="h-5 w-5 mr-2" /> Generate Certificate</>}
-              modelTitle="Certificate Generation"
-              modelDescription="A pastor's signature is required to generate this official document."
+            <Modal 
+              triggerButtonContent={<><Printer className="h-5 w-5 mr-2" /> Generate Certificate</>} 
+              modelTitle="Certificate Generation" 
+              modelDescription="A pastor's signature is required to generate this official document." 
               triggerButtonVariant="default"
               triggerClassName="rounded-xl px-8 h-12 gap-2 shadow-lg shadow-primary/20"
             >
@@ -250,72 +250,72 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
             .no-signature { text-align: center; color: #666; font-style: italic; }
           }
         `}</style>
-        <div className="p-0 border-[10px] border-double border-gray-200 min-h-[90vh] p-12 relative">
-          {/* Certificate Header */}
-          <div className="text-center mb-12 border-b-2 border-primary/20 pb-8">
-            <h1 className="text-5xl font-black text-gray-900 uppercase tracking-[0.2em] mb-4">{churchName}</h1>
-            <div className="flex items-center justify-center gap-4 text-primary/60 mb-6">
-              <div className="h-px w-12 bg-current" />
-              <p className="text-sm font-bold uppercase tracking-widest">Certificate of Membership</p>
-              <div className="h-px w-12 bg-current" />
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-wider">{churchName}</h1>
+          <p className="text-lg text-gray-600 italic mt-2">Welcoming You to Our Family in Faith</p>
+        </div>
+        <div className="p-0">
+          <h2 className="text-2xl font-semibold text-center mb-8">Church Membership Form</h2>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">First Name</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{firstName || "N/A"}</p>
             </div>
-            <p className="text-lg text-gray-500 italic max-w-lg mx-auto">
-              "For as the body is one and has many members, but all the members of that one body, being many, are one body, so also is Christ."
-            </p>
-          </div>
-
-          {/* Member Content */}
-          <div className="space-y-10 py-6">
-            <div className="text-center space-y-6">
-              <p className="text-xl text-gray-600">This is to certify that</p>
-              <h3 className="text-4xl font-black text-gray-900 underline decoration-primary/30 decoration-4 underline-offset-8">
-                {firstName} {lastName}
-              </h3>
-              <p className="text-xl text-gray-600">is a recognized member of our congregation</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-16 gap-y-10 mt-12 max-w-2xl mx-auto">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Date of Birth</label>
-                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">
-                  {dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : "N/A"}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Contact Number</label>
-                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">{phone || "N/A"}</p>
-              </div>
-              <div className="col-span-2 space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Residential Address</label>
-                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">{address || "N/A"}</p>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Last Name</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{lastName || "N/A"}</p>
             </div>
           </div>
-
-          {/* Signatures */}
-          <div className="absolute bottom-16 left-12 right-12 grid grid-cols-2 gap-20">
-            <div className="text-center space-y-4">
-              <div className="h-20 border-b-2 border-gray-300 flex items-end justify-center pb-2 italic text-gray-400">
-                (Member Signature)
-              </div>
-              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Member's Name</p>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Father's Name</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{fatherName || "N/A"}</p>
             </div>
-
-            <div className="text-center space-y-4">
-              <div className="h-20 border-b-2 border-gray-300 flex items-center justify-center">
-                {data?.data?.data?.signature?.signaturePicPath ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Mother's Name</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{motherName || "N/A"}</p>
+            </div>
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700">Address</label>
+            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{address || "N/A"}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{dateOfBirth || "N/A"}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{phone || "N/A"}</p>
+            </div>
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700">Spiritual Status</label>
+            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{spiritualStatus || "N/A"}</p>
+          </div>
+          <div className="mt-12 grid grid-cols-2 gap-8">
+            <div>
+              <div className="border-b border-gray-400 mt-4 mb-3 h-16" />
+              <p className="text-center text-sm font-medium">Member's Signature</p>
+              <p className="text-center text-sm mt-3">Date: ____________________</p>
+            </div>
+            <div>
+              <div className="border-b border-gray-400 mt-4 mb-3 h-16 flex items-center justify-center">
+                {data?.data?.data?.signature?.signaturePicName ? (
                   <img
-                    src={data.data.data.signature.signaturePicPath.startsWith('http')
+                    src={data.data.data.signature.signaturePicPath?.startsWith('http')
                       ? data.data.data.signature.signaturePicPath
-                      : `${import.meta.env.VITE_APP_API_URL}${data.data.data.signature.signaturePicPath}`}
+                      : `${import.meta.env.VITE_APP_API_URL}/signatures/${data.data.data.signature.signaturePicName}`}
                     alt="Pastor's Signature"
-                    className="max-h-16 object-contain"
+                    className="signature-img"
                   />
                 ) : (
-                  <p className="text-xs italic text-gray-300">Pending Authorization</p>
+                  <p className="no-signature">No signature available</p>
                 )}
               </div>
-              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Authorized Pastor</p>
+              <p className="text-center text-sm font-medium">Pastor's Signature</p>
+              <p className="text-center text-sm mt-3">Date: ____________________</p>
             </div>
           </div>
         </div>

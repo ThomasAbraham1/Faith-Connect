@@ -11,14 +11,15 @@ import { Modal } from "@/components/dynamic/Modal";
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { FormDataType } from "./types/members.types";
 import api from "@/api/api";
+import { useCRUDSheet } from "@/context/CRUDSheetProvider";
 import { Button } from "@/components/ui/button";
 import { AvatarUploadButton, useAvatarUploadHandler } from "@/components/dynamic/Cropper";
 import { useCrop } from "@/context/CropProvider";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Home } from "lucide-react";
-import type { FormDataType, Member } from "./types/members.types";
 
 type roleRecordType = {
     _id: string;
@@ -26,12 +27,14 @@ type roleRecordType = {
     Permissions: string[]
 }
 
+// Optional: pass member data when editing
 type AddMembersProps = {
-    data?: Member | null;
+    data?: FormDataType | null;
     triggerVariant?: "default" | "outline" | "ghost";
-    trigger?: string; 
+    trigger?: string; // Allow override
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    // onSuccess?: () => void;
 };
 
 export const CUMembers = ({
@@ -43,51 +46,84 @@ export const CUMembers = ({
 }: AddMembersProps) => {
     const isEdit = !!data?.id;
     const { setCroppedImage } = useCrop();
+    const [selectedHousehold, setSelectedHousehold] = useState('');
+    const [householdRole, setHouseholdRole] = useState('SPOUSE');
+    const [familyName, setFamilyName] = useState('');
+
+    // Pre-populate household state when editing
+    useEffect(() => {
+        if (isEdit) {
+            setSelectedHousehold((data as any)?.rawHouseholdId || 'none');
+            setHouseholdRole((data as any)?.rawHouseholdRole || 'SPOUSE');
+            setFamilyName('');
+        } else {
+            setSelectedHousehold('none');
+            setHouseholdRole('SPOUSE');
+            setFamilyName('');
+        }
+    }, [isEdit, data]);
 
     const queryClient = useQueryClient();
 
     // After member create/edit, handle household assignment
-    const handleMemberSaved = async (memberId: string, formValues: FormDataType) => {
+    const handleMemberSaved = async (memberId: string) => {
         const targetId = memberId || data?.id;
-        const { householdId, householdRole, newFamilyName } = formValues;
+        if (!targetId) return;
 
-        if (!targetId || !householdId || householdId === 'none') {
-            // Detach if "none" is selected explicitly
-            if (householdId === 'none' && data?.rawHouseholdId) {
-                try {
-                    await api.patch(`/households/${data.rawHouseholdId}/members`, { removeMembers: [targetId] });
-                    queryClient.invalidateQueries({ queryKey: ["membersData"] });
-                    queryClient.invalidateQueries({ queryKey: ["households"] });
-                } catch (e) {
-                    console.error('Detach Error:', e);
-                }
-            }
-            toast.success(isEdit ? 'Member updated successfully' : 'Member created successfully');
-            return;
-        }
+        const oldHouseholdId = (data as any)?.rawHouseholdId;
 
         try {
-            if (householdId === '__new__') {
-                if (!newFamilyName?.trim()) return;
-                // Create the household — this member becomes PRIMARY automatically
-                await api.post('/households', { name: newFamilyName.trim(), primaryContactId: targetId });
-                // Also save the role label for this member
-                await api.patch(`/members/${targetId}`, { householdRole });
-            } else {
-                // Assign to existing household
-                await api.patch(`/households/${householdId}/members`, { addMembers: [targetId] });
+            // Case 1: No Household
+            if (!selectedHousehold || selectedHousehold === 'none') {
+                if (oldHouseholdId && oldHouseholdId !== 'none') {
+                    // Remove from old household, unsetting ID and Role
+                    await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
+                }
+            } 
+            // Case 2: Create New Household
+            else if (selectedHousehold === '__new__') {
+                if (!familyName.trim()) {
+                    toast.error("Family name is required");
+                    return;
+                }
+                
+                // Create household (this automatically assigns targetId as PRIMARY)
+                const res = await api.post('/households', { name: familyName.trim(), primaryContactId: targetId });
+                const newHouseholdId = res.data?.data?._id || res.data?._id;
+                
+                // If they were in an old household, remove them
+                if (oldHouseholdId && oldHouseholdId !== newHouseholdId && oldHouseholdId !== 'none') {
+                    await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
+                }
+            } 
+            // Case 3: Join / Update Existing Household
+            else {
+                // If they are changing households, remove from old
+                if (oldHouseholdId && oldHouseholdId !== selectedHousehold && oldHouseholdId !== 'none') {
+                    await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
+                }
+                
+                // Add to new household
+                await api.patch(`/households/${selectedHousehold}/members`, { addMembers: [targetId] });
+                
+                // Also update the role
                 await api.patch(`/members/${targetId}`, { householdRole });
             }
-            
+
             // Refresh data
             queryClient.invalidateQueries({ queryKey: ["membersData"] });
             queryClient.invalidateQueries({ queryKey: ["households"] });
+            queryClient.invalidateQueries({ queryKey: ["household", targetId] });
             
             toast.success(isEdit ? 'Member updated successfully' : 'Member created successfully');
         } catch (e: any) {
             console.error('Household Assignment Error:', e);
             toast.error(e?.response?.data?.message || 'Member saved, but household assignment failed');
         }
+
+        setSelectedHousehold('none');
+        setHouseholdRole('SPOUSE');
+        setFamilyName('');
     };
 
     useEffect(() => {
@@ -137,46 +173,26 @@ export const CUMembers = ({
                 multipart={true}
                 triggerVariant={triggerVariant}
                 defaultValues={useMemo(() => ({
-                    firstName: data?.firstName,
                     userName: data?.userName,
                     password: data?.password,
                     phone: data?.phone,
                     dateOfBirth: data?.dateOfBirth,
-                    roles: data?.role || (rolesData?.data?.[0]?.name),
                     anniversaryDate: data?.anniversaryDate,
-                    profilePic: data?.profilePicUrl,
+                    spiritualStatus: data?.spiritualStatus,
+                    roles: data?.roles,
                     fatherName: data?.fatherName,
                     motherName: data?.motherName,
+                    firstName: data?.firstName,
                     lastName: data?.lastName,
                     email: data?.email,
                     address: data?.address,
-                    householdId: data?.rawHouseholdId || 'none',
-                    householdRole: data?.rawHouseholdRole || 'SPOUSE',
-                    newFamilyName: '',
-                }), [data, rolesData])}
+                }), [data])}
 
                 addEndpoint="/members"
                 editEndpoint={(id) => `/members/${id}`}
                 invalidateQueries={["membersData"]}
                 open={open ?? sheetOpen}
-                preSubmitTransform={(data) => {
-                    const cleanData = { ...data };
-                    
-                    // Fix: If profilePic is a string (URL), don't send it back to server
-                    if (typeof cleanData.profilePic === 'string') {
-                        delete cleanData.profilePic;
-                    }
-
-                    if (cleanData.householdId === 'none') {
-                        cleanData.householdId = null;
-                        cleanData.householdRole = null;
-                    }
-                    if (cleanData.householdId === '__new__') {
-                        // Don't send __new__ as an ID to the member update endpoint
-                        delete cleanData.householdId;
-                    }
-                    return cleanData;
-                }}
+                suppressToast={true}
                 onOpenChange={(newOpen) => {
                     if (onOpenChange) {
                         onOpenChange(newOpen);
@@ -184,9 +200,9 @@ export const CUMembers = ({
                         setSheetOpen(newOpen);
                     }
                 }}
-                onSuccess={async (response?: any, formValues?: any) => {
+                onSuccess={async (response?: any) => {
                     const newMemberId = response?.data?._id || response?.data?.data?._id || data?.id;
-                    if (newMemberId) await handleMemberSaved(newMemberId, formValues);
+                    if (newMemberId) await handleMemberSaved(newMemberId);
                 }}
             >
 
@@ -455,94 +471,64 @@ export const CUMembers = ({
 
                                 <div className="grid gap-2">
                                     <Label>Family</Label>
-                                    <Controller
-                                        name="householdId"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select
-                                                value={field.value || 'none'}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="No household assigned" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">— No household —</SelectItem>
-                                                    <SelectItem value="__new__">✦ Create new family for this member</SelectItem>
-                                                    {(householdsData || []).map((h: any) => (
-                                                        <SelectItem key={h._id} value={h._id}>
-                                                            {h.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
+                                    <Select
+                                        value={selectedHousehold}
+                                        onValueChange={setSelectedHousehold}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="No household assigned" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— No household —</SelectItem>
+                                            <SelectItem value="__new__">✦ Create new family for this member</SelectItem>
+                                            {(householdsData || []).map((h: any) => (
+                                                <SelectItem key={h._id} value={h._id}>
+                                                    {h.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
 
                                 {/* Create new family: show name input + role */}
-                                {watch('householdId') === '__new__' && (
+                                {selectedHousehold === '__new__' && (
                                     <div className="grid gap-3">
                                         <div className="grid gap-2">
                                             <Label>Family Name</Label>
                                             <Input
                                                 placeholder="e.g. The Abraham Family"
-                                                {...register('newFamilyName')}
+                                                value={familyName}
+                                                onChange={(e) => setFamilyName(e.target.value)}
                                             />
                                         </div>
-                                        <div className="grid gap-2">
-                                            <Label>My Role in This Family</Label>
-                                            <Controller
-                                                name="householdRole"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <RadioGroup
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
-                                                        className="flex gap-4 flex-wrap"
-                                                    >
-                                                        {['PRIMARY', 'SPOUSE', 'CHILD', 'DEPENDENT'].map((role) => (
-                                                            <div key={role} className="flex items-center gap-2">
-                                                                <RadioGroupItem value={role} id={`new-role-${role}`} />
-                                                                <Label htmlFor={`new-role-${role}`} className="font-normal capitalize cursor-pointer">
-                                                                    {role === 'PRIMARY' ? 'Head of Family' : role.charAt(0) + role.slice(1).toLowerCase()}
-                                                                </Label>
-                                                            </div>
-                                                        ))}
-                                                    </RadioGroup>
-                                                )}
-                                            />
-                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            The family will be created with this member as <strong>Head of Family</strong> automatically.
+                                        </p>
                                     </div>
                                 )}
 
-                                {/* Existing family selected: just show role picker */}
-                                {watch('householdId') && watch('householdId') !== 'none' && watch('householdId') !== '__new__' && (
+                                {/* Assign to existing household: show role picker */}
+                                {selectedHousehold && selectedHousehold !== 'none' && selectedHousehold !== '__new__' && (
                                     <div className="grid gap-2">
-                                        <Label>My Role in This Family</Label>
-                                        <Controller
-                                            name="householdRole"
-                                            control={control}
-                                            render={({ field }) => (
-                                                <RadioGroup
-                                                    value={field.value}
-                                                    onValueChange={field.onChange}
-                                                    className="flex gap-4 flex-wrap"
-                                                >
-                                                    {['PRIMARY', 'SPOUSE', 'CHILD', 'DEPENDENT'].map((role) => (
-                                                        <div key={role} className="flex items-center gap-2">
-                                                            <RadioGroupItem value={role} id={`role-${role}`} />
-                                                            <Label htmlFor={`role-${role}`} className="font-normal capitalize cursor-pointer">
-                                                                {role === 'PRIMARY' ? 'Head of Family' : role.charAt(0) + role.slice(1).toLowerCase()}
-                                                            </Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            )}
-                                        />
+                                        <Label>Role in Family</Label>
+                                        <RadioGroup
+                                            value={householdRole}
+                                            onValueChange={setHouseholdRole}
+                                            className="flex gap-4 flex-wrap"
+                                        >
+                                            {['SPOUSE', 'CHILD', 'DEPENDENT'].map((role) => (
+                                                <div key={role} className="flex items-center gap-2">
+                                                    <RadioGroupItem value={role} id={`role-${role}`} />
+                                                    <Label htmlFor={`role-${role}`} className="font-normal capitalize cursor-pointer">
+                                                        {role.charAt(0) + role.slice(1).toLowerCase()}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
                                     </div>
                                 )}
+
                             </div>
                         </>
 

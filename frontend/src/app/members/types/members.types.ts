@@ -15,9 +15,6 @@ export type FormDataType = {
     motherName: string;
     address: string;
     signature: Blob;
-    householdId?: string | null;
-    householdRole?: string;
-    newFamilyName?: string;
 };
 
 export interface membersResponseObject {
