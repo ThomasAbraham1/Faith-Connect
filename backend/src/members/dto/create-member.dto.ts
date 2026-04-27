@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { Signature } from './../../schemas/Signature.schema';
 import { SignatureDto } from './signature.dto';
-import { IsArray, IsEnum } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
 
 // interface Role {
 //   name: string;
@@ -39,5 +39,13 @@ export class CreateMemberDto {
   roles: Role[];
   spiritualStatus: SpiritualStatus
   profilePic: profilePic;
-  signature: SignatureDto
+  signature: SignatureDto;
+
+  @IsOptional()
+  @IsString()
+  householdRole?: string;
+
+  @IsOptional()
+  @IsString()
+  householdId?: string;
 }

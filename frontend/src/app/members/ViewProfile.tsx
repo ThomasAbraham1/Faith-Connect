@@ -24,23 +24,23 @@ const SPIRITUAL_STATUS_COLOR: Record<string, string> = {
   UNDECIDED: 'bg-amber-500/10 text-amber-600 border-amber-200',
 };
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value?: string | null }) => {
-  if (!value) return null;
+const InfoRow = ({ icon: Icon, label, value, subValue }: { icon: any; label: string; value?: string | null; subValue?: string }) => {
+  if (!value && !subValue) return null;
   return (
-    <div className="flex items-start gap-3 py-2">
-      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
-        <Icon className="h-4 w-4 text-muted-foreground" />
+    <div className="flex items-center gap-4 py-3 group">
+      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+        <Icon className="h-5 w-5 text-primary/70" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm font-medium truncate">{value}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-0.5">{label}</p>
+        <p className="text-sm font-semibold text-foreground truncate">{value || 'Not provided'}</p>
+        {subValue && <p className="text-[10px] text-muted-foreground mt-0.5">{subValue}</p>}
       </div>
     </div>
   );
 };
 
 export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchName, spiritualStatus, dateOfBirth, address, fatherName, motherName, lastName, firstName, email, anniversaryDate }: any) => {
-  const [open, setOpen] = React.useState(false);
   const [userId, setUserId] = useState(undefined)
 
   const { data, error, isPending } = useQuery({
@@ -78,108 +78,165 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
   const statusColor = SPIRITUAL_STATUS_COLOR[spiritualStatus] || 'bg-muted text-muted-foreground border-border';
 
   return (
-    <>
-      {/* ── PREMIUM PROFILE CARD ── */}
-      <div className="space-y-5 print:hidden">
-
-        {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/5 to-background border border-border/50">
-          {/* Decorative background rings */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-primary/10 blur-2xl" />
-          <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-primary/5 blur-xl" />
-
-          <div className="relative p-6 flex items-start gap-5">
-            <Avatar className="h-20 w-20 border-4 border-background shadow-lg flex-shrink-0">
+    <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in duration-300">
+      {/* ── MODERN HERO HEADER ── */}
+      <div className="relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
+        {/* Background Accent */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+        
+        <div className="relative p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
+          {/* Profile Image with Ring */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl scale-95" />
+            <Avatar className="h-28 w-28 border-4 border-background shadow-2xl relative z-10">
               <AvatarImage
                 src={profilePicUrl?.startsWith('http') ? profilePicUrl : `${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
                 alt={fullName}
+                className="object-cover"
               />
-              <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">{initials}</AvatarFallback>
+              <AvatarFallback className="text-3xl font-black bg-gradient-to-br from-primary/20 to-primary/5 text-primary">
+                {initials}
+              </AvatarFallback>
             </Avatar>
+          </div>
 
-            <div className="flex-1 min-w-0 pt-1">
-              <h2 className="text-xl font-bold tracking-tight truncate">{fullName}</h2>
-              <p className="text-sm text-muted-foreground">@{userName}</p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {spiritualStatus && (
-                  <Badge variant="outline" className={`text-xs ${statusColor}`}>
-                    <Star className="h-3 w-3 mr-1" />
-                    {spiritualStatus.charAt(0) + spiritualStatus.slice(1).toLowerCase()}
-                  </Badge>
-                )}
-              </div>
+          {/* Name & Quick Info */}
+          <div className="flex-1 text-center md:text-left space-y-2">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-foreground">{fullName}</h2>
+              <p className="text-primary/70 font-medium tracking-wide">@{userName}</p>
+            </div>
+            
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+              {spiritualStatus && (
+                <Badge variant="outline" className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${statusColor}`}>
+                  <Star className="h-3 w-3 mr-1.5 fill-current" />
+                  {spiritualStatus}
+                </Badge>
+              )}
+              {churchName && (
+                <Badge variant="outline" className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-muted/50 border-border/50 text-muted-foreground">
+                  <Home className="h-3 w-3 mr-1.5" />
+                  {churchName}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="personal" className="gap-2 text-xs">
-              <User2 className="h-3.5 w-3.5" /> Personal Info
-            </TabsTrigger>
-            <TabsTrigger value="family" className="gap-2 text-xs">
-              <Home className="h-3.5 w-3.5" /> Family
-            </TabsTrigger>
-          </TabsList>
+      {/* ── CONTENT GRID ── */}
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/50 rounded-2xl h-14 border border-border/30">
+          <TabsTrigger value="details" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300 gap-2 font-bold text-xs uppercase tracking-wider">
+            <User2 className="h-4 w-4" /> Member Details
+          </TabsTrigger>
+          <TabsTrigger value="family" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-300 gap-2 font-bold text-xs uppercase tracking-wider">
+            <Users className="h-4 w-4" /> Family Circle
+          </TabsTrigger>
+        </TabsList>
 
-          {/* PERSONAL INFO TAB */}
-          <TabsContent value="personal" className="mt-4 space-y-3">
-            <Card className="border-border/50 bg-card/50">
-              <CardContent className="pt-4 pb-2 divide-y divide-border/50">
-                <InfoRow icon={Phone} label="Phone Number" value={phone} />
+        <TabsContent value="details" className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Contact Info Card */}
+            <Card className="border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
+              <div className="p-4 bg-muted/20 border-b border-border/20">
+                <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
+                   <Phone className="h-3 w-3" /> Contact Information
+                </h3>
+              </div>
+              <CardContent className="p-4 space-y-1 divide-y divide-border/10">
+                <InfoRow icon={Phone} label="Primary Contact" value={phone} />
                 <InfoRow icon={Mail} label="Email Address" value={email} />
-                <InfoRow icon={MapPin} label="Address" value={address} />
-                <InfoRow icon={Cake} label="Date of Birth" value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : dateOfBirth} />
-                <InfoRow icon={Heart} label="Anniversary" value={anniversaryDate ? new Date(anniversaryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : anniversaryDate} />
+                <InfoRow icon={MapPin} label="Home Address" value={address} />
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 bg-card/50">
-              <CardContent className="pt-4 pb-2 divide-y divide-border/50">
-                <InfoRow icon={Users} label="Father's Name" value={fatherName} />
-                <InfoRow icon={Users} label="Mother's Name" value={motherName} />
+            {/* Important Dates Card */}
+            <Card className="border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
+              <div className="p-4 bg-muted/20 border-b border-border/20">
+                <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
+                   <Calendar className="h-3 w-3" /> Important Dates
+                </h3>
+              </div>
+              <CardContent className="p-4 space-y-1 divide-y divide-border/10">
+                <InfoRow 
+                  icon={Cake} 
+                  label="Date of Birth" 
+                  value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null} 
+                  subValue={dateOfBirth ? `${new Date().getFullYear() - new Date(dateOfBirth).getFullYear()} Years Old` : undefined}
+                />
+                <InfoRow 
+                  icon={Heart} 
+                  label="Marriage Anniversary" 
+                  value={anniversaryDate ? new Date(anniversaryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null} 
+                />
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* FAMILY TAB */}
-          <TabsContent value="family" className="mt-4">
+            {/* Lineage Card */}
+            <Card className="md:col-span-2 border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden rounded-2xl">
+              <div className="p-4 bg-muted/20 border-b border-border/20">
+                <h3 className="text-xs font-black uppercase tracking-tighter text-muted-foreground flex items-center gap-2">
+                   <Users className="h-3 w-3" /> Parents & Lineage
+                </h3>
+              </div>
+              <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 divide-y md:divide-y-0 divide-border/10">
+                <InfoRow icon={User2} label="Father's Name" value={fatherName} />
+                <div className="md:border-l md:border-border/10 md:pl-8">
+                   <InfoRow icon={User2} label="Mother's Name" value={motherName} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="family" className="mt-6 animate-in slide-in-from-bottom-4 duration-500">
+           <div className="w-full">
             {memberId ? (
               <HouseholdPanel memberId={memberId} />
             ) : (
-              <Card className="border-border/50 bg-card/50">
-                <CardContent className="pt-6 pb-6 flex flex-col items-center gap-2 text-center">
-                  <Home className="h-8 w-8 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground">No family information available.</p>
-                </CardContent>
-              </Card>
+              <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 rounded-3xl border border-dashed border-border/50 bg-muted/20">
+                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                    <Home className="h-8 w-8 text-muted-foreground/30" />
+                 </div>
+                 <div className="space-y-1">
+                    <p className="font-bold text-muted-foreground">No Family Data</p>
+                    <p className="text-xs text-muted-foreground/60 max-w-[200px]">This member hasn't been assigned to a family yet.</p>
+                 </div>
+              </div>
             )}
-          </TabsContent>
-        </Tabs>
+           </div>
+        </TabsContent>
+      </Tabs>
 
-        {/* Print Button */}
-        <div className="flex justify-center gap-3">
-          {isPending && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-50 rounded-2xl">
-              <LoadingSpinner />
-            </div>
-          )}
-          {data?.data?.data?.signature ? (
-            <Button variant="outline" className="gap-2" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" /> Print Membership Card
-            </Button>
-          ) : error ? (
-            <Button variant="outline" className="gap-2" onClick={() => toast.error((error as any)?.response?.data?.message || 'No pastor signature found.')}>
-              <Printer className="h-4 w-4" /> Print
-            </Button>
-          ) : (
-            <Modal triggerButtonContent={<><Printer className="h-4 w-4 mr-2" /> Print</>} modelTitle="Signature Required" modelDescription="Please set the pastor's signature before printing." onOpenChange={() => {}}>
-              <SignatureCard postSignatureMutation={signatureMutation} />
-            </Modal>
-          )}
-        </div>
+      {/* ── FOOTER ACTIONS ── */}
+      <div className="flex items-center justify-center pt-2 gap-4">
+        {isPending ? (
+          <Button disabled variant="outline" className="rounded-xl px-8 h-12">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" /> Initializing...
+          </Button>
+        ) : data?.data?.data?.signature ? (
+          <Button 
+            className="rounded-xl px-8 h-12 gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95" 
+            onClick={() => window.print()}
+          >
+            <Printer className="h-5 w-5" /> Print Membership Certificate
+          </Button>
+        ) : (
+          <Modal 
+            triggerButtonContent={<><Printer className="h-5 w-5 mr-2" /> Generate Certificate</>} 
+            modelTitle="Certificate Generation" 
+            modelDescription="A pastor's signature is required to generate this official document." 
+            triggerButtonVariant="default"
+            triggerClassName="rounded-xl px-8 h-12 gap-2 shadow-lg shadow-primary/20"
+          >
+            <SignatureCard postSignatureMutation={signatureMutation} />
+          </Modal>
+        )}
       </div>
+    </div>
 
       {/* ── PRINT VIEW (unchanged from before) ── */}
       <div className="hidden print:block max-w-3xl mx-auto p-8 bg-white">

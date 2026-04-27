@@ -89,8 +89,9 @@ export const CUMembers = ({
             // Refresh data so the table and dropdowns see the new household assignment
             queryClient.invalidateQueries({ queryKey: ["membersData"] });
             queryClient.invalidateQueries({ queryKey: ["households"] });
-        } catch (e) {
-            toast.error('Member saved, but household assignment failed');
+        } catch (e: any) {
+            console.error('Household Assignment Error:', e);
+            toast.error(e?.response?.data?.message || 'Member saved, but household assignment failed');
         }
         setSelectedHousehold('');
         setHouseholdRole('SPOUSE');

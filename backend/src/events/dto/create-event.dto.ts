@@ -24,14 +24,17 @@ export class CreateEventDto {
     isRecurring?: boolean
 
     @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
     @IsString()
     recurrenceType?: string
 
     @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
     @IsString()
     recurrenceDay?: string
 
     @IsOptional()
+    @Transform(({ value }) => value === "" ? undefined : value)
     @IsDateString() // Using IsDateString because frontend sends JSON
     recurrenceEndDate?: Date
 

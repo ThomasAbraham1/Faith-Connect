@@ -112,8 +112,9 @@ export class MembersController {
   async update(@Param('id') id: string, @Body() updateMemberDto: UpdateMemberDto, @UploadedFiles() uploadedFiles, @Req() req) {
     const churchId = req.user.church._id;
     const existingMember = await this.membersService.findOne(id);
+    if (!existingMember) throw new NotFoundException('Member not found');
 
-    if (uploadedFiles.profilePic) {
+    if (uploadedFiles?.profilePic) {
       try {
         const file = uploadedFiles.profilePic[0];
         const optimizedBuffer = await sharp(file.buffer)
@@ -142,7 +143,7 @@ export class MembersController {
       }
     }
 
-    if (uploadedFiles.signature) {
+    if (uploadedFiles?.signature) {
       try {
         const file = uploadedFiles.signature[0];
         const key = `members/${churchId}/signature-${Date.now()}-${file.originalname}`;

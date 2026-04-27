@@ -75,9 +75,12 @@ export class MembersService {
 
     console.log(id, updateMemberDto, userSessionObject)
     console.log(userInfo)
-    if (userInfo?.profilePic) {
-      const profilePicPath: string[] = [userInfo.profilePic.profilePicPath];
-      this.deleteExistingPicture(profilePicPath);
+    if (updateMemberDto.profilePic && userInfo?.profilePic?.profilePicPath) {
+      // Only delete if the path actually changed (meaning a new file was uploaded)
+      if (updateMemberDto.profilePic.profilePicPath !== userInfo.profilePic.profilePicPath) {
+        const profilePicPath: string[] = [userInfo.profilePic.profilePicPath];
+        this.deleteExistingPicture(profilePicPath);
+      }
     }
     const result = await this.userModel.findOneAndUpdate({ _id: id }, updateMemberDto, {
       new: true,
