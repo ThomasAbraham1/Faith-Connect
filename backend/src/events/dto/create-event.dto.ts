@@ -36,4 +36,12 @@ export class CreateEventDto {
     @IsOptional()
     @IsBoolean()
     registrationOpen?: boolean;
+
+    @IsOptional()
+    @IsString()
+    churchId?: string;
+
+    @IsOptional()
+    @IsString()
+    coverImageUrl?: string;
 }
