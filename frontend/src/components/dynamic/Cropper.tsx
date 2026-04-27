@@ -61,7 +61,7 @@ export const useAvatarUploadHandler = (
     const { selectedFile, croppedImage } =
       useCrop();
     return (
-      <div className="justify-items-center-safe w-full flex justify-center">
+      <div className="justify-items-center-safe">
         {selectedFile && (
           <DynamicCropper
             profilePic={selectedFile}
@@ -101,7 +101,7 @@ export const useAvatarUploadHandler = (
   }
 
   const DynamicCropper = (props: CropperProps & { aspect?: number, circularCrop?: boolean }) => (
-    <div className="space-y-4 w-full flex flex-col items-center">
+    <div className="space-y-4">
       <ImageCrop
         aspect={props.aspect ?? 1}
         circularCrop={props.circularCrop ?? true}
@@ -109,8 +109,8 @@ export const useAvatarUploadHandler = (
         maxImageSize={2024 * 2024}
         onCrop={props.onCropConfirmFunction}
       >
-        <ImageCropContent className="max-w-md w-full" />
-        <div className="flex items-center gap-2 justify-center">
+        <ImageCropContent className="max-w-md" />
+        <div className="flex items-center gap-2">
           <ImageCropApply />
           <ImageCropReset />
           <Button

@@ -134,12 +134,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
 
         {/* DETAILS TAB */}
         <TabsContent value="details" className="mt-0 space-y-4">
-          {/* Cover image */}
-          {event.coverImageUrl && (
-            <div className="w-full h-48 rounded-xl overflow-hidden">
-              <img src={event.coverImageUrl} alt={event.eventName} className="w-full h-full object-cover" />
-            </div>
-          )}
+
 
           {/* Registration Link Card */}
           <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
