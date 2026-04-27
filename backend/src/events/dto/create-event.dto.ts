@@ -1,4 +1,5 @@
 import { IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { Transform } from "class-transformer"
 
 export class CreateEventDto {
     @IsString()
@@ -18,6 +19,7 @@ export class CreateEventDto {
     organizer: string
 
     @IsOptional()
+    @Transform(({ value }) => value === 'true' || value === true)
     @IsBoolean()
     isRecurring?: boolean
 
@@ -34,6 +36,7 @@ export class CreateEventDto {
     recurrenceEndDate?: Date
 
     @IsOptional()
+    @Transform(({ value }) => value === 'true' || value === true)
     @IsBoolean()
     registrationOpen?: boolean;
 
