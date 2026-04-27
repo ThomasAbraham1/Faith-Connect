@@ -1,0 +1,122 @@
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import { LoginForm } from "./app/auth/login-form.tsx";
+import { SignupForm } from "./app/auth/signup-form.tsx";
+import { InputOTPControlled } from "./app/auth/otpPage.tsx";
+import { OTPMethodSelection } from "./app/auth/otpMethodSelectionPage.tsx";
+import { EventRegistrationPage } from "./app/events/EventRegistrationPage.tsx";
+import { ThemeProvider } from "@/components/theme-provider";
+import Dashboard from "./app/dashboard/index";
+import { AppLayout } from "./components/layout/AppLayout.tsx";
+import { appRoutes } from "./routes.tsx";
+import { EventDetailRoute } from "./app/events/EventDetailRoute.tsx";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { ToasterProvider } from "./providers/ToasterProvider.tsx";
+import { ContextProvider } from './context/Context.tsx'
+import React from "react";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />, // 👈 App is the parent layout
+    children: [
+      {
+        index: true, // 👈 this means `/`
+        element: <LoginForm />,
+      },
+      {
+        path: "Signup",
+        element: <SignupForm />,
+      },
+      {
+        path: "monkey",
+        element: <SignupForm />,
+      },
+      {
+        path: "otp/:otpMethod",
+        element: <InputOTPControlled />,
+      },
+      {
+        path: "otpMethod",
+        element: <OTPMethodSelection />,
+      },
+      {
+        path: "dashboard",
+        element: <AppLayout />,
+        // hydrateFallbackElement: <AppLayout />,
+        children: [
+          {
+            index: true,
+            element: <Dashboard />,
+          },
+          {
+            path: appRoutes.members.label,
+            element: appRoutes.members.element,
+          },
+          {
+            path: appRoutes.attendance.label,
+            element: appRoutes.attendance.element,
+          },
+          {
+            path: appRoutes.settings.label,
+            element: appRoutes.settings.element,
+          },
+          { 
+            path: appRoutes.events.label,
+            element: appRoutes.events.element,
+          },
+          {
+            path: `${appRoutes.events.label}/:eventId/registrations`,
+            element: <EventDetailRoute />,
+          },
+          {
+            path: appRoutes.bulkEmail.label,
+            element: appRoutes.bulkEmail.element,
+          },
+          {
+            path: appRoutes.templates.label,
+            element: appRoutes.templates.element,
+          },
+          {
+            path: appRoutes.groups.label,
+            element: appRoutes.groups.element,
+          },
+          {
+            path: `${appRoutes.groups.label}/:groupId`,
+            element: appRoutes.groups.element,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: "e/:eventId",
+    element: <EventRegistrationPage />,
+  },
+]);
+
+// queryClient
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+createRoot(document.getElementById("root")!).render(
+  // <React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <ContextProvider>
+      <ThemeProvider>
+        <ToasterProvider>
+          <RouterProvider router={router} />
+        </ToasterProvider>
+      </ThemeProvider>
+    </ContextProvider>
+  </QueryClientProvider>
+  // </React.StrictMode>
+);
