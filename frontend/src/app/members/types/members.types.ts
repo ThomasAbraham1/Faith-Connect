@@ -54,6 +54,8 @@ export type Member = {
     anniversaryDate?: string;
     household?: string;
     householdRole?: string;
+    rawHouseholdId?: string;
+    rawHouseholdRole?: string;
     firstName: string;
     lastName: string;
     fatherName: string;

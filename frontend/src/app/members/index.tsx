@@ -97,6 +97,8 @@ export const MembersPage = () => {
           anniversaryDate: value.anniversaryDate,
           household: (value.householdId as any)?.name || '—',
           householdRole: roleLabels[value.householdRole] || value.householdRole || '—',
+          rawHouseholdId: (value.householdId as any)?._id || value.householdId,
+          rawHouseholdRole: value.householdRole,
           firstName: value.firstName,
           email: value.email,
           lastName: value.lastName,
@@ -172,7 +174,9 @@ export const MembersPage = () => {
                     const mappedMember = {
                       ...memberData,
                       roles: memberData.role,
-                      profilePic: memberData.profilePicUrl
+                      profilePic: memberData.profilePicUrl,
+                      householdId: memberData.rawHouseholdId,
+                      householdRole: memberData.rawHouseholdRole,
                     };
                     setEditingMember(mappedMember as any);
                     setIsSheetOpen(true);
@@ -193,7 +197,7 @@ export const MembersPage = () => {
                   names={[`${row.original.firstName} ${row.original.lastName}`]}
                 />
                 <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
-                  <ViewProfile memberId={row.original._id}
+                  <ViewProfile memberId={row.original.id}
                     userName={row.getValue("userName")}
                     dateOfBirth={row.original.dateOfBirth}
                     anniversaryDate={row.original.anniversaryDate}

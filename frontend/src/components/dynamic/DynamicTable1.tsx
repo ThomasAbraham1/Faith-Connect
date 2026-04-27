@@ -66,99 +66,96 @@ export function DynamicTable1<T>({
 
     const priorityKeys = ["firstName", "lastName", "userName", "email", "phone", "eventName", "eventDate", "eventLocation", "status"];
 
-    let sortedKeys = data?.length > 0 ? Object.keys(data[0]).sort((a, b) => {
-        const indexA = priorityKeys.indexOf(a);
-        const indexB = priorityKeys.indexOf(b);
+    const columns = React.useMemo(() => {
+        let sortedKeys = data?.length > 0 ? Object.keys(data[0]).sort((a, b) => {
+            const indexA = priorityKeys.indexOf(a);
+            const indexB = priorityKeys.indexOf(b);
 
-        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        if (indexA !== -1) return -1;
-        if (indexB !== -1) return 1;
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            if (indexA !== -1) return -1;
+            if (indexB !== -1) return 1;
 
-        return 0;
-    }) : [];
+            return 0;
+        }) : [];
 
-    let columns: ColumnDef<T>[] = sortedKeys.map((key) => {
-        return {
-            accessorKey: key,
-            header: ({ column }) => {
-                return (
-                    <div 
-                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs tracking-wider"
-                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    >
-                        {lodash.startCase(key)}
-                        <ArrowUpDown className="size-3" />
-                    </div>
-                );
-            },
-            cell: ({ row }) => {
-                const value = row.getValue(key);
-                let displayValue: any = value;
-                
-                const isDateKey = key.toLowerCase().includes('date') || key.endsWith('At');
-                if (isDateKey && typeof value === "string") {
-                    const parsed = new Date(value);
-                    if (!isNaN(parsed.getTime())) {
-                        displayValue = parsed.toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        });
+        let cols: ColumnDef<T>[] = sortedKeys.map((key) => {
+            return {
+                accessorKey: key,
+                header: ({ column }) => {
+                    return (
+                        <div 
+                            className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs tracking-wider"
+                            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        >
+                            {lodash.startCase(key)}
+                            <ArrowUpDown className="size-3" />
+                        </div>
+                    );
+                },
+                cell: ({ row }) => {
+                    const value = row.getValue(key);
+                    let displayValue: any = value;
+                    
+                    const isDateKey = key.toLowerCase().includes('date') || key.endsWith('At');
+                    if (isDateKey && typeof value === "string") {
+                        const parsed = new Date(value);
+                        if (!isNaN(parsed.getTime())) {
+                            displayValue = parsed.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+                        }
+                    } else if (typeof value === "string" && !["email", "userName"].includes(key)) {
+                        displayValue = lodash.startCase(value);
                     }
-                } else if (typeof value === "string" && !["email", "userName"].includes(key)) {
-                    displayValue = lodash.startCase(value);
-                }
 
-                return (
-                    <div className="py-2 text-sm">{displayValue}</div>
-                );
-            },
-        }
-    });
-
-    columns.unshift({
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    });
-
-
-    // const childrenArray = React.Children.toArray(children);
-
-    // if (childrenArray) {
-    //     childrenArray.find((child) => {
-    // if (React.isValidElement(child) && child.type === ActionsColumn) {
-    if (children) {
-        columns.push({
-            accessorKey: "actions",
-            header: () => (
-                <div className="font-bold text-xs tracking-wider py-2">
-                    Actions
-                </div>
-            ),
-
-            cell: ({ row }) => (
-                children(row)
-            ),
+                    return (
+                        <div className="py-2 text-sm">{displayValue}</div>
+                    );
+                },
+            }
         });
-    }
+
+        cols.unshift({
+            id: "select",
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && "indeterminate")
+                    }
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        });
+
+        if (children) {
+            cols.push({
+                accessorKey: "actions",
+                header: () => (
+                    <div className="font-bold text-xs tracking-wider py-2">
+                        Actions
+                    </div>
+                ),
+                cell: ({ row }) => (
+                    children(row)
+                ),
+            });
+        }
+
+        return cols;
+    }, [data, children]);
     // console.log(children, 'child found');
     //         }
     //         console.log('childrenArray', childrenArray)
