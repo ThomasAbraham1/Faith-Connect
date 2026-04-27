@@ -250,72 +250,72 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
             .no-signature { text-align: center; color: #666; font-style: italic; }
           }
         `}</style>
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-wider">{churchName}</h1>
-          <p className="text-lg text-gray-600 italic mt-2">Welcoming You to Our Family in Faith</p>
-        </div>
-        <div className="p-0">
-          <h2 className="text-2xl font-semibold text-center mb-8">Church Membership Form</h2>
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{firstName || "N/A"}</p>
+        <div className="p-0 border-[10px] border-double border-gray-200 min-h-[90vh] p-12 relative">
+          {/* Certificate Header */}
+          <div className="text-center mb-12 border-b-2 border-primary/20 pb-8">
+            <h1 className="text-5xl font-black text-gray-900 uppercase tracking-[0.2em] mb-4">{churchName}</h1>
+            <div className="flex items-center justify-center gap-4 text-primary/60 mb-6">
+              <div className="h-px w-12 bg-current" />
+              <p className="text-sm font-bold uppercase tracking-widest">Certificate of Membership</p>
+              <div className="h-px w-12 bg-current" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{lastName || "N/A"}</p>
+            <p className="text-lg text-gray-500 italic max-w-lg mx-auto">
+              "For as the body is one and has many members, but all the members of that one body, being many, are one body, so also is Christ."
+            </p>
+          </div>
+
+          {/* Member Content */}
+          <div className="space-y-10 py-6">
+            <div className="text-center space-y-6">
+              <p className="text-xl text-gray-600">This is to certify that</p>
+              <h3 className="text-4xl font-black text-gray-900 underline decoration-primary/30 decoration-4 underline-offset-8">
+                {firstName} {lastName}
+              </h3>
+              <p className="text-xl text-gray-600">is a recognized member of our congregation</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-16 gap-y-10 mt-12 max-w-2xl mx-auto">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Date of Birth</label>
+                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">
+                  {dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : "N/A"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Contact Number</label>
+                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">{phone || "N/A"}</p>
+              </div>
+              <div className="col-span-2 space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Residential Address</label>
+                <p className="text-lg font-bold text-gray-800 border-b border-gray-200 pb-2">{address || "N/A"}</p>
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Father's Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{fatherName || "N/A"}</p>
+
+          {/* Signatures */}
+          <div className="absolute bottom-16 left-12 right-12 grid grid-cols-2 gap-20">
+            <div className="text-center space-y-4">
+              <div className="h-20 border-b-2 border-gray-300 flex items-end justify-center pb-2 italic text-gray-400">
+                (Member Signature)
+              </div>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Member's Name</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Mother's Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{motherName || "N/A"}</p>
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700">Address</label>
-            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{address || "N/A"}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{dateOfBirth || "N/A"}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{phone || "N/A"}</p>
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700">Spiritual Status</label>
-            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{spiritualStatus || "N/A"}</p>
-          </div>
-          <div className="mt-12 grid grid-cols-2 gap-8">
-            <div>
-              <div className="border-b border-gray-400 mt-4 mb-3 h-16" />
-              <p className="text-center text-sm font-medium">Member's Signature</p>
-              <p className="text-center text-sm mt-3">Date: ____________________</p>
-            </div>
-            <div>
-              <div className="border-b border-gray-400 mt-4 mb-3 h-16 flex items-center justify-center">
-                {data?.data?.data?.signature?.signaturePicName ? (
+            
+            <div className="text-center space-y-4">
+              <div className="h-20 border-b-2 border-gray-300 flex items-center justify-center">
+                {data?.data?.data?.signature?.signaturePicPath ? (
                   <img
-                    src={data.data.data.signature.signaturePicPath?.startsWith('http')
+                    src={data.data.data.signature.signaturePicPath.startsWith('http')
                       ? data.data.data.signature.signaturePicPath
-                      : `${import.meta.env.VITE_APP_API_URL}/signatures/${data.data.data.signature.signaturePicName}`}
+                      : `${import.meta.env.VITE_APP_API_URL}${data.data.data.signature.signaturePicPath}`}
                     alt="Pastor's Signature"
-                    className="signature-img"
+                    className="max-h-16 object-contain"
                   />
                 ) : (
-                  <p className="no-signature">No signature available</p>
+                  <p className="text-xs italic text-gray-300">Pending Authorization</p>
                 )}
               </div>
-              <p className="text-center text-sm font-medium">Pastor's Signature</p>
-              <p className="text-center text-sm mt-3">Date: ____________________</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Authorized Pastor</p>
             </div>
           </div>
         </div>
