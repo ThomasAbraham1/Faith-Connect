@@ -7,6 +7,7 @@ import { LoginForm } from "./app/auth/login-form.tsx";
 import { SignupForm } from "./app/auth/signup-form.tsx";
 import { InputOTPControlled } from "./app/auth/otpPage.tsx";
 import { OTPMethodSelection } from "./app/auth/otpMethodSelectionPage.tsx";
+import { EventRegistrationPage } from "./app/events/EventRegistrationPage.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "./app/dashboard/index";
 import { AppLayout } from "./components/layout/AppLayout.tsx";
@@ -85,6 +86,10 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "e/:eventId",
+    element: <EventRegistrationPage />,
   },
 ]);
 

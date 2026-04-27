@@ -10,6 +10,8 @@ import { Role, RoleSchema } from 'src/schemas/Role.schema';
 import { Twofa, TwofaSchema } from 'src/schemas/Twofa.schema';
 import { User, userSchema } from 'src/schemas/User.schema';
 import { Group, GroupSchema } from 'src/schemas/Group.schema';
+import { Household, HouseholdSchema } from 'src/schemas/Household.schema';
+import { Registration, RegistrationSchema } from 'src/schemas/Registration.schema';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { Group, GroupSchema } from 'src/schemas/Group.schema';
       { name: Attendance.name, schema: AttendanceSchema },
       { name: Events.name, schema: EventsSchema },
       { name: Group.name, schema: GroupSchema },
+      { name: Household.name, schema: HouseholdSchema },
+      { name: Registration.name, schema: RegistrationSchema },
     ]),
   ],
   exports: [MongooseModule], // This module now exports all configured models

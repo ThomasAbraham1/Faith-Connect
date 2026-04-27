@@ -25,6 +25,7 @@ import { TemplatesModule } from './templates/templates.module';
 import { GroupsModule } from './groups/groups.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { HouseholdsModule } from './households/households.module';
 
 import { DashboardModule } from './dashboard/dashboard.module';
 
@@ -78,6 +79,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     GroupsModule,
     ExpensesModule,
     WhatsappModule,
+    HouseholdsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -42,6 +42,12 @@ export class User {
   anniversaryDate: string;
   @Prop({ ref: 'Role' })
   roles: string[];
+  @Prop({ type: String, enum: ['PRIMARY', 'SPOUSE', 'CHILD', 'DEPENDENT'], required: false })
+  householdRole?: string;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: false })
+  householdId?: mongoose.Types.ObjectId;
+
   @Prop({ type: ProfilePic })
   profilePic: ProfilePic;
   @Prop({ type: Signature })

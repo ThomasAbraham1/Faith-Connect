@@ -5,6 +5,23 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { DeleteEventDto } from './dto/delete-event.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
+// --- PUBLIC routes (no auth) ---
+@Controller('events/public')
+export class EventsPublicController {
+  constructor(private readonly eventsService: EventsService) {}
+
+  @Get(':id')
+  findPublic(@Param('id') id: string) {
+    return this.eventsService.findPublic(id);
+  }
+
+  @Post(':id/register')
+  register(@Param('id') id: string, @Body() body: { firstName: string; lastName: string; email: string; phone: string }) {
+    return this.eventsService.registerForEvent(id, body);
+  }
+}
+
+// --- PRIVATE routes (auth required) ---
 @Controller('events')
 @UseGuards(AuthenticatedGuard)
 export class EventsController {
@@ -13,7 +30,6 @@ export class EventsController {
   @Post()
   create(@Req() req, @Body() createEventDto) {
     createEventDto.churchId = req.user.church._id
-    console.log(createEventDto)
     return this.eventsService.create(createEventDto);
   }
 
@@ -25,7 +41,17 @@ export class EventsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(+id);
+    return this.eventsService.findOne(id);
+  }
+
+  @Get(':id/registrations')
+  getRegistrations(@Param('id') id: string) {
+    return this.eventsService.getRegistrations(id);
+  }
+
+  @Post(':id/registrations')
+  addRegistration(@Req() req, @Param('id') id: string, @Body() body: { memberId: string }) {
+    return this.eventsService.addRegistration(id, body.memberId, req.user.church._id);
   }
 
   @Patch(':id')
@@ -35,7 +61,6 @@ export class EventsController {
 
   @Delete(':id')
   remove(@Param() deleteEventDto: DeleteEventDto) {
-    console.log(deleteEventDto)
     return this.eventsService.remove(deleteEventDto.id);
   }
 }

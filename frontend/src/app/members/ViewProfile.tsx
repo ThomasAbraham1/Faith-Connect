@@ -12,8 +12,9 @@ import { SignatureMaker } from '@docuseal/signature-maker-react';
 import { toast } from "sonner"
 import type { AxiosResponse } from "axios"
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard"
+import { HouseholdPanel } from "./HouseholdPanel"
 
-export const ViewProfile = ({ userName, profilePicUrl, phone, churchName, spiritualStatus, dateOfBirth, address, fatherName, motherName, lastName, firstName }) => {
+export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchName, spiritualStatus, dateOfBirth, address, fatherName, motherName, lastName, firstName }) => {
   // Split userName into firstName and lastName (assuming userName is "First Last")
   const [open, setOpen] = React.useState(false);
   const [userId, setUserId] = useState(undefined)
@@ -94,6 +95,9 @@ export const ViewProfile = ({ userName, profilePicUrl, phone, churchName, spirit
           </div>
         </CardContent>
       </Card>
+
+      {/* Household Panel */}
+      {memberId && <HouseholdPanel memberId={memberId} />}
 
       {/* Print Display: Church Membership Form */}
       <div className="hidden print:block max-w-3xl mx-auto p-8 bg-white">

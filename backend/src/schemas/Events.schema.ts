@@ -28,6 +28,12 @@ export class Events {
 
     @Prop({ type: Date, required: false })
     recurrenceEndDate: Date
+
+    @Prop({ type: String, required: false })
+    coverImageUrl?: string;
+
+    @Prop({ type: Boolean, default: true })
+    registrationOpen: boolean;
 }
 
 export const EventsSchema = SchemaFactory.createForClass(Events)

@@ -4,7 +4,6 @@ import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 import api from "@/api/api";
 import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
-
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
 import { Eye, SquarePen, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { CUEvents } from "./CUEvents";
 import type { TEventsData } from "./types/events.types";
 import { Alert } from "@/components/dynamic/Alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { EventDetail } from "./EventDetail";
 
 function EventsPage() {
   const userContext = useUser();
@@ -19,8 +19,8 @@ function EventsPage() {
   const [selectedRowIds, setSelectedRowIds] = useState<String[]>([])
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TEventsData | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
-  // Function to get selected row and format them for further processing
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
     const selectedRowsObject = value as Record<string, Row<TEventsData>>
     const arrayOfIds = Object.values(selectedRowsObject).map((value: any) => value.original.id)
@@ -31,42 +31,39 @@ function EventsPage() {
     queryKey: ["eventsData"],
     queryFn: async () => {
       const response = await api.get("/events");
-      // console.log(response)
       return response;
     },
   });
 
-  // Mutation Function - Delete & Edit
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (id: string | String[]) => {
-      console.log(id)
       if (typeof id != 'object') {
         return api.delete(`/events/${id}`)
       }
       return api.delete(`/events/${(id as []).join(',')}`)
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["eventsData"],
-      })
-
-      // Reseting table selection checks
+      queryClient.invalidateQueries({ queryKey: ["eventsData"] })
       if (tableRef.current) {
         tableRef.current.resetRowSelection();
       }
     }
   });
 
-  // Simplified data for debugging
   const dataArray = React.useMemo(() => {
     const raw = data?.data?.data || data?.data || [];
-    console.log("DEBUG - RAW DATA:", raw);
     return Array.isArray(raw) ? raw : [];
   }, [data]);
 
+  // --- Event Detail view ---
+  if (selectedEventId) {
+    return <EventDetail eventId={selectedEventId} onBack={() => setSelectedEventId(null)} />;
+  }
+
   if (isPending) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading events...</div>;
   if (error) return <div className="p-8 text-center text-destructive">Error loading events: {(error as Error).message}</div>;
+
   return (
     <div className="space-y-6">
       <div>
@@ -79,7 +76,6 @@ function EventsPage() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex justify-between items-center mb-4">
-            {/* <div className="text-xs text-muted-foreground">Total events detected: {dataArray.length}</div> */}
             <div>
               {selectedRowIds.length > 0 ? (
                 <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
@@ -116,6 +112,14 @@ function EventsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => setSelectedEventId(row.original._id || row.original.id)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => {
                     setEditingEvent(row.original);
                     setIsSheetOpen(true);
@@ -129,7 +133,6 @@ function EventsPage() {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </Alert>
-
               </ActionsColumn>
             }
           </DynamicTable1>

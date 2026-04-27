@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { EventsService } from './events.service';
-import { EventsController } from './events.controller';
+import { EventsController, EventsPublicController } from './events.controller';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  controllers: [EventsController],
+  controllers: [EventsController, EventsPublicController],
   providers: [EventsService],
   imports: [DatabaseModule],
 })
