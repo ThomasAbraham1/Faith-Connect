@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "docker compose -f backend/compose.yml up localstack -d && concurrently \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev": "docker compose -f backend/compose.yml up localstack -d || true && concurrently \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev:no-docker": "concurrently \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "docker:localstack": "docker compose -f backend/compose.yml up localstack -d",
     "backend": "npm run start:dev --prefix backend",
     "frontend": "npm run dev --prefix frontend"

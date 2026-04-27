@@ -61,7 +61,7 @@ type CrudSheetProps<T extends FieldValues> = {
     buildFormData?: (data: T, dirty: Partial<T>) => FormData;
 
     /** Optional: custom success / error handlers */
-    onSuccess?: () => void;
+    onSuccess?: (response?: any) => void;
     onError?: (err: any) => void;
 
     // Set data build type - FormData or json
@@ -114,12 +114,12 @@ export function CrudSheet<T extends FieldValues>({
             const method = isEdit ? api.patch : api.post;
             return method(url, fd);
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
             toast.success(isEdit ? "Updated successfully" : "Created successfully");
             queryClient.invalidateQueries({ queryKey: invalidateQueries });
             setCroppedImage(null);
             reset(); // clear form
-            onSuccess?.();
+            onSuccess?.(response);
         },
         onError: (err: any) => {
             toast.error(err?.response?.data?.message ?? "Something went wrong");
