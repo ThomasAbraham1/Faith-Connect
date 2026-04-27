@@ -23,7 +23,7 @@ function EventsPage() {
 
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
     const selectedRowsObject = value as Record<string, Row<TEventsData>>
-    const arrayOfIds = Object.values(selectedRowsObject).map((value: any) => value.original.id)
+    const arrayOfIds = Object.values(selectedRowsObject).map((value: any) => value.original._id || value.original.id)
     setSelectedRowIds(arrayOfIds)
   }, [])
 
@@ -123,7 +123,7 @@ function EventsPage() {
                   <SquarePen className="h-4 w-4" />
                 </Button>
 
-                <Alert onComfirmFunction={() => mutation.mutate(row.original.id || "")}>
+                <Alert onComfirmFunction={() => mutation.mutate((row.original._id || row.original.id) as string)}>
                   <Button variant="ghost" size="icon">
                     <Trash2 className="h-4 w-4" />
                   </Button>

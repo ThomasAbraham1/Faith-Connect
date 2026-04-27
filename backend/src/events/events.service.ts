@@ -15,7 +15,7 @@ export class EventsService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(Registration.name) private readonly registrationModel: Model<Registration>,
     @InjectModel(Church.name) private readonly churchModel: Model<Church>,
-  ) {}
+  ) { }
 
   async create(createEventDto: any) {
     return await this.eventsModel.create(createEventDto);
@@ -47,6 +47,7 @@ export class EventsService {
   }
 
   remove(id: string | string[]) {
+    console.log('hi')
     return this.eventsModel.deleteMany({ _id: { $in: id } });
   }
 

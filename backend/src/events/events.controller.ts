@@ -61,6 +61,7 @@ export class EventsController {
 
   @Delete(':id')
   remove(@Param() deleteEventDto: DeleteEventDto) {
+    console.log("HOW ARE YOU ")
     return this.eventsService.remove(deleteEventDto.id);
   }
 }
