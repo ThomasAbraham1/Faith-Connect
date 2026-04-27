@@ -41,7 +41,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     queryKey: ['event', eventId],
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}`);
-      return res.data;
+      return res.data?.data || res.data;
     },
   });
 
@@ -55,12 +55,15 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   });
 
   const toggleRegistrationMutation = useMutation({
-    mutationFn: () =>
-      api.patch(`/events/${eventId}`, { registrationOpen: !event?.registrationOpen }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      console.log("event is ", event)
+      const response = await api.patch(`/events/${eventId}`, { registrationOpen: !event?.registrationOpen })
+      return response.data
+    },
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventsData'] });
-      toast.success(`Registration ${!event?.registrationOpen ? 'opened' : 'closed'}`);
+      toast.success(response.message);
     },
   });
 
