@@ -69,7 +69,7 @@ type CrudSheetProps<T extends FieldValues> = {
 
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-
+    suppressToast?: boolean;
 };
 
 export function CrudSheet<T extends FieldValues>({
@@ -89,6 +89,7 @@ export function CrudSheet<T extends FieldValues>({
     buildFormData,
     onSuccess,
     onError,
+    suppressToast = false,
 }: CrudSheetProps<T>) {
     const isEdit = !!id;
     const queryClient = useQueryClient();
@@ -114,12 +115,16 @@ export function CrudSheet<T extends FieldValues>({
             const method = isEdit ? api.patch : api.post;
             return method(url, fd);
         },
-        onSuccess: (response) => {
-            toast.success(isEdit ? "Updated successfully" : "Created successfully");
+        onSuccess: async (response) => {
+            if (!suppressToast) {
+                toast.success(isEdit ? "Updated successfully" : "Created successfully");
+            }
             queryClient.invalidateQueries({ queryKey: invalidateQueries });
             setCroppedImage(null);
             reset(); // clear form
-            onSuccess?.(response);
+            if (onSuccess) {
+                await onSuccess(response);
+            }
         },
         onError: (err: any) => {
             toast.error(err?.response?.data?.message ?? "Something went wrong");
@@ -167,23 +172,15 @@ export function CrudSheet<T extends FieldValues>({
     }
 
 
-    const onSubmit = (data: T) => {
+    const onSubmit = async (data: T) => {
         console.log(data)
         const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
 
-        if (processedData instanceof FormData) {
-            console.log("FormData content:");
-            processedData.forEach((value, key) => {
-                console.log(`${key}: ${value}`);
-            });
-        } else {
-            // mutation.mutate(processedData);
-            for (const [key, value] of Object.entries(processedData)) {
-                console.log(`${key}: ${value}`);
-            }
+        try {
+            await mutation.mutateAsync(processedData);
+        } catch (e) {
+            // Error handled by mutation.onError
         }
-        mutation.mutate(processedData);
-        console.log(processedData, "Processed Data");
     };
 
     return (

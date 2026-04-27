@@ -68,6 +68,7 @@ export const CUMembers = ({
     const handleMemberSaved = async (memberId: string) => {
         const targetId = memberId || data?.id;
         if (!targetId || !selectedHousehold || selectedHousehold === 'none') {
+            toast.success(isEdit ? 'Member updated successfully' : 'Member created successfully');
             setSelectedHousehold('');
             setFamilyName('');
             return;
@@ -79,16 +80,16 @@ export const CUMembers = ({
                 await api.post('/households', { name: familyName.trim(), primaryContactId: targetId });
                 // Also save the role label for this member
                 await api.patch(`/members/${targetId}`, { householdRole });
-                toast.success(`Family "${familyName}" created!`);
             } else {
                 // Assign to existing household
                 await api.patch(`/households/${selectedHousehold}/members`, { addMembers: [targetId] });
                 await api.patch(`/members/${targetId}`, { householdRole });
-                toast.success('Household updated!');
             }
             // Refresh data so the table and dropdowns see the new household assignment
             queryClient.invalidateQueries({ queryKey: ["membersData"] });
             queryClient.invalidateQueries({ queryKey: ["households"] });
+            
+            toast.success(isEdit ? 'Member updated successfully' : 'Member created successfully');
         } catch (e: any) {
             console.error('Household Assignment Error:', e);
             toast.error(e?.response?.data?.message || 'Member saved, but household assignment failed');
@@ -164,6 +165,7 @@ export const CUMembers = ({
                 editEndpoint={(id) => `/members/${id}`}
                 invalidateQueries={["membersData"]}
                 open={open ?? sheetOpen}
+                suppressToast={true}
                 onOpenChange={(newOpen) => {
                     if (onOpenChange) {
                         onOpenChange(newOpen);
@@ -171,9 +173,9 @@ export const CUMembers = ({
                         setSheetOpen(newOpen);
                     }
                 }}
-                onSuccess={(response?: any) => {
+                onSuccess={async (response?: any) => {
                     const newMemberId = response?.data?._id || response?.data?.data?._id || data?.id;
-                    if (newMemberId) handleMemberSaved(newMemberId);
+                    if (newMemberId) await handleMemberSaved(newMemberId);
                 }}
             >
 
