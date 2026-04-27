@@ -83,7 +83,7 @@ export const CUEvents = ({
                         {/* Cover Image Upload */}
                         <div className="grid gap-2">
                             <Label>Cover Image <span className="text-muted-foreground text-xs">(Optional)</span></Label>
-                            <AvatarUploadCropperContent fieldName="coverImage" />
+                            <AvatarUploadCropperContent fieldName="coverImage" aspect={16 / 9} circularCrop={false} />
                             <AvatarUploadButton
                                 isRequired={false}
                                 setValue={setValue}

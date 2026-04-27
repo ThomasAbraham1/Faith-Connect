@@ -57,48 +57,60 @@ export const useAvatarUploadHandler = (
     setSelectedFile(null);
   };
 
-  const AvatarUploadCropperContent = ({ fieldName = "profilePic" }: { fieldName?: string } = {}) => {
+  const AvatarUploadCropperContent = ({ fieldName = "profilePic", aspect = 1, circularCrop = true }: { fieldName?: string, aspect?: number, circularCrop?: boolean } = {}) => {
     const { selectedFile, croppedImage } =
       useCrop();
     return (
-      <div className="justify-items-center-safe">
+      <div className="justify-items-center-safe w-full flex justify-center">
         {selectedFile && (
           <DynamicCropper
             profilePic={selectedFile}
+            aspect={aspect}
+            circularCrop={circularCrop}
             onCropConfirmFunction={(cropped) => setCroppedImageFunction(cropped, fieldName)}
             onCropResetFunction={handleReset}
           />
         )}
         {croppedImage ? (
-          <Avatar className="w-30 h-30">
-            <AvatarImage src={croppedImage} alt="Preview" />
-            <AvatarFallback>No Preview</AvatarFallback>
-          </Avatar>
-        ) : (
-          !selectedFile && (
+          circularCrop ? (
             <Avatar className="w-30 h-30">
-              <AvatarImage alt="Preview" />
+              <AvatarImage src={croppedImage} alt="Preview" />
               <AvatarFallback>No Preview</AvatarFallback>
             </Avatar>
+          ) : (
+            <div className="w-full h-40 max-w-md rounded-lg overflow-hidden border shadow-sm">
+                <img src={croppedImage} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+          )
+        ) : (
+          !selectedFile && (
+            circularCrop ? (
+              <Avatar className="w-30 h-30">
+                <AvatarImage alt="Preview" />
+                <AvatarFallback>No Preview</AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="w-full h-40 max-w-md rounded-lg border border-dashed border-muted flex items-center justify-center bg-muted/20 text-muted-foreground text-sm shadow-sm">
+                No Preview
+              </div>
+            )
           )
         )}
       </div>
     );
   }
 
-
-
-  const DynamicCropper = (props: CropperProps) => (
-    <div className="space-y-4">
+  const DynamicCropper = (props: CropperProps & { aspect?: number, circularCrop?: boolean }) => (
+    <div className="space-y-4 w-full flex flex-col items-center">
       <ImageCrop
-        aspect={1}
-        circularCrop
+        aspect={props.aspect ?? 1}
+        circularCrop={props.circularCrop ?? true}
         file={props.profilePic}
-        maxImageSize={1024 * 1024}
+        maxImageSize={2024 * 2024}
         onCrop={props.onCropConfirmFunction}
       >
-        <ImageCropContent className="max-w-md" />
-        <div className="flex items-center gap-2">
+        <ImageCropContent className="max-w-md w-full" />
+        <div className="flex items-center gap-2 justify-center">
           <ImageCropApply />
           <ImageCropReset />
           <Button
