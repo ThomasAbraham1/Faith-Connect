@@ -93,9 +93,22 @@ export function DynamicTable1<T>({
             },
             cell: ({ row }) => {
                 const value = row.getValue(key);
-                const displayValue = (typeof value === "string" && !["email", "userName"].includes(key)) 
-                    ? lodash.startCase(value) 
-                    : value;
+                let displayValue: any = value;
+                
+                const isDateKey = key.toLowerCase().includes('date');
+                if (isDateKey && typeof value === "string") {
+                    const parsed = new Date(value);
+                    if (!isNaN(parsed.getTime())) {
+                        displayValue = parsed.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                    }
+                } else if (typeof value === "string" && !["email", "userName"].includes(key)) {
+                    displayValue = lodash.startCase(value);
+                }
+
                 return (
                     <div className="py-2 text-sm">{displayValue}</div>
                 );

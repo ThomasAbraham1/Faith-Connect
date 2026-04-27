@@ -15,6 +15,13 @@ export class MembersService {
   ) { }
   async create(createMemberDto: CreateMemberDto) {
     try {
+      if (!createMemberDto.userName) {
+        createMemberDto.userName = `member_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      }
+      if (!createMemberDto.password) {
+        createMemberDto.password = `auto_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      }
+
       const doesUserNameExist = await this.userModel.findOne({ 
         userName: createMemberDto.userName,
         churchId: createMemberDto.churchId 

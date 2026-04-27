@@ -123,7 +123,7 @@ export const CUMembers = ({
         queryKey: ["households"],
         queryFn: async () => {
             const res = await api.get("/households");
-            return res.data || [];
+            return res.data.data || [];
         },
     });
 
@@ -213,9 +213,9 @@ export const CUMembers = ({
                         </AvatarUploadButton>
                         < div className="grid gap-6  sm:grid-cols-2 grid-rows-auto items-end">
                             <div className="grid gap-3">
-                                <Label htmlFor="firstName">First Name: </Label>
+                                <Label htmlFor="firstName">First Name: <span className="text-red-500">*</span></Label>
                                 <Input id="firstName"  {...register("firstName", {
-                                    // required: 'First Name is required'
+                                    required: 'First Name is required'
                                 })} />{errors.firstName && (
                                     <div className="text-red-500 text-sm">
                                         {errors.firstName.message}
@@ -223,9 +223,9 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="lastName">Last name: </Label>
+                                <Label htmlFor="lastName">Last Name: <span className="text-red-500">*</span></Label>
                                 <Input id="lastName"  {...register("lastName", {
-                                    // required: 'Last name is required'
+                                    required: 'Last Name is required'
                                 })} />{errors.lastName && (
                                     <div className="text-red-500 text-sm">
                                         {errors.lastName.message}
@@ -254,9 +254,7 @@ export const CUMembers = ({
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="userName">Username: </Label>
-                                <Input id="userName"  {...register("userName", {
-                                    // required: 'Username is required'
-                                })} />
+                                <Input id="userName"  {...register("userName")} />
                                 {errors.userName && (
                                     <div className="text-red-500 text-sm">
                                         {errors.userName.message}
@@ -265,20 +263,19 @@ export const CUMembers = ({
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="password">Password: </Label>
-                                <Input id="password"  {...register("password", {
-                                    // required: 'Password is required'
-                                })} />{errors.password && (
+                                <Input id="password" type="password" {...register("password")} />
+                                {errors.password && (
                                     <div className="text-red-500 text-sm">
                                         {errors.password.message}
                                     </div>
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="phone">Phone:</Label>
+                                <Label htmlFor="phone">Phone: <span className="text-red-500">*</span></Label>
                                 <Controller
                                     name="phone"
                                     control={control}
-                                    // rules={{ required: "Phone is required" }}
+                                    rules={{ required: "Phone is required" }}
                                     render={({ field }) => (
                                         <PhoneInput {...field} placeholder="Enter a phone number" onChange={(value) => field.onChange(value)}></PhoneInput>
                                     )}
@@ -290,7 +287,7 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="email">Email: </Label>
+                                <Label htmlFor="email">Email: <span className="text-red-500">*</span></Label>
                                 <Input id="email"  {...register("email", {
                                     required: 'Email is required'
                                 })} />{errors.email && (
@@ -301,9 +298,8 @@ export const CUMembers = ({
                             </div>
                             <div className="grid gap-3">
                                 <Label htmlFor="address">Address: </Label>
-                                <Textarea id="address"  {...register("address", {
-                                    required: 'address is required'
-                                })} />{errors.address && (
+                                <Textarea id="address"  {...register("address")} />
+                                {errors.address && (
                                     <div className="text-red-500 text-sm">
                                         {errors.address.message}
                                     </div>
@@ -314,9 +310,8 @@ export const CUMembers = ({
                                 <Controller
                                     name="dateOfBirth"
                                     control={control}
-                                    // rules={{ required: "Date of birth is required" }}
                                     render={({ field }) => (
-                                        <DatePicker value={field.value as any as Date} className='w-full' onChange={(value) => {
+                                        <DatePicker value={field.value ? new Date(field.value) : undefined} className='w-full' onChange={(value) => {
                                             field.onChange(value)
                                         }}></DatePicker>
                                     )}
@@ -328,13 +323,13 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="anniversaryDate">Anniversary (Optional):</Label>
+                                <Label htmlFor="anniversaryDate">Anniversary:</Label>
                                 <Controller
                                     name="anniversaryDate"
                                     control={control}
                                     render={({ field }) => (
                                         <DatePicker 
-                                            value={field.value as any as Date} 
+                                            value={field.value ? new Date(field.value) : undefined} 
                                             className='w-full' 
                                             onChange={(value) => {
                                                 field.onChange(value)
@@ -376,7 +371,7 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="role">Roles:</Label>
+                                <Label htmlFor="role">Roles: <span className="text-red-500">*</span></Label>
                                 <Controller
                                     name="roles"
                                     control={control}
