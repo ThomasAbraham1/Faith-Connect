@@ -11,15 +11,14 @@ import { Modal } from "@/components/dynamic/Modal";
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { FormDataType } from "./types/members.types";
 import api from "@/api/api";
-import { useCRUDSheet } from "@/context/CRUDSheetProvider";
 import { Button } from "@/components/ui/button";
 import { AvatarUploadButton, useAvatarUploadHandler } from "@/components/dynamic/Cropper";
 import { useCrop } from "@/context/CropProvider";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Home } from "lucide-react";
+import type { FormDataType, Member } from "./types/members.types";
 
 type roleRecordType = {
     _id: string;
@@ -27,14 +26,12 @@ type roleRecordType = {
     Permissions: string[]
 }
 
-// Optional: pass member data when editing
 type AddMembersProps = {
-    data?: FormDataType | null;
+    data?: Member | null;
     triggerVariant?: "default" | "outline" | "ghost";
-    trigger?: string; // Allow override
+    trigger?: string; 
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-    // onSuccess?: () => void;
 };
 
 export const CUMembers = ({
@@ -164,6 +161,12 @@ export const CUMembers = ({
                 open={open ?? sheetOpen}
                 preSubmitTransform={(data) => {
                     const cleanData = { ...data };
+                    
+                    // Fix: If profilePic is a string (URL), don't send it back to server
+                    if (typeof cleanData.profilePic === 'string') {
+                        delete cleanData.profilePic;
+                    }
+
                     if (cleanData.householdId === 'none') {
                         cleanData.householdId = null;
                         cleanData.householdRole = null;
