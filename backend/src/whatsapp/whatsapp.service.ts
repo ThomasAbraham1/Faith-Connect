@@ -5,30 +5,48 @@ import { TwilioService } from 'nestjs-twilio';
 export class WhatsappService {
   constructor(private readonly twilioService: TwilioService) {}
 
-  async sendMessage(to: string, contentSid: string, contentVariables: string) {
-    try {
-      const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
-      
-      const message = await this.twilioService.client.messages.create({
-        from: from,
-        to: `whatsapp:${to.startsWith('+') ? to : '+' + to}`,
-        contentSid: contentSid,
-        contentVariables: contentVariables,
-      });
+  /** Normalize any phone number to E.164 format (strips spaces, dashes, parens) */
+  private sanitizePhone(phone: string): string {
+    // Remove all whitespace and common formatting chars
+    const cleaned = phone.replace(/[\s\-().]/g, '');
+    // Ensure it starts with +
+    return cleaned.startsWith('+') ? cleaned : `+${cleaned}`;
+  }
 
-      return { success: true, sid: message.sid };
-    } catch (error) {
-      console.error('Twilio WhatsApp Error:', error);
-      return { success: false, error: error.message };
-    }
+  async sendMessage(to: string, contentSid: string, contentVariables: string) {
+    const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+    const sanitized = this.sanitizePhone(to);
+
+    const message = await this.twilioService.client.messages.create({
+      from: from,
+      to: `whatsapp:${sanitized}`,
+      contentSid: contentSid,
+      contentVariables: contentVariables,
+    });
+
+    return { success: true, sid: message.sid };
   }
 
   async sendBulkMessages(phones: string[], contentSid: string, contentVariables: string) {
     const results: any[] = [];
+    const errors: string[] = [];
+
     for (const phone of phones) {
-      const res = await this.sendMessage(phone, contentSid, contentVariables);
-      results.push({ phone, ...res });
+      try {
+        const res = await this.sendMessage(phone, contentSid, contentVariables);
+        results.push({ phone, ...res });
+      } catch (error) {
+        console.error(`Twilio WhatsApp Error for ${phone}:`, error);
+        errors.push(`${phone}: ${error.message}`);
+        results.push({ phone, success: false, error: error.message });
+      }
     }
-    return results;
+
+    // If ALL messages failed, throw so the frontend sees an error
+    if (results.length > 0 && results.every((r) => !r.success)) {
+      throw new Error(`All messages failed: ${errors.join('; ')}`);
+    }
+
+    return { results, totalSent: results.filter((r) => r.success).length, totalFailed: errors.length };
   }
 }

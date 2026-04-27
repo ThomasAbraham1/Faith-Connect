@@ -49,7 +49,9 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     queryKey: ['event-registrations', eventId],
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}/registrations`);
-      return res.data.data.data || [];
+      // Interceptor wraps: { data: [...] }, so the array is at res.data.data
+      const raw = res.data?.data;
+      return Array.isArray(raw) ? raw : [];
     },
     enabled: activeTab === 'registrants',
   });
@@ -112,6 +114,9 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 </span>
               )}
             </div>
+            {event.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed mt-2 max-w-2xl">{event.description}</p>
+            )}
           </div>
         </div>
       </div>
@@ -134,14 +139,6 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
             <div className="w-full h-48 rounded-xl overflow-hidden">
               <img src={event.coverImageUrl} alt={event.eventName} className="w-full h-full object-cover" />
             </div>
-          )}
-
-          {event.description && (
-            <Card className="bg-background/50 backdrop-blur-xl border-border/50">
-              <CardContent className="pt-4">
-                <p className="text-sm text-muted-foreground leading-relaxed">{event.description}</p>
-              </CardContent>
-            </Card>
           )}
 
           {/* Registration Link Card */}

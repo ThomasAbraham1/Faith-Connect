@@ -80,7 +80,12 @@ export const MembersPage = () => {
       (value: membersResponseObject, index: number) => {
         // Find role name for user role IDs
         console.log(value)
-        var userRoles: string;
+      const roleLabels: Record<string, string> = {
+          PRIMARY: 'Head of Family',
+          SPOUSE: 'Spouse',
+          CHILD: 'Child',
+          DEPENDENT: 'Dependent',
+        };
         return {
           id: value._id,
           userName: value.userName,
@@ -90,8 +95,8 @@ export const MembersPage = () => {
           spiritualStatus: value.spiritualStatus,
           dateOfBirth: value.dateOfBirth,
           anniversaryDate: value.anniversaryDate,
-          householdId: value.householdId,
-          householdRole: value.householdRole,
+          household: (value.householdId as any)?.name || '—',
+          householdRole: roleLabels[value.householdRole] || value.householdRole || '—',
           firstName: value.firstName,
           email: value.email,
           lastName: value.lastName,
@@ -154,7 +159,7 @@ export const MembersPage = () => {
             data={tableData}
             getSelectedRowsObject={getSelectedRowsObject}
             columnOptions={{
-              HideColumns: ["id", "churchId", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth"]
+              HideColumns: ["id", "churchId", "profilePicUrl", "address", "password", "fatherName", "motherName", "dateOfBirth", "anniversaryDate", "userName"]
             }}
           >
             {(row) =>
@@ -190,17 +195,18 @@ export const MembersPage = () => {
                 <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
                   <ViewProfile memberId={row.original._id}
                     userName={row.getValue("userName")}
-                    dateOfBirth={row.getValue("dateOfBirth")}
+                    dateOfBirth={row.original.dateOfBirth}
+                    anniversaryDate={row.original.anniversaryDate}
                     phone={row.getValue("phone")}
-                    address={row.getValue("address")}
+                    address={row.original.address}
                     firstName={row.getValue("firstName")}
                     lastName={row.getValue("lastName")}
                     email={row.getValue("email")}
-                    fatherName={row.getValue("fatherName")}
-                    motherName={row.getValue("motherName")}
+                    fatherName={row.original.fatherName}
+                    motherName={row.original.motherName}
                     spiritualStatus={row.getValue("spiritualStatus")}
                     churchName={userContext.church?.churchName}
-                    profilePicUrl={row.getValue("profilePicUrl")}></ViewProfile>
+                    profilePicUrl={row.original.profilePicUrl}></ViewProfile>
                 </Modal>
               </ActionsColumn>
             }

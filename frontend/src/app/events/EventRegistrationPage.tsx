@@ -117,14 +117,14 @@ export const EventRegistrationPage: React.FC = () => {
               </span>
             )}
           </div>
+          {event.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed mt-3 max-w-xl">{event.description}</p>
+          )}
         </div>
       </div>
 
       {/* Registration Form */}
       <div className="max-w-lg mx-auto px-4 py-8 md:py-12">
-        {event.description && (
-          <p className="text-muted-foreground text-sm mb-8 leading-relaxed">{event.description}</p>
-        )}
 
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm shadow-xl">
           <CardHeader>

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { TEventsData } from "./types/events.types";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { DatePicker } from "@/components/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,19 +14,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { AvatarUploadButton, useAvatarUploadHandler } from "@/components/dynamic/Cropper";
+import { useCrop } from "@/context/CropProvider";
 
 // Optional: pass event data when editing
 type AddEventsProps = {
-    data?: TEventsData | null; // Renamed from event
+    data?: TEventsData | null;
     triggerVariant?: "default" | "outline" | "ghost";
-    trigger?: string; // Aligning type to string like CUMembers
+    trigger?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     onSuccess?: () => void;
 };
 
 export const CUEvents = ({
-    data, // Renamed from event
+    data,
     triggerVariant,
     trigger,
     open,
@@ -34,6 +36,16 @@ export const CUEvents = ({
     onSuccess
 }: AddEventsProps) => {
     const isEdit = !!data?.id;
+    const { setCroppedImage } = useCrop();
+
+    // When editing, pre-load the existing cover image into the cropper preview
+    useEffect(() => {
+        if (isEdit && (data as any)?.coverImageUrl) {
+            setCroppedImage((data as any).coverImageUrl);
+        } else if (!isEdit) {
+            setCroppedImage(null);
+        }
+    }, [isEdit, data, setCroppedImage]);
 
     return (
         <CrudSheet<TEventsData>
@@ -42,6 +54,7 @@ export const CUEvents = ({
             description={isEdit ? "Update event details" : "Create a new event"}
             trigger={trigger!}
             triggerVariant={triggerVariant}
+            multipart={true}
             defaultValues={useMemo(() => ({
                 eventName: data?.eventName ?? "",
                 description: data?.description ?? "",
@@ -60,13 +73,29 @@ export const CUEvents = ({
             onOpenChange={onOpenChange}
             onSuccess={onSuccess}
         >
-            {({ register, control, watch, formState: { errors } }) => {
+            {({ register, control, watch, setValue, formState: { errors } }) => {
                 const isRecurring = watch("isRecurring");
+                const { AvatarUploadCropperContent } = useAvatarUploadHandler(setValue, control);
 
                 return (
                     <div className="grid gap-6 px-4">
+
+                        {/* Cover Image Upload */}
+                        <div className="grid gap-2">
+                            <Label>Cover Image <span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                            <AvatarUploadCropperContent fieldName="coverImage" />
+                            <AvatarUploadButton
+                                isRequired={false}
+                                setValue={setValue}
+                                getValues={() => ({})}
+                                control={control}
+                                name="coverImage"
+                                label="Upload Cover Image"
+                            />
+                        </div>
+
                         <div className="grid gap-3">
-                            <Label htmlFor="eventName">Event Title</Label>
+                            <Label htmlFor="eventName">Event Title <span className="text-red-500">*</span></Label>
                             <Input
                                 id="eventName"
                                 {...register("eventName", { required: "Title is required" })}
@@ -140,7 +169,7 @@ export const CUEvents = ({
 
 
                         <div className="grid gap-3">
-                            <Label htmlFor="eventDate">{isRecurring ? "Start Date" : "Date"}</Label>
+                            <Label htmlFor="eventDate">{isRecurring ? "Start Date" : "Date"} <span className="text-red-500">*</span></Label>
                             <Controller
                                 name="eventDate"
                                 control={control}
@@ -180,7 +209,7 @@ export const CUEvents = ({
                         )}
 
                         <div className="grid gap-3">
-                            <Label htmlFor="eventLocation">Location</Label>
+                            <Label htmlFor="eventLocation">Location <span className="text-red-500">*</span></Label>
                             <Input
                                 id="eventLocation"
                                 {...register("eventLocation", { required: "Location is required" })}

@@ -77,6 +77,8 @@ export const CUMembers = ({
                 if (!familyName.trim()) return;
                 // Create the household — this member becomes PRIMARY automatically
                 await api.post('/households', { name: familyName.trim(), primaryContactId: targetId });
+                // Also save the role label for this member
+                await api.patch(`/members/${targetId}`, { householdRole });
                 toast.success(`Family "${familyName}" created!`);
             } else {
                 // Assign to existing household
@@ -458,18 +460,38 @@ export const CUMembers = ({
                                     </Select>
                                 </div>
 
-                                {/* Create new family: show name input */}
+
+                                {/* Create new family: show name input + role */}
                                 {selectedHousehold === '__new__' && (
-                                    <div className="grid gap-2">
-                                        <Label>Family Name</Label>
-                                        <Input
-                                            placeholder="e.g. The Abraham Family"
-                                            value={familyName}
-                                            onChange={(e) => setFamilyName(e.target.value)}
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            This member will be set as the <strong>Primary Contact</strong> of this family.
-                                        </p>
+                                    <div className="grid gap-3">
+                                        <div className="grid gap-2">
+                                            <Label>Family Name</Label>
+                                            <Input
+                                                placeholder="e.g. The Abraham Family"
+                                                value={familyName}
+                                                onChange={(e) => setFamilyName(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label>My Role in This Family</Label>
+                                            <RadioGroup
+                                                value={householdRole}
+                                                onValueChange={setHouseholdRole}
+                                                className="flex gap-4 flex-wrap"
+                                            >
+                                                {['PRIMARY', 'SPOUSE', 'CHILD', 'DEPENDENT'].map((role) => (
+                                                    <div key={role} className="flex items-center gap-2">
+                                                        <RadioGroupItem value={role} id={`new-role-${role}`} />
+                                                        <Label htmlFor={`new-role-${role}`} className="font-normal capitalize cursor-pointer">
+                                                            {role === 'PRIMARY' ? 'Head of Family' : role.charAt(0) + role.slice(1).toLowerCase()}
+                                                        </Label>
+                                                    </div>
+                                                ))}
+                                            </RadioGroup>
+                                            <p className="text-xs text-muted-foreground">
+                                                The family will be created with this member as <strong>Primary Contact</strong>. The role label defines how this member appears in the family.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -493,6 +515,7 @@ export const CUMembers = ({
                                         </RadioGroup>
                                     </div>
                                 )}
+
                             </div>
                         </>
 

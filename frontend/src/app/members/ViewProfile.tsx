@@ -2,36 +2,54 @@ import api from "@/api/api"
 import { Modal } from "@/components/dynamic/Modal"
 import LoadingSpinner from "@/components/spinner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import React, { useEffect } from "react"
-
+import React from "react"
 import { useState } from 'react';
-import { SignatureMaker } from '@docuseal/signature-maker-react';
 import { toast } from "sonner"
-import type { AxiosResponse } from "axios"
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard"
 import { HouseholdPanel } from "./HouseholdPanel"
+import {
+  Phone, Mail, MapPin, Calendar, User2, Heart, Users, Home, Cake, Star, Printer
+} from "lucide-react"
 
-export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchName, spiritualStatus, dateOfBirth, address, fatherName, motherName, lastName, firstName }) => {
-  // Split userName into firstName and lastName (assuming userName is "First Last")
+const SPIRITUAL_STATUS_COLOR: Record<string, string> = {
+  BELIEVER: 'bg-green-500/10 text-green-700 border-green-200',
+  NON_BELIEVER: 'bg-slate-500/10 text-slate-600 border-slate-200',
+  SEEKER: 'bg-blue-500/10 text-blue-600 border-blue-200',
+  UNDECIDED: 'bg-amber-500/10 text-amber-600 border-amber-200',
+};
+
+const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value?: string | null }) => {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-3 py-2">
+      <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium truncate">{value}</p>
+      </div>
+    </div>
+  );
+};
+
+export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchName, spiritualStatus, dateOfBirth, address, fatherName, motherName, lastName, firstName, email, anniversaryDate }: any) => {
   const [open, setOpen] = React.useState(false);
   const [userId, setUserId] = useState(undefined)
 
-
-  // useEffect(() => {
-  //   console.log(userId);
-
-  // }, [userId])
-  const { data, error, isPending, isError } = useQuery({
+  const { data, error, isPending } = useQuery({
     queryKey: ['pastorSignature'],
     queryFn: async () => {
       const result = await api.get('/members/settings/signature')
       if (result) {
         setUserId(result.data.data._id)
       }
-      console.log(result)
       return result
     },
     retry: false
@@ -39,195 +57,187 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
 
   const queryClient = useQueryClient()
 
-
   const signatureMutation = useMutation({
     mutationFn: async (data: FormData) => {
       if (userId)
         data.append('userId', userId);
       else
         throw 'User ID is not set'
-      const result = await api.post('/members/settings/signature', data
-      )
-      return result
+      return await api.post('/members/settings/signature', data)
     },
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.invalidateQueries({
-        queryKey: ['pastorSignature']
-      })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pastorSignature'] })
     },
     onError: (error: any) => {
-      console.error(error);
-      toast.error(error.response.data.data.message);
+      toast.error(error.response?.data?.data?.message || 'Failed to save signature');
     },
   })
 
-  console.log('data signature:', (`${import.meta.env.VITE_APP_API_URL}/signatures/${data?.data.data.signature?.signaturePicName}`))
+  const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'NA';
+  const fullName = `${firstName || ''} ${lastName || ''}`.trim();
+  const statusColor = SPIRITUAL_STATUS_COLOR[spiritualStatus] || 'bg-muted text-muted-foreground border-border';
 
   return (
     <>
-      {/* Screen Display: Profile Card */}
-      <Card className="mt-6 w-full max-w-md mx-auto rounded-2xl shadow-lg print:hidden">
-        <CardHeader className="flex flex-col items-center gap-2">
-          <Avatar className="h-28 w-28 border shadow-md">
-            <AvatarImage
-              src={profilePicUrl?.startsWith('http') ? profilePicUrl : `${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
-              alt="Profile picture"
-            />
-            <AvatarFallback className="text-lg font-semibold">NA</AvatarFallback>
-          </Avatar>
-          <CardTitle className="mt-2 text-xl font-semibold">{userName}</CardTitle>
-          <p className="text-sm text-muted-foreground">User Profile</p>
-        </CardHeader>
+      {/* ── PREMIUM PROFILE CARD ── */}
+      <div className="space-y-5 print:hidden">
 
-        <CardContent className="space-y-4 text-sm">
-          <div className="flex justify-between border-b pb-2">
-            <span className="font-medium text-muted-foreground">Phone</span>
-            <span className="font-semibold">{phone}</span>
-          </div>
-          <div className="flex justify-between border-b pb-2">
-            <span className="font-medium text-muted-foreground">Birthdate</span>
-            <span className="font-semibold">{dateOfBirth}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium text-muted-foreground">Spiritual Status</span>
-            <span className="font-semibold">{spiritualStatus}</span>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Hero Banner */}
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/5 to-background border border-border/50">
+          {/* Decorative background rings */}
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-primary/10 blur-2xl" />
+          <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-primary/5 blur-xl" />
 
-      {/* Household Panel */}
-      {memberId && <HouseholdPanel memberId={memberId} />}
+          <div className="relative p-6 flex items-start gap-5">
+            <Avatar className="h-20 w-20 border-4 border-background shadow-lg flex-shrink-0">
+              <AvatarImage
+                src={profilePicUrl?.startsWith('http') ? profilePicUrl : `${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
+                alt={fullName}
+              />
+              <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">{initials}</AvatarFallback>
+            </Avatar>
 
-      {/* Print Display: Church Membership Form */}
-      <div className="hidden print:block max-w-3xl mx-auto p-8 bg-white">
-        <style>{`
-    @media print {
-      @page {
-        size: A4;
-        margin: 1cm;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        -webkit-print-color-adjust: exact; /* Ensure colors render accurately */
-      }
-      body, html {
-        margin: 0 !important;
-        padding: 0 !important;
-        font-family: 'Times New Roman', Times, serif;
-        border: none !important;
-      }
-      .print-no-header-footer {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      /* Explicitly suppress headers and footers */
-      @page {
-        @top-left { content: none !important; }
-        @top-center { content: none !important; }
-        @top-right { content: none !important; }
-        @bottom-left { content: none !important; }
-        @bottom-center { content: none !important; }
-        @bottom-right { content: none !important; }
-      }
-      .signature-img {
-        max-height: 50px; /* Limit height to prevent oversized signature */
-        max-width: 200px; /* Limit width to fit within column */
-        object-fit: contain; /* Maintain aspect ratio */
-        display: block;
-        margin: 0 auto; /* Center the image */
-      }
-      .no-signature {
-        text-align: center;
-        color: #666;
-        font-style: italic;
-      }
-      .answer-field {
-        border-color: #374151; /* Dark grey (gray-700) for borders */
-        color: #111827; /* Darker text (gray-900) for answers */
-      }
-      .label-field {
-        color: #1F2937; /* Dark grey (gray-800) for labels */
-      }
-    }
-  `}</style>
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-wider">
-            {churchName}
-          </h1>
-          <p className="text-lg text-gray-600 italic mt-2">
-            Welcoming You to Our Family in Faith
-          </p>
+            <div className="flex-1 min-w-0 pt-1">
+              <h2 className="text-xl font-bold tracking-tight truncate">{fullName}</h2>
+              <p className="text-sm text-muted-foreground">@{userName}</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {spiritualStatus && (
+                  <Badge variant="outline" className={`text-xs ${statusColor}`}>
+                    <Star className="h-3 w-3 mr-1" />
+                    {spiritualStatus.charAt(0) + spiritualStatus.slice(1).toLowerCase()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="p-0">
-          <h2 className="text-2xl font-semibold text-center mb-8">
-            Church Membership Form
-          </h2>
+        {/* Tabs */}
+        <Tabs defaultValue="personal" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="personal" className="gap-2 text-xs">
+              <User2 className="h-3.5 w-3.5" /> Personal Info
+            </TabsTrigger>
+            <TabsTrigger value="family" className="gap-2 text-xs">
+              <Home className="h-3.5 w-3.5" /> Family
+            </TabsTrigger>
+          </TabsList>
 
+          {/* PERSONAL INFO TAB */}
+          <TabsContent value="personal" className="mt-4 space-y-3">
+            <Card className="border-border/50 bg-card/50">
+              <CardContent className="pt-4 pb-2 divide-y divide-border/50">
+                <InfoRow icon={Phone} label="Phone Number" value={phone} />
+                <InfoRow icon={Mail} label="Email Address" value={email} />
+                <InfoRow icon={MapPin} label="Address" value={address} />
+                <InfoRow icon={Cake} label="Date of Birth" value={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : dateOfBirth} />
+                <InfoRow icon={Heart} label="Anniversary" value={anniversaryDate ? new Date(anniversaryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : anniversaryDate} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 bg-card/50">
+              <CardContent className="pt-4 pb-2 divide-y divide-border/50">
+                <InfoRow icon={Users} label="Father's Name" value={fatherName} />
+                <InfoRow icon={Users} label="Mother's Name" value={motherName} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* FAMILY TAB */}
+          <TabsContent value="family" className="mt-4">
+            {memberId ? (
+              <HouseholdPanel memberId={memberId} />
+            ) : (
+              <Card className="border-border/50 bg-card/50">
+                <CardContent className="pt-6 pb-6 flex flex-col items-center gap-2 text-center">
+                  <Home className="h-8 w-8 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground">No family information available.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Print Button */}
+        <div className="flex justify-center gap-3">
+          {isPending && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-50 rounded-2xl">
+              <LoadingSpinner />
+            </div>
+          )}
+          {data?.data?.data?.signature ? (
+            <Button variant="outline" className="gap-2" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" /> Print Membership Card
+            </Button>
+          ) : error ? (
+            <Button variant="outline" className="gap-2" onClick={() => toast.error((error as any)?.response?.data?.message || 'No pastor signature found.')}>
+              <Printer className="h-4 w-4" /> Print
+            </Button>
+          ) : (
+            <Modal triggerButtonContent={<><Printer className="h-4 w-4 mr-2" /> Print</>} modelTitle="Signature Required" modelDescription="Please set the pastor's signature before printing." onOpenChange={() => {}}>
+              <SignatureCard postSignatureMutation={signatureMutation} />
+            </Modal>
+          )}
+        </div>
+      </div>
+
+      {/* ── PRINT VIEW (unchanged from before) ── */}
+      <div className="hidden print:block max-w-3xl mx-auto p-8 bg-white">
+        <style>{`
+          @media print {
+            @page { size: A4; margin: 1cm; }
+            body, html { margin: 0 !important; padding: 0 !important; font-family: 'Times New Roman', Times, serif; }
+            .signature-img { max-height: 50px; max-width: 200px; object-fit: contain; display: block; margin: 0 auto; }
+            .no-signature { text-align: center; color: #666; font-style: italic; }
+          }
+        `}</style>
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-800 uppercase tracking-wider">{churchName}</h1>
+          <p className="text-lg text-gray-600 italic mt-2">Welcoming You to Our Family in Faith</p>
+        </div>
+        <div className="p-0">
+          <h2 className="text-2xl font-semibold text-center mb-8">Church Membership Form</h2>
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {firstName || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{firstName || "N/A"}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {lastName || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{lastName || "N/A"}</p>
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">Father's Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {fatherName || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{fatherName || "N/A"}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Mother's Name</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {motherName || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{motherName || "N/A"}</p>
             </div>
           </div>
-
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700">Address</label>
-            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-              {address || "N/A"}
-            </p>
+            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{address || "N/A"}</p>
           </div>
-
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {dateOfBirth || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{dateOfBirth || "N/A"}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-                {phone || "N/A"}
-              </p>
+              <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{phone || "N/A"}</p>
             </div>
           </div>
-
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700">Spiritual Status</label>
-            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">
-              {spiritualStatus || "N/A"}
-            </p>
+            <p className="mt-1 text-base font-semibold border-b border-gray-300 pb-1">{spiritualStatus || "N/A"}</p>
           </div>
-
           <div className="mt-12 grid grid-cols-2 gap-8">
             <div>
-              <div className="border-b border-gray-400 mt-4 mb-3 h-16"></div>
+              <div className="border-b border-gray-400 mt-4 mb-3 h-16" />
               <p className="text-center text-sm font-medium">Member's Signature</p>
               <p className="text-center text-sm mt-3">Date: ____________________</p>
             </div>
@@ -235,12 +245,11 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
               <div className="border-b border-gray-400 mt-4 mb-3 h-16 flex items-center justify-center">
                 {data?.data?.data?.signature?.signaturePicName ? (
                   <img
-                    src={data.data.data.signature.signaturePicPath?.startsWith('http') 
-                      ? data.data.data.signature.signaturePicPath 
+                    src={data.data.data.signature.signaturePicPath?.startsWith('http')
+                      ? data.data.data.signature.signaturePicPath
                       : `${import.meta.env.VITE_APP_API_URL}/signatures/${data.data.data.signature.signaturePicName}`}
-                    alt="Member's Signature"
+                    alt="Pastor's Signature"
                     className="signature-img"
-                    onError={() => console.error('Failed to load signature image')}
                   />
                 ) : (
                   <p className="no-signature">No signature available</p>
@@ -250,67 +259,8 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
               <p className="text-center text-sm mt-3">Date: ____________________</p>
             </div>
           </div>
-
-          {/* <div className="mt-10 text-center text-sm text-gray-500">
-            <p>Grace Community Church</p>
-            <p>123 Faith Road, Springfield, USA</p>
-            <p>Contact: (123) 456-7890 | info@gracechurch.org</p>
-          </div> */}
         </div>
       </div>
-
-
-      {/* Print Button (not printed) */}
-      < div className="mt-6 flex justify-center gap-4 print:hidden" >
-        {isPending &&
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
-            <LoadingSpinner />
-          </div>
-        }
-
-        {
-          (data && data.data.data.signature) ? <Button variant={'default'}
-            onClick={() => {
-              window.print()
-            }}
-            className="w-36"
-          >
-            Print
-          </Button> : (error ? <Button variant={'default'}
-            onClick={() => {
-              toast.error(error?.response?.data.message)
-            }}
-            className="w-36"
-          >
-            Print
-          </Button> :
-            (<Modal triggerButtonContent={'Print'} modelTitle={'Signature not found!'} modelDescription={'Create the pastors signature here'} onOpenChange={() => console.log("hello")} > <SignatureCard postSignatureMutation={signatureMutation} /></Modal>)
-          )
-        }
-        {/* {(data && !error) ? (<Button variant={'default'}
-          onClick={() => {
-            window.print()
-          }}
-          className="w-36"
-        >
-          Print
-        </Button>)
-          // If pastor isn't in system - asking to create a pastor
-          :
-          ((data && !data.data.signature) ?
-            (<Modal triggerButtonContent={'Print'} modelTitle={'Signature not found!'} modelDescription={'Create the pastors signature here'} onOpenChange={() => console.log("hello")} > <SignatureCard /></Modal>) :
-            (<Button variant={'default'}
-              onClick={() => {
-                toast.error(error?.response?.data.message)
-              }}
-              className="w-36"
-            >
-              Print
-            </Button>)
-
-          )
-        } */}
-      </div >
     </>
   )
 }

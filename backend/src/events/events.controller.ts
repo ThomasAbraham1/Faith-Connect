@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import sharp from 'sharp';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { DeleteEventDto } from './dto/delete-event.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { StorageService } from 'src/storage/storage.service';
 
 // --- PUBLIC routes (no auth) ---
 @Controller('events/public')
@@ -25,11 +29,25 @@ export class EventsPublicController {
 @Controller('events')
 @UseGuards(AuthenticatedGuard)
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) { }
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly storageService: StorageService,
+  ) { }
 
   @Post()
-  create(@Req() req, @Body() createEventDto) {
-    createEventDto.churchId = req.user.church._id
+  @UseInterceptors(FileInterceptor('coverImage', { storage: memoryStorage() }))
+  async create(@Req() req, @Body() createEventDto: CreateEventDto, @UploadedFile() coverImage?: Express.Multer.File) {
+    createEventDto.churchId = req.user.church._id;
+    if (coverImage) {
+      const churchId = req.user.church._id;
+      const optimizedBuffer = await sharp(coverImage.buffer)
+        .resize(1200, 630, { fit: 'cover', withoutEnlargement: true })
+        .webp({ quality: 85 })
+        .toBuffer();
+      const key = `events/${churchId}/cover-${Date.now()}.webp`;
+      const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+      (createEventDto as any).coverImageUrl = url;
+    }
     return this.eventsService.create(createEventDto);
   }
 
@@ -55,7 +73,23 @@ export class EventsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
+  @UseInterceptors(FileInterceptor('coverImage', { storage: memoryStorage() }))
+  async update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto,
+    @UploadedFile() coverImage?: Express.Multer.File,
+    @Req() req?: any,
+  ) {
+    if (coverImage) {
+      const churchId = req.user.church._id;
+      const optimizedBuffer = await sharp(coverImage.buffer)
+        .resize(1200, 630, { fit: 'cover', withoutEnlargement: true })
+        .webp({ quality: 85 })
+        .toBuffer();
+      const key = `events/${churchId}/cover-${Date.now()}.webp`;
+      const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+      (updateEventDto as any).coverImageUrl = url;
+    }
     return this.eventsService.update(id, updateEventDto);
   }
 

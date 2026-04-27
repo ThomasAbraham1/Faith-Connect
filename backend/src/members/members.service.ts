@@ -37,7 +37,9 @@ export class MembersService {
 
   async findAll(churchId: string) {
     try {
-      return await this.userModel.find({ churchId: churchId });
+      return await this.userModel
+        .find({ churchId: churchId })
+        .populate('householdId', 'name');
     } catch (e) {
       return e;
     }

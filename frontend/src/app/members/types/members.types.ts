@@ -30,16 +30,20 @@ export interface membersResponseObject {
     email?: string;
     spiritualStatus: string;
     dateOfBirth: string;
+    anniversaryDate: string;
     address: string;
     lastName: string;
     firstName: string;
     motherName: string;
     fatherName: string;
+    householdId?: { _id: string; name: string } | string;
+    householdRole?: string;
 }
 
 // Column Config
 export type Member = {
     _id: string;
+    id: string;
     userName: string;
     password: string;
     phone: string;
@@ -47,6 +51,9 @@ export type Member = {
     role: string;
     spiritualStatus: string;
     dateOfBirth: string;
+    anniversaryDate?: string;
+    household?: string;
+    householdRole?: string;
     firstName: string;
     lastName: string;
     fatherName: string;
