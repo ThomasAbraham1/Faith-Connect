@@ -2,6 +2,7 @@ import api from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SquarePen, Trash2, Eye, MessageSquare } from "lucide-react";
 import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
+import { FaWhatsapp } from "react-icons/fa";
 import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 
@@ -132,7 +133,7 @@ export const MembersPage = () => {
               <SendWhatsApp 
                 triggerContent={
                   <>
-                    <MessageSquare className="h-4 w-4 mr-2" />
+                    <FaWhatsapp className="h-4 w-4 mr-2" />
                     Send WhatsApp to Selected
                   </>
                 }
@@ -190,7 +191,7 @@ export const MembersPage = () => {
                   </Button>
                 </Alert>
                 <SendWhatsApp 
-                  triggerContent={<MessageSquare className="h-4 w-4" />}
+                  triggerContent={<FaWhatsapp className="h-4 w-4" />}
                   triggerVariant="ghost"
                   triggerClassName="text-green-600 hover:text-green-700 hover:bg-green-50/50 h-9 w-9 p-0"
                   phoneNumbers={[row.original.phone]}
