@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import { SignatureCard } from "@/components/dynamic/DynamicSignatureCard"
 import { HouseholdPanel } from "./HouseholdPanel"
 import {
-  Phone, Mail, MapPin, Calendar, User2, Heart, Users, Home, Cake, Star, Printer
+  Phone, Mail, MapPin, Calendar, User2, Heart, Users, Home, Cake, Star, Printer, Loader2
 } from "lucide-react"
 
 const SPIRITUAL_STATUS_COLOR: Record<string, string> = {
