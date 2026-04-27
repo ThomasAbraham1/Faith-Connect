@@ -95,7 +95,7 @@ export function DynamicTable1<T>({
                 const value = row.getValue(key);
                 let displayValue: any = value;
                 
-                const isDateKey = key.toLowerCase().includes('date');
+                const isDateKey = key.toLowerCase().includes('date') || key.endsWith('At');
                 if (isDateKey && typeof value === "string") {
                     const parsed = new Date(value);
                     if (!isNaN(parsed.getTime())) {
