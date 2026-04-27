@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, MapPin, Briefcase, ChevronRight, User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { CUGroup } from "./CUGroup";
 
 interface GroupsListProps {
@@ -17,7 +17,15 @@ interface GroupsListProps {
 export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
   const [category, setCategory] = React.useState<GroupCategory>("REGION");
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
-    const { category: URLcategory } = useParams();
+  const [searchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category') as GroupCategory;
+
+  React.useEffect(() => {
+    if (urlCategory && (urlCategory === "REGION" || urlCategory === "MINISTRY")) {
+      setCategory(urlCategory);
+    }
+  }, [urlCategory]);
+
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ["groups", category],
@@ -36,14 +44,14 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
             Manage and organize your congregation into regions and ministries.
           </p>
         </div>
-        <CUGroup 
-          trigger="Add Group" 
-          open={isCreateOpen} 
+        <CUGroup
+          trigger="Add Group"
+          open={isCreateOpen}
           onOpenChange={setIsCreateOpen}
         />
       </div>
 
-      <Tabs defaultValue="REGION" className="w-full" onValueChange={(v) => setCategory(v as GroupCategory)}>
+      <Tabs value={category} className="w-full" onValueChange={(v) => setCategory(v as GroupCategory)}>
         <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-muted/50 backdrop-blur-sm border border-border/50">
           <TabsTrigger value="REGION" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
@@ -70,8 +78,8 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {groups?.map((group) => (
-                <Card 
-                  key={group._id} 
+                <Card
+                  key={group._id}
                   className="group relative overflow-hidden cursor-pointer border-border/50 bg-background/50 backdrop-blur-xl hover:bg-background/80 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
                   onClick={() => onGroupClick(group)}
                 >
@@ -89,14 +97,14 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
                       {group.name}
                     </CardTitle>
                   </CardHeader>
-                  
+
                   <CardContent className="relative">
                     <div className="flex flex-col gap-4 mt-2">
                       <div className="flex items-center gap-3">
                         <div className="flex -space-x-2">
                           {group.leaders.slice(0, 3).map((leader, i) => (
-                            <div 
-                              key={leader._id} 
+                            <div
+                              key={leader._id}
                               className="h-8 w-8 rounded-full border-2 border-background bg-muted flex items-center justify-center overflow-hidden"
                             >
                               {leader.profilePicUrl ? (
@@ -121,7 +129,7 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onGroupClick }) => {
                       </div>
 
                       <div className="h-[1px] w-full bg-gradient-to-r from-border/50 via-border/10 to-transparent" />
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Users className="h-4 w-4" />
