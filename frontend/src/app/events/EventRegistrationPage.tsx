@@ -19,7 +19,7 @@ export const EventRegistrationPage: React.FC = () => {
     queryKey: ['public-event', eventId],
     queryFn: async () => {
       const res = await axios.get(`${API_BASE}/events/public/${eventId}`);
-      return res.data;
+      return res.data?.data || res.data;
     },
   });
 

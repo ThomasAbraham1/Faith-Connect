@@ -55,15 +55,19 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   });
 
   const toggleRegistrationMutation = useMutation({
-    mutationFn: async () => {
-      console.log("event is ", event)
+    mutationFn: async () => { 
       const response = await api.patch(`/events/${eventId}`, { registrationOpen: !event?.registrationOpen })
       return response.data
     },
     onSuccess: (response) => {
+      console.log(response)
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventsData'] });
-      toast.success(response.message);
+      if(response.data.registrationOpen){
+        toast.success(response?.data?.message || 'Event registration opened successfully!');
+      }else{
+        toast.success(response?.data?.message || 'Event registration closed successfully!');
+      }
     },
   });
 
