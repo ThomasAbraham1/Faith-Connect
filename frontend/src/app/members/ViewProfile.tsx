@@ -78,7 +78,8 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
   const statusColor = SPIRITUAL_STATUS_COLOR[spiritualStatus] || 'bg-muted text-muted-foreground border-border';
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in duration-300">
+    <>
+      <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in duration-300">
       {/* ── MODERN HERO HEADER ── */}
       <div className="relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
         {/* Background Accent */}
