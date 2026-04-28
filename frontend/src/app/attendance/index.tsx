@@ -25,14 +25,14 @@ import {
 import type { TEventsData } from "../events/types/events.types";
 
 
-type tableDataShape = { id: string, churchId: string, userName: string, status: string }
+type tableDataShape = { id: string, churchId: string, userName: string, name: string, status: string }
 type attendanceRecord = {
     memberId: string,
     status: 'PRESENT' | 'ABSENT',
     _id: string
 }
 
-type userQueryDataShape = { _id: string, churchId: string, userName: string, }
+type userQueryDataShape = { _id: string, churchId: string, userName: string, firstName: string, lastName?: string }
 type attendanceRecordsType = {
     memberId: string;
     status: string
@@ -45,7 +45,7 @@ export type formDataType = {
     eventId?: string; // Add eventId to form type
 }
 
-type attendanceTableDataType = Record<'churchId' | 'id' | 'status' | 'userName', string>[]
+type attendanceTableDataType = Record<'churchId' | 'id' | 'status' | 'userName' | 'name', string>[]
 
 export const Attendance = () => {
     const [tableDataState, setTableDataState] = useState<attendanceTableDataType>([])
@@ -161,6 +161,7 @@ export const Attendance = () => {
             return {
                 id: value._id,
                 userName: value.userName,
+                name: `${value.firstName} ${value.lastName || ''}`.trim(),
                 churchId: value.churchId,
                 status: record?.status ? record?.status : '', // fallback to ABSENT
             };
@@ -187,6 +188,23 @@ export const Attendance = () => {
 
     const columns: ColumnDef<tableDataShape>[] = useMemo(() => [
         {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <div 
+                        className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors py-2 font-bold text-xs tracking-wider"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Name
+                        <ArrowUpDown className="size-3" />
+                    </div>
+                );
+            },
+            cell: ({ row }) => (
+                <div className="py-2 text-sm font-medium">{row.getValue("name")}</div>
+            ),
+        },
+        {
             accessorKey: "userName",
             header: ({ column }) => {
                 return (
@@ -200,7 +218,7 @@ export const Attendance = () => {
                 );
             },
             cell: ({ row }) => (
-                <div className="py-2 text-sm">{row.getValue("userName")}</div>
+                <div className="py-2 text-sm text-muted-foreground">{row.getValue("userName")}</div>
             ),
         },
         {
@@ -228,20 +246,6 @@ export const Attendance = () => {
                             } radioOptions={['PRESENT', 'ABSENT']} />
                     } />
                 </div>
-            ),
-        },
-        {
-            accessorKey: "id",
-            header: "Id",
-            cell: ({ row }) => (
-                <div className="py-2 text-sm">{row.getValue("id")}</div>
-            ),
-        },
-        {
-            accessorKey: "churchId",
-            header: "Church Id",
-            cell: ({ row }) => (
-                <div className="py-2 text-sm">{row.getValue("churchId")}</div>
             ),
         },
     ], [attendanceQueryData, tableDataState])
