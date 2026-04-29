@@ -17,7 +17,7 @@ import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
 import { CUMembers } from "./CUMembers";
 import { Modal } from "@/components/dynamic/Modal";
-import { useReactToPrint } from "react-to-print"; 
+import { useReactToPrint } from "react-to-print";
 import { ViewProfile } from "./ViewProfile";
 import type { membersResponseObject, Member } from "./types/members.types";
 
@@ -233,12 +233,12 @@ export const MembersPage = () => {
           </DynamicTable1>
         </CardContent>
       </Card>
-      
+
       {/* Hidden printable table */}
-      <PrintableMembersTable 
-        ref={contentRef} 
-        data={tableData as Member[]} 
-        churchName={userContext.church?.name}
+      <PrintableMembersTable
+        ref={contentRef}
+        data={tableData as Member[]}
+        churchName={userContext.church?.churchName} 
       />
     </div>
   );

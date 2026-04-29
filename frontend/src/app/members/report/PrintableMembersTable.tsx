@@ -9,7 +9,7 @@ interface PrintableMembersTableProps {
 export const PrintableMembersTable = forwardRef<HTMLDivElement, PrintableMembersTableProps>(
   ({ data, churchName }, ref) => {
     return (
-      <div ref={ref} className="p-8 bg-white text-black" style={{ display: 'none', width: '100%' }}>
+      <div ref={ref} className="p-8 bg-white text-black w-full print:block" style={{ position: 'absolute', left: '-9999px', top: '0' }}>
         <style type="text/css" media="print">
           {`
             @page { size: A4 landscape; margin: 10mm; }
@@ -44,7 +44,7 @@ export const PrintableMembersTable = forwardRef<HTMLDivElement, PrintableMembers
                 <td className="border border-gray-300 p-2">{member.lastName || '-'}</td>
                 <td className="border border-gray-300 p-2">{member.phone || '-'}</td>
                 <td className="border border-gray-300 p-2">{member.email || '-'}</td>
-                <td className="border border-gray-300 p-2 capitalize">{member.role?.join(', ') || '-'}</td>
+                <td className="border border-gray-300 p-2 capitalize">{member.role || '-'}</td>
                 <td className="border border-gray-300 p-2 capitalize">{member.spiritualStatus?.replace('_', ' ') || '-'}</td>
               </tr>
             ))}
