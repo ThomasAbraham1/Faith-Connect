@@ -22,9 +22,9 @@ export class MembersService {
         createMemberDto.password = `auto_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       }
 
-      const doesUserNameExist = await this.userModel.findOne({ 
+      const doesUserNameExist = await this.userModel.findOne({
         userName: createMemberDto.userName,
-        churchId: createMemberDto.churchId 
+        churchId: createMemberDto.churchId
       });
       if (doesUserNameExist) {
         throw new ConflictException('Username already exists within this church');
@@ -63,9 +63,9 @@ export class MembersService {
 
     // check if username exists within the same church
     if (updateMemberDto.userName && updateMemberDto.userName !== userInfo.userName) {
-      const doesUserNameExist = await this.userModel.findOne({ 
-        userName: updateMemberDto.userName, 
-        churchId: userInfo.churchId 
+      const doesUserNameExist = await this.userModel.findOne({
+        userName: updateMemberDto.userName,
+        churchId: userInfo.churchId
       });
       if (doesUserNameExist) {
         throw new ConflictException('Username already exists within this church');
@@ -155,6 +155,7 @@ export class MembersService {
       }, { signature: 1, _id: 1 });
       if (!result)
         throw new NotFoundException('Please create a member with pastor role first - For pastors signature')
+      console.log(result)
       return result
     } catch (e) {
       throw e

@@ -112,6 +112,7 @@ export function CrudSheet<T extends FieldValues>({
     const mutation = useMutation({
         mutationFn: (fd: FormData | T) => {
             const url = isEdit ? editEndpoint(id!) : addEndpoint;
+            console.log(fd, 'fd')
             const method = isEdit ? api.patch : api.post;
             return method(url, fd);
         },
@@ -175,7 +176,6 @@ export function CrudSheet<T extends FieldValues>({
     const onSubmit = async (data: T) => {
         console.log(data)
         const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
-
         try {
             await mutation.mutateAsync(processedData);
         } catch (e) {

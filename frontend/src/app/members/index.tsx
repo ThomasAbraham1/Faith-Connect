@@ -1,8 +1,9 @@
 import api from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SquarePen, Trash2, Eye, MessageSquare } from "lucide-react";
+import { SquarePen, Trash2, Eye, MessageSquare, Printer } from "lucide-react";
 import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
 import { FaWhatsapp } from "react-icons/fa";
+import { PrintableMembersTable } from "./report/PrintableMembersTable";
 import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 
@@ -16,11 +17,14 @@ import { DynamicTable1 } from "@/components/dynamic/DynamicTable1";
 import { ActionsColumn } from "@/components/dynamic/ActionsColumn";
 import { CUMembers } from "./CUMembers";
 import { Modal } from "@/components/dynamic/Modal";
+import { useReactToPrint } from "react-to-print"; 
 import { ViewProfile } from "./ViewProfile";
 import type { membersResponseObject, Member } from "./types/members.types";
 
 
 export const MembersPage = () => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
   const userContext = useUser();
   const tableRef = useRef<TableType<Member>>(null);
   const [selection, setSelection] = useState<{ ids: string[], rows: Member[] }>({ ids: [], rows: [] });
@@ -81,7 +85,7 @@ export const MembersPage = () => {
       (value: membersResponseObject, index: number) => {
         // Find role name for user role IDs
         console.log(value)
-      const roleLabels: Record<string, string> = {
+        const roleLabels: Record<string, string> = {
           PRIMARY: 'Head of Family',
           SPOUSE: 'Spouse',
           CHILD: 'Child',
@@ -106,8 +110,8 @@ export const MembersPage = () => {
           fatherName: value.fatherName,
           motherName: value.motherName,
           address: value.address,
-          profilePicUrl: value.profilePic?.profilePicPath?.startsWith('http') 
-            ? value.profilePic.profilePicPath 
+          profilePicUrl: value.profilePic?.profilePicPath?.startsWith('http')
+            ? value.profilePic.profilePicPath
             : `/uploads/${value.profilePic?.profilePicName}`,
         };
       }
@@ -130,7 +134,7 @@ export const MembersPage = () => {
               <Alert onComfirmFunction={() => mutation.mutate(selection.ids)}>
                 <Button variant="destructive">Delete Selected</Button>
               </Alert>
-              <SendWhatsApp 
+              <SendWhatsApp
                 triggerContent={
                   <>
                     <FaWhatsapp className="h-4 w-4 mr-2" />
@@ -143,8 +147,8 @@ export const MembersPage = () => {
                 names={selection.rows.map(r => `${r.firstName} ${r.lastName}`)}
               />
             </div>
-            
-            <div className={selection.ids.length > 0 ? "hidden" : "block"}>
+
+            <div className={selection.ids.length > 0 ? "hidden" : "flex gap-2"}>
               <CUMembers
                 trigger="Add Member"
                 triggerVariant="default"
@@ -155,8 +159,19 @@ export const MembersPage = () => {
                 }}
                 data={editingMember as any}
               />
+              <Button
+                variant="outline"
+                onClick={() => reactToPrintFn()}
+                className="gap-2"
+              >
+                <Printer className="h-4 w-4" />
+                Print Directory
+              </Button>
             </div>
           </div>
+
+
+
           <DynamicTable1<Member>
             ref={tableRef}
             data={tableData}
@@ -190,7 +205,7 @@ export const MembersPage = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </Alert>
-                <SendWhatsApp 
+                <SendWhatsApp
                   triggerContent={<FaWhatsapp className="h-4 w-4" />}
                   triggerVariant="ghost"
                   triggerClassName="text-green-600 hover:text-green-700 hover:bg-green-50/50 h-9 w-9 p-0"
@@ -218,6 +233,13 @@ export const MembersPage = () => {
           </DynamicTable1>
         </CardContent>
       </Card>
+      
+      {/* Hidden printable table */}
+      <PrintableMembersTable 
+        ref={contentRef} 
+        data={tableData as Member[]} 
+        churchName={userContext.church?.name}
+      />
     </div>
   );
 };

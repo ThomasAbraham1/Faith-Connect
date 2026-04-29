@@ -79,10 +79,10 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto flex flex-col max-h-[85vh] animate-in fade-in zoom-in duration-300">
+      <div className="print:hidden w-full max-w-2xl mx-auto flex flex-col max-h-[85vh] animate-in fade-in zoom-in duration-300">
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6">
           {/* ── MODERN HERO HEADER ── */}
-          <div className="relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
+          <div className=" relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
             

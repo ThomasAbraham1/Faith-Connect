@@ -49,6 +49,7 @@ export const CUMembers = ({
     const [selectedHousehold, setSelectedHousehold] = useState('');
     const [householdRole, setHouseholdRole] = useState('SPOUSE');
     const [familyName, setFamilyName] = useState('');
+    console.log(data, "dattaaaaa")
 
     // Pre-populate household state when editing
     useEffect(() => {
@@ -441,9 +442,8 @@ export const CUMembers = ({
                                         control={control}
                                         rules={{ required: "Signature is required for a pastor" }}
                                         render={({ field }) => (
-                                            <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(watch('signature') ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
+                                            <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(field.value  ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
                                                 <SignatureCard value={(field.value && URL.createObjectURL(field.value)) ?? undefined} onChange={(value: Blob) => {
-                                                    // console.log(value + " ALSJLDJA");
                                                     field.onChange(value);
                                                     toast.success('Signature changed!')
                                                 }}></SignatureCard>
