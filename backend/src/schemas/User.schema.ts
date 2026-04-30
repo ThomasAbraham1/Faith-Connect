@@ -14,42 +14,62 @@ export enum SpiritualStatus {
 export type UserDocument = HydratedDocument<User>;
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Church' })
-  churchId: string;
-  @Prop({ required: true, lowercase: true })
-  userName: string;
-  @Prop({ required: true })
-  password: string;
-  @Prop({})
-  motherName: string;
-  @Prop({})
-  lastName: string;
-  @Prop({})
-  address: string;
-  @Prop({})
-  fatherName: string;
+  // 1. Identity
   @Prop({})
   firstName: string;
+
   @Prop({})
-  phone: string;
+  lastName: string;
+
+  @Prop({ required: true, lowercase: true })
+  userName: string;
+
+  // 2. Contact Information
   @Prop({})
   email: string;
-  @Prop({ enum: Object.values(SpiritualStatus) })
-  spiritualStatus: SpiritualStatus;
+
   @Prop({})
-  dateOfBirth: string;
+  phone: string;
+
   @Prop({})
-  anniversaryDate: string;
-  @Prop({ ref: 'Role' })
-  roles: string[];
+  address: string;
+
+  // 3. Family & Household
   @Prop({ type: String, enum: ['PRIMARY', 'SPOUSE', 'CHILD', 'DEPENDENT'], required: false })
   householdRole?: string;
+
+  @Prop({})
+  fatherName: string;
+
+  @Prop({})
+  motherName: string;
+
+  // 4. Important Dates
+  @Prop({})
+  dateOfBirth: string;
+
+  @Prop({})
+  anniversaryDate: string;
+
+  // 5. Status & Admin
+  @Prop({ enum: Object.values(SpiritualStatus) })
+  spiritualStatus: SpiritualStatus;
+
+  @Prop({ ref: 'Role' })
+  roles: string[];
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Church' })
+  churchId: string;
+
+  @Prop({ required: true })
+  password: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: false })
   householdId?: mongoose.Types.ObjectId;
 
   @Prop({ type: ProfilePic })
   profilePic: ProfilePic;
+
   @Prop({ type: Signature })
   signature: Signature;
 }
