@@ -28,6 +28,7 @@ import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { HouseholdsModule } from './households/households.module';
 
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ExpensesModule,
     WhatsappModule,
     HouseholdsModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

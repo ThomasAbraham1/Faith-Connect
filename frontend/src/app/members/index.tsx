@@ -1,9 +1,10 @@
 import api from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SquarePen, Trash2, Eye, MessageSquare, Printer } from "lucide-react";
+import { SquarePen, Trash2, Eye, MessageSquare, Printer, DownloadCloud } from "lucide-react";
 import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
 import { FaWhatsapp } from "react-icons/fa";
 import { PrintableMembersTable } from "./report/PrintableMembersTable";
+import { handleExcelDownload } from "@/lib/utils";
 import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 
@@ -24,12 +25,27 @@ import type { membersResponseObject, Member } from "./types/members.types";
 
 export const MembersPage = () => {
   const contentRef = useRef<HTMLDivElement>(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const [isPrintingDirectory, setIsPrintingDirectory] = useState(false);
+
+  const reactToPrintFn = useReactToPrint({
+    contentRef,
+    onBeforePrint: async () => setIsPrintingDirectory(true),
+    onAfterPrint: async () => setIsPrintingDirectory(false),
+  });
+
   const userContext = useUser();
   const tableRef = useRef<TableType<Member>>(null);
   const [selection, setSelection] = useState<{ ids: string[], rows: Member[] }>({ ids: [], rows: [] });
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  // Calling reports/users endpoint for generationg excel
+  const downloadExcel = async () => {
+    const response = await api.get("/report/users", {
+      responseType: "blob",
+    });
+    handleExcelDownload(response, 'members.xlsx');
+  };
 
   // Function to get selected row and format them for further processing
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
@@ -161,11 +177,19 @@ export const MembersPage = () => {
               />
               <Button
                 variant="outline"
-                onClick={() => reactToPrintFn()}
+                onClick={() => downloadExcel()}
+                className="gap-2"
+              >
+                <DownloadCloud className="h-4 w-4" />
+                Download Excel
+              </Button>
+              <Button
+                variant="outline"
+                // onClick={() => reactToPrintFn()}
                 className="gap-2"
               >
                 <Printer className="h-4 w-4" />
-                Print Directory
+                Download PDF
               </Button>
             </div>
           </div>
@@ -238,7 +262,7 @@ export const MembersPage = () => {
       <PrintableMembersTable
         ref={contentRef}
         data={tableData as Member[]}
-        churchName={userContext.church?.churchName} 
+        churchName={userContext.church?.churchName}
       />
     </div>
   );

@@ -24,8 +24,10 @@ import {
   User,
   Phone,
   Mail,
+  DownloadCloud,
 } from 'lucide-react';
 import { SendWhatsApp } from '../whatsapp/SendWhatsApp';
+import { handleExcelDownload } from '@/lib/utils';
 
 interface EventDetailProps {
   eventId: string;
@@ -57,17 +59,18 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   });
 
   const toggleRegistrationMutation = useMutation({
-    mutationFn: async () => { 
+    mutationFn: async () => {
       const response = await api.patch(`/events/${eventId}`, { registrationOpen: !event?.registrationOpen })
+      console.log(response)
       return response.data
     },
     onSuccess: (response) => {
       console.log(response)
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventsData'] });
-      if(response.data.registrationOpen){
+      if (response.data.registrationOpen) {
         toast.success(response?.data?.message || 'Event registration opened successfully!');
-      }else{
+      } else {
         toast.success(response?.data?.message || 'Event registration closed successfully!');
       }
     },
@@ -78,6 +81,13 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   const copyLink = () => {
     navigator.clipboard.writeText(registrationUrl);
     toast.success('Link copied to clipboard!');
+  };
+
+   const downloadExcel = async () => {
+    const response = await api.get("/report/registrations?eventId="+eventId, {
+      responseType: "blob",
+    });
+    handleExcelDownload(response, 'registrations.xlsx');
   };
 
   if (eventLoading || !event) {
@@ -184,15 +194,28 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                   <Badge variant="secondary">{registrations.length}</Badge>
                 )}
               </CardTitle>
-              {populatedRegs.length > 0 && (
-                <SendWhatsApp
-                  triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> Send WhatsApp</>}
-                  triggerVariant="outline"
-                  triggerClassName="h-9 px-3 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
-                  phoneNumbers={populatedRegs.map((m: any) => m.phone)}
-                  names={populatedRegs.map((m: any) => `${m.firstName} ${m.lastName}`)}
-                />
-              )}
+              <div className="flex items-center gap-2">
+                {/* Download Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadExcel}
+                  className="h-9 px-3 text-xs gap-2"
+                >
+                  <DownloadCloud className="h-4 w-4" />
+                  Export Excel
+                </Button>
+
+                {populatedRegs.length > 0 && (
+                  <SendWhatsApp
+                    triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> Send WhatsApp</>}
+                    triggerVariant="outline"
+                    triggerClassName="h-9 px-3 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
+                    phoneNumbers={populatedRegs.map((m: any) => m.phone)}
+                    names={populatedRegs.map((m: any) => `${m.firstName} ${m.lastName}`)}
+                  />
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               {regsLoading ? (

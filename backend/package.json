@@ -45,6 +45,7 @@
     "class-validator": "^0.14.2",
     "connect-mongodb-session": "^5.0.0",
     "cookie-parser": "^1.4.7",
+    "exceljs": "^4.4.0",
     "express-session": "^1.18.2",
     "mongoose": "^8.16.5",
     "mongoose-beautiful-unique-validation": "^7.1.1",

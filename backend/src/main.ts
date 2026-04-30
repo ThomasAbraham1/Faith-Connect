@@ -17,6 +17,7 @@ async function bootstrap() {
   app.enableCors({
     origin: ['https://www.faithconnect.store', 'https://faithconnect-474707.el.r.appspot.com', 'http://localhost:5173', 'http://43.204.208.225', 'http://app.harpazotech.com', 'https://app.harpazotech.com', 'http://localhost:5174'],
     credentials: true,
+    exposedHeaders: ['Content-Disposition']
   });
   console.log(isProduction)
   // Global Filter
@@ -72,4 +73,4 @@ async function bootstrap() {
   app.listen(port);
 }
 bootstrap();
- 
+
