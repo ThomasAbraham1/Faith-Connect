@@ -51,6 +51,21 @@ export const CUMembers = ({
     const [familyName, setFamilyName] = useState('');
     console.log(data, "dattaaaaa")
 
+
+    const [defaultCountry, setDefaultCountry] = useState<string>("US"); // Default to US or your primary country
+
+
+    useEffect(() => {
+        fetch('https://ipapi.co/country/')
+            .then(res => res.text())
+            .then(countryCode => {
+                if (countryCode && countryCode.length === 2) {
+                    setDefaultCountry(countryCode);
+                }
+            })
+            .catch(() => console.log("Failed to detect location, using default."));
+    }, []);
+
     // Pre-populate household state when editing
     useEffect(() => {
         if (isEdit) {
@@ -80,33 +95,33 @@ export const CUMembers = ({
                     // Remove from old household, unsetting ID and Role
                     await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
                 }
-            } 
+            }
             // Case 2: Create New Household
             else if (selectedHousehold === '__new__') {
                 if (!familyName.trim()) {
                     toast.error("Family name is required");
                     return;
                 }
-                
+
                 // Create household (this automatically assigns targetId as PRIMARY)
                 const res = await api.post('/households', { name: familyName.trim(), primaryContactId: targetId });
                 const newHouseholdId = res.data?.data?._id || res.data?._id;
-                
+
                 // If they were in an old household, remove them
                 if (oldHouseholdId && oldHouseholdId !== newHouseholdId && oldHouseholdId !== 'none') {
                     await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
                 }
-            } 
+            }
             // Case 3: Join / Update Existing Household
             else {
                 // If they are changing households, remove from old
                 if (oldHouseholdId && oldHouseholdId !== selectedHousehold && oldHouseholdId !== 'none') {
                     await api.patch(`/households/${oldHouseholdId}/members`, { removeMembers: [targetId] });
                 }
-                
+
                 // Add to new household
                 await api.patch(`/households/${selectedHousehold}/members`, { addMembers: [targetId] });
-                
+
                 // Also update the role
                 await api.patch(`/members/${targetId}`, { householdRole });
             }
@@ -115,7 +130,7 @@ export const CUMembers = ({
             queryClient.invalidateQueries({ queryKey: ["membersData"] });
             queryClient.invalidateQueries({ queryKey: ["households"] });
             queryClient.invalidateQueries({ queryKey: ["household", targetId] });
-            
+
             toast.success(isEdit ? 'Member updated successfully' : 'Member created successfully');
         } catch (e: any) {
             console.error('Household Assignment Error:', e);
@@ -315,7 +330,9 @@ export const CUMembers = ({
                                     control={control}
                                     rules={{ required: "Phone is required" }}
                                     render={({ field }) => (
-                                        <PhoneInput {...field} placeholder="Enter a phone number" onChange={(value) => field.onChange(value)}></PhoneInput>
+                                        <PhoneInput {...field}
+                                            defaultCountry={defaultCountry as any}
+                                            placeholder="Enter a phone number" onChange={(value) => field.onChange(value)}></PhoneInput>
                                     )}
                                 />
                                 {errors.phone && (
@@ -325,10 +342,8 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="email">Email: <span className="text-red-500">*</span></Label>
-                                <Input id="email"  {...register("email", {
-                                    required: 'Email is required'
-                                })} />{errors.email && (
+                                <Label htmlFor="email">Email: </Label>
+                                <Input id="email"  {...register("email")} />{errors.email && (
                                     <div className="text-red-500 text-sm">
                                         {errors.email.message}
                                     </div>
@@ -366,9 +381,9 @@ export const CUMembers = ({
                                     name="anniversaryDate"
                                     control={control}
                                     render={({ field }) => (
-                                        <DatePicker 
-                                            value={field.value ? new Date(field.value) : undefined} 
-                                            className='w-full' 
+                                        <DatePicker
+                                            value={field.value ? new Date(field.value) : undefined}
+                                            className='w-full'
                                             onChange={(value) => {
                                                 field.onChange(value)
                                             }}
@@ -442,7 +457,7 @@ export const CUMembers = ({
                                         control={control}
                                         rules={{ required: "Signature is required for a pastor" }}
                                         render={({ field }) => (
-                                            <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(field.value  ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
+                                            <Modal triggerButtonVariant={'outline'} triggerButtonContent={`${(field.value ? 'Edit Signature' : 'Add Signature')}`} modelTitle={'Create your signature'}>
                                                 <SignatureCard value={(field.value && URL.createObjectURL(field.value)) ?? undefined} onChange={(value: Blob) => {
                                                     field.onChange(value);
                                                     toast.success('Signature changed!')
