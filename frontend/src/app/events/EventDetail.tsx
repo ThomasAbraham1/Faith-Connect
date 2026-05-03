@@ -179,6 +179,10 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
               <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
                 <code className="text-xs flex-1 truncate text-muted-foreground">{registrationUrl}</code>
               </div>
+              <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 px-1">
+                <Info className="h-3 w-3 text-primary/60" />
+                For social media (WhatsApp, etc.), use this link instead of copying from your browser's address bar to ensure preview cards display correctly.
+              </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="gap-2 flex-1" onClick={copyLink}>
                   <Copy className="h-3.5 w-3.5" /> Copy Link
