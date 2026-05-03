@@ -44,30 +44,42 @@ export class ReportService {
     workbook.creator = 'Called To Ascend ChMS';
     const worksheet = workbook.addWorksheet(sheet);
 
-    // 3. Define Columns dynamically from Schema
-    const excludedFields = ['__v', '_id', 'password', 'tenantId', 'churchId'];
+    // 3. Define Columns
+    const excludedFields = ['__v', '_id', 'password', 'tenantId', 'churchId', 'responses', 'createdAt', 'updatedAt', ];
     const fieldNames = Object.keys(model.schema.paths).filter(
       (field) => !excludedFields.includes(field) && !field.includes('.'),
     );
 
-    worksheet.columns = fieldNames.map((field) => {
+    // Special handling for dynamic registration fields
+    let dynamicFields: any[] = [];
+    if (type === ReportType.REGISTRATIONS && filters.eventId) {
+      const event = await this.eventModel.findById(filters.eventId);
+      if (event && event.formFields) {
+        dynamicFields = event.formFields;
+      }
+    }
+
+    const baseColumns = fieldNames.map((field) => {
       const path = (model.schema.paths as any)[field];
       let header = field
         .replace(/([A-Z])/g, ' $1')
         .replace(/^./, (str) => str.toUpperCase())
         .trim();
 
-      // If this is a reference field (like eventId), rename it to "Name" for the user
       if (path?.options?.ref && header.toLowerCase().endsWith('id')) {
         header = header.substring(0, header.length - 2).trim() + ' Name';
       }
 
-      return {
-        header,
-        key: field,
-        width: 25,
-      };
+      return { header, key: field, width: 25 };
     });
+
+    const customColumns = dynamicFields.map(f => ({
+      header: f.label,
+      key: `custom_${f.name}`,
+      width: 25
+    }));
+
+    worksheet.columns = [...baseColumns, ...customColumns];
 
     // 4. Style the Header Row
     const headerRow = worksheet.getRow(1);
@@ -80,11 +92,31 @@ export class ReportService {
     headerRow.height = 25;
 
     // 5. Add the Data Rows
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       const rowData = {};
+      
+      // Standard fields
       fieldNames.forEach((field) => {
         rowData[field] = this.formatValue(item[field]);
       });
+
+      // Special handling for names/email/phone from responses if memberId is missing
+      if (type === ReportType.REGISTRATIONS && !item.memberId && item.responses) {
+        const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
+        // If member name is N/A in standard fields, try pulling from responses
+        if (rowData['memberId'] === 'N/A') {
+          const first = resp.firstName || resp.first_name || '';
+          const last = resp.lastName || resp.last_name || '';
+          rowData['memberId'] = `${first} ${last}`.trim() || 'Guest';
+        }
+      }
+
+      // Dynamic custom fields
+      dynamicFields.forEach(f => {
+        const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
+        rowData[`custom_${f.name}`] = resp?.[f.name] ?? '';
+      });
+
       worksheet.addRow(rowData);
     });
 

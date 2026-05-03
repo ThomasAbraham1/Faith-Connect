@@ -49,7 +49,7 @@ const centerAspectCrop = (
     mediaHeight
   );
 
-const getCroppedPngImage = async (
+const getCroppedImage = async (
   imageSrc: HTMLImageElement,
   scaleFactor: number,
   pixelCrop: PixelCrop,
@@ -65,9 +65,12 @@ const getCroppedPngImage = async (
   const scaleX = imageSrc.naturalWidth / imageSrc.width;
   const scaleY = imageSrc.naturalHeight / imageSrc.height;
 
-  ctx.imageSmoothingEnabled = false;
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  // Preserve the natural resolution of the image
+  canvas.width = Math.floor(pixelCrop.width * scaleX);
+  canvas.height = Math.floor(pixelCrop.height * scaleY);
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   ctx.drawImage(
     imageSrc,
@@ -81,12 +84,13 @@ const getCroppedPngImage = async (
     canvas.height
   );
 
-  const croppedImageUrl = canvas.toDataURL('image/png');
+  // Use JPEG for better quality/size balance on large banners
+  const croppedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
   const response = await fetch(croppedImageUrl);
   const blob = await response.blob();
 
-  if (blob.size > maxImageSize) {
-    return await getCroppedPngImage(
+  if (blob.size > maxImageSize && scaleFactor > 0.5) {
+    return await getCroppedImage(
       imageSrc,
       scaleFactor * 0.9,
       pixelCrop,
@@ -187,7 +191,7 @@ export const ImageCrop = ({
       return;
     }
 
-    const croppedImage = await getCroppedPngImage(
+    const croppedImage = await getCroppedImage(
       imgRef.current,
       1,
       completedCrop,

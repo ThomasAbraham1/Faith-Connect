@@ -89,15 +89,11 @@ export const MembersPage = () => {
 
 
   // Take admin role ID and compare it with user data to filter members
-  const roleName = userContext.church?.roles.find((role) => role.name == "admin")?.name
   // Removing admins and retrieving members only
   // Adhering to Dynamic Table data definition
   const tableData: Member[] = React.useMemo(() => {
 
-    return data?.data.data.filter((member: membersResponseObject) => {
-      // console.log('member.roles:', member.roles, 'roleName:', roleName)
-      return !member.roles.includes(roleName || '') ? true : false
-    }).map(
+    return data?.data.data.map(
       (value: membersResponseObject, index: number) => {
         // Find role name for user role IDs
         console.log(value)
@@ -121,6 +117,7 @@ export const MembersPage = () => {
           rawHouseholdId: (value.householdId as any)?._id || value.householdId,
           rawHouseholdRole: value.householdRole,
           firstName: value.firstName,
+          middleName: value.middleName,
           email: value.email,
           lastName: value.lastName,
           fatherName: value.fatherName,
@@ -132,7 +129,7 @@ export const MembersPage = () => {
         };
       }
     ) || [];
-  }, [data, roleName])
+  }, [data])
 
   return (
     <div className="space-y-6">
@@ -164,7 +161,7 @@ export const MembersPage = () => {
               />
             </div>
 
-            <div className={selection.ids.length > 0 ? "hidden" : "flex gap-2"}>
+            <div className={selection.ids.length > 0 ? "hidden" : "flex flex-wrap gap-2"}>
               <CUMembers
                 trigger="Add Member"
                 triggerVariant="default"
@@ -181,15 +178,17 @@ export const MembersPage = () => {
                 className="gap-2"
               >
                 <DownloadCloud className="h-4 w-4" />
-                Download Excel
+                <span className="sm:hidden">Excel</span>
+                <span className="hidden sm:inline">Download Excel</span>
               </Button>
               <Button
                 variant="outline"
-                // onClick={() => reactToPrintFn()}
+                onClick={() => reactToPrintFn()}
                 className="gap-2"
               >
                 <Printer className="h-4 w-4" />
-                Download PDF
+                <span className="sm:hidden">PDF</span>
+                <span className="hidden sm:inline">Download PDF</span>
               </Button>
             </div>
           </div>

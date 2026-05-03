@@ -16,7 +16,7 @@ export const PrintableMembersTable = forwardRef<HTMLDivElement, PrintableMembers
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           `}
         </style>
-        
+         
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold uppercase tracking-tight text-gray-900">{churchName || 'Church Directory'}</h1>
           <p className="text-sm text-gray-500 mt-2 font-medium">Member List • {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
@@ -37,7 +37,7 @@ export const PrintableMembersTable = forwardRef<HTMLDivElement, PrintableMembers
             {data.map((member) => (
               <tr key={member.id} className="hover:bg-gray-50 transition-colors">
                 <td className="p-3 font-semibold text-gray-900">
-                  {member.firstName} {member.lastName}
+                  {member.firstName} {member.middleName} {member.lastName}
                 </td>
                 <td className="p-3 text-gray-600">{member.phone || '-'}</td>
                 <td className="p-3 text-gray-600">{member.email || '-'}</td>

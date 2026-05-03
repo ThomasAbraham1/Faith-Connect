@@ -11,14 +11,17 @@ export class Registration {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Events', required: true })
   eventId: mongoose.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  memberId: mongoose.Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false })
+  memberId?: mongoose.Types.ObjectId;
+
+  @Prop({ type: Map, of: mongoose.Schema.Types.Mixed, default: {} })
+  responses: Map<string, any>;
 
   @Prop({ type: String, enum: ['PUBLIC_FORM', 'ADMIN_ADDED'], default: 'PUBLIC_FORM' })
-  source: string;
+  source: string; 
 }
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);
 
-// Prevent duplicate registrations for the same person + event
-RegistrationSchema.index({ eventId: 1, memberId: 1 }, { unique: true });
+// Index for performance
+RegistrationSchema.index({ eventId: 1 });

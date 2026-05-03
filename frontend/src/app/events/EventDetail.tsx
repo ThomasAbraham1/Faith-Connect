@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { SendWhatsApp } from '../whatsapp/SendWhatsApp';
 import { handleExcelDownload } from '@/lib/utils';
+import { FormDesigner } from './FormDesigner';
+import { ClipboardEdit } from 'lucide-react';
 
 interface EventDetailProps {
   eventId: string;
@@ -55,8 +57,17 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
       const raw = res.data?.data;
       return Array.isArray(raw) ? raw : [];
     },
-    enabled: activeTab === 'registrants',
+    refetchOnWindowFocus: true,
   });
+
+  // Force refetch when switching to the registrants tab
+  React.useEffect(() => {
+    if (activeTab === 'registrants') {
+      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+    }
+  }, [activeTab, eventId, queryClient]);
+
+  const hasRegistrants = (registrations || []).length > 0;
 
   const toggleRegistrationMutation = useMutation({
     mutationFn: async () => {
@@ -133,9 +144,12 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-[340px] mb-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-[450px] mb-6">
           <TabsTrigger value="details" className="gap-2">
             <Info className="h-4 w-4" /> Details
+          </TabsTrigger>
+          <TabsTrigger value="form" className="gap-2">
+            <ClipboardEdit className="h-4 w-4" /> Form
           </TabsTrigger>
           <TabsTrigger value="registrants" className="gap-2">
             <Users className="h-4 w-4" /> Registrants
@@ -144,6 +158,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
 
         {/* DETAILS TAB */}
         <TabsContent value="details" className="mt-0 space-y-4">
+          {/* Registration Link Card content... */}
 
 
           {/* Registration Link Card */}
@@ -181,6 +196,11 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* FORM DESIGNER TAB */}
+        <TabsContent value="form" className="mt-0">
+          <FormDesigner event={event} hasRegistrants={hasRegistrants} />
         </TabsContent>
 
         {/* REGISTRANTS TAB */}
@@ -227,38 +247,63 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                   <div className="divide-y divide-border/50">
                     {(registrations || []).map((reg: any) => {
                       const m = reg.memberId;
-                      if (!m) return null;
+                      // Use responses if memberId is missing (new public registrations)
+                      const firstName = m?.firstName || reg.responses?.firstName || reg.responses?.first_name || 'Guest';
+                      const lastName = m?.lastName || reg.responses?.lastName || reg.responses?.last_name || '';
+                      const phone = m?.phone || reg.responses?.phone || 'N/A';
+                      const email = m?.email || reg.responses?.email || '';
+                      const profilePic = m?.profilePic?.profilePicPath || '';
+
+                      // Extract custom responses (everything except the fixed ones)
+                      const fixedKeys = ['firstName', 'lastName', 'phone', 'email', 'first_name', 'last_name'];
+                      const customResponses = Object.entries(reg.responses || {})
+                        .filter(([key]) => !fixedKeys.includes(key));
+
                       return (
-                        <div key={reg._id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors group">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10 border-2 border-background">
-                              <AvatarImage src={m.profilePic?.profilePicPath || ''} />
-                              <AvatarFallback>
-                                <User className="h-4 w-4 text-muted-foreground" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold text-sm">{m.firstName} {m.lastName}</p>
-                              <div className="flex items-center gap-3">
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Phone className="h-3 w-3" />{m.phone}
-                                </span>
-                                {m.email && (
+                        <div key={reg._id} className="flex flex-col p-4 hover:bg-muted/30 transition-colors group">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-10 w-10 border-2 border-background">
+                                <AvatarImage src={profilePic} />
+                                <AvatarFallback>
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-semibold text-sm">{firstName} {lastName}</p>
+                                <div className="flex items-center gap-3">
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Mail className="h-3 w-3" />{m.email}
+                                    <Phone className="h-3 w-3" />{phone}
                                   </span>
-                                )}
+                                  {email && (
+                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Mail className="h-3 w-3" />{email}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
+                            <Badge
+                              variant="outline"
+                              className={reg.source === 'PUBLIC_FORM'
+                                ? 'text-xs border-blue-200 text-blue-600 bg-blue-50'
+                                : 'text-xs border-muted text-muted-foreground'}
+                            >
+                              {reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added'}
+                            </Badge>
                           </div>
-                          <Badge
-                            variant="outline"
-                            className={reg.source === 'PUBLIC_FORM'
-                              ? 'text-xs border-blue-200 text-blue-600 bg-blue-50'
-                              : 'text-xs border-muted text-muted-foreground'}
-                          >
-                            {reg.source === 'PUBLIC_FORM' ? 'Self-registered' : 'Admin added'}
-                          </Badge>
+
+                          {/* Custom Fields Display */}
+                          {customResponses.length > 0 && (
+                            <div className="mt-3 ml-14 grid gap-2">
+                              {customResponses.map(([key, value]) => (
+                                <div key={key} className="flex gap-2 text-xs">
+                                  <span className="font-medium text-muted-foreground uppercase tracking-tight">{key.replace(/_/g, ' ')}:</span>
+                                  <span className="text-foreground">{String(value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

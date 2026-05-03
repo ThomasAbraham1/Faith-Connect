@@ -103,7 +103,7 @@ function EventsPage() {
             data={dataArray}
             getSelectedRowsObject={getSelectedRowsObject}
             columnOptions={{
-              HideColumns: ["id", "churchId", "_id"]
+              HideColumns: ["id", "churchId", "_id", "formFields"]
             }}
           >
             {(row) =>

@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Events } from 'src/schemas/Events.schema';
 import { User } from 'src/schemas/User.schema';
 import { Registration } from 'src/schemas/Registration.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Church } from 'src/schemas/Church.schema';
 
 @Injectable()
@@ -38,8 +38,8 @@ export class EventsService {
   async findPublic(id: string) {
     const event = await this.eventsModel.findById(id).lean();
     if (!event) throw new NotFoundException('Event not found');
-    const church = await this.churchModel.findById(event.churchId).select('churchName').lean();
-    return { ...event, churchName: church?.churchName };
+    const church = await this.churchModel.findById(event.churchId).select('churchName logo').lean();
+    return { ...event, churchName: church?.churchName, churchLogo: church?.logo };
   }
 
   update(id: string, updateEventDto: UpdateEventDto) {
@@ -51,47 +51,37 @@ export class EventsService {
     return this.eventsModel.deleteMany({ _id: { $in: id } });
   }
 
-  /** Public registration — upsert member, then create Registration */
-  async registerForEvent(eventId: string, data: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-  }) {
+  /** Public registration — stores responses, checks for duplicate phone */
+  async registerForEvent(eventId: string, responses: Record<string, any>) {
     const event = await this.eventsModel.findById(eventId);
     if (!event) throw new NotFoundException('Event not found');
+    if (!event.registrationOpen) throw new Error('Registration is closed');
 
-    // 1. Find or create member
-    let member = await this.userModel.findOne({
-      churchId: event.churchId,
-      $or: [{ email: data.email }, { phone: data.phone }],
-    });
-
-    let isNewMember = false;
-    if (!member) {
-      isNewMember = true;
-      const userName = `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}_${Date.now()}`;
-      member = await this.userModel.create({
-        churchId: event.churchId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        userName,
-        password: Math.random().toString(36).slice(-10),
-        spiritualStatus: 'SEEKER',
-        roles: [],
-      });
+    // 1. Validate fixed mandatory fields
+    const { firstName, lastName, phone } = responses;
+    if (!firstName || !lastName || !phone) {
+      throw new Error('First Name, Last Name, and Phone are required');
     }
 
-    // 2. Upsert registration (ignore duplicate)
-    await this.registrationModel.findOneAndUpdate(
-      { eventId, memberId: member._id },
-      { eventId, memberId: member._id, churchId: event.churchId, source: 'PUBLIC_FORM' },
-      { upsert: true, new: true },
-    );
+    // 2. Check for duplicate registration by phone number for this event
+    const existingRegistration = await this.registrationModel.findOne({
+      eventId: new Types.ObjectId(eventId),
+      'responses.phone': phone,
+    });
 
-    return { success: true, isNewMember };
+    if (existingRegistration) {
+      throw new Error('A registration with this phone number already exists for this event');
+    }
+
+    // 3. Create the registration entry
+    const registration = await this.registrationModel.create({
+      eventId: new Types.ObjectId(eventId),
+      churchId: new Types.ObjectId(event.churchId),
+      source: 'PUBLIC_FORM',
+      responses,
+    });
+
+    return { success: true, registrationId: registration._id };
   }
 
   /** Private — get all registrants for an event, populated with member data */
@@ -105,9 +95,25 @@ export class EventsService {
 
   /** Admin: manually add an existing member to an event */
   async addRegistration(eventId: string, memberId: string, churchId: string) {
+    const member = await this.userModel.findById(memberId);
+    if (!member) throw new NotFoundException('Member not found');
+
+    // Store member info in responses for consistency with public registrations
+    const responses = {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      email: member.email,
+      phone: member.phone,
+    };
+
     return this.registrationModel.findOneAndUpdate(
-      { eventId, memberId },
-      { eventId, memberId, churchId, source: 'ADMIN_ADDED' },
+      { eventId: new Types.ObjectId(eventId), 'responses.phone': member.phone },
+      { 
+        eventId: new Types.ObjectId(eventId), 
+        churchId: new Types.ObjectId(churchId), 
+        source: 'ADMIN_ADDED',
+        responses 
+      },
       { upsert: true, new: true },
     );
   }

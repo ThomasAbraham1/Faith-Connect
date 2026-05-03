@@ -19,6 +19,9 @@ export class User {
   firstName: string;
 
   @Prop({})
+  middleName: string;
+
+  @Prop({})
   lastName: string;
 
   @Prop({ required: true, lowercase: true })

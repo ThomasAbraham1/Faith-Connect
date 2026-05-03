@@ -20,7 +20,7 @@ export class EventsPublicController {
   }
 
   @Post(':id/register')
-  register(@Param('id') id: string, @Body() body: { firstName: string; lastName: string; email: string; phone: string }) {
+  register(@Param('id') id: string, @Body() body: Record<string, any>) {
     return this.eventsService.registerForEvent(id, body);
   }
 }
@@ -38,14 +38,33 @@ export class EventsController {
   @UseInterceptors(FileInterceptor('coverImage', { storage: memoryStorage() }))
   async create(@Req() req, @Body() createEventDto: CreateEventDto, @UploadedFile() coverImage?: Express.Multer.File) {
     createEventDto.churchId = req.user.church._id;
+
+    // Handle formFields if it comes as a string (multipart/form-data)
+    if (typeof createEventDto.formFields === 'string') {
+      try {
+        createEventDto.formFields = JSON.parse(createEventDto.formFields);
+      } catch (e) {
+        console.error('Error parsing formFields:', e);
+      }
+    }
+
     if (coverImage) {
       const churchId = req.user.church._id;
-      const optimizedBuffer = await sharp(coverImage.buffer)
-        .resize(1200, 630, { fit: 'cover', withoutEnlargement: true })
-        .webp({ quality: 85 })
-        .toBuffer();
-      const key = `events/${churchId}/cover-${Date.now()}.webp`;
-      const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+      let finalBuffer = coverImage.buffer;
+      let finalMimeType = coverImage.mimetype;
+
+      // Only optimize if file is large (> 200KB)
+      if (coverImage.size > 200000) {
+        finalBuffer = await sharp(coverImage.buffer)
+          .resize(1920, null, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 90 })
+          .toBuffer();
+        finalMimeType = 'image/webp';
+      }
+
+      const ext = finalMimeType.split('/')[1];
+      const key = `events/${churchId}/cover-${Date.now()}.${ext}`;
+      const url = await this.storageService.uploadFile(finalBuffer, key, finalMimeType);
       (createEventDto as any).coverImageUrl = url;
     }
     return this.eventsService.create(createEventDto);
@@ -80,14 +99,32 @@ export class EventsController {
     @UploadedFile() coverImage?: Express.Multer.File,
     @Req() req?: any,
   ) {
+    // Handle formFields if it comes as a string (multipart/form-data)
+    if (typeof updateEventDto.formFields === 'string') {
+      try {
+        updateEventDto.formFields = JSON.parse(updateEventDto.formFields);
+      } catch (e) {
+        console.error('Error parsing formFields:', e);
+      }
+    }
+
     if (coverImage) {
       const churchId = req.user.church._id;
-      const optimizedBuffer = await sharp(coverImage.buffer)
-        .resize(1200, 630, { fit: 'cover', withoutEnlargement: true })
-        .webp({ quality: 85 })
-        .toBuffer();
-      const key = `events/${churchId}/cover-${Date.now()}.webp`;
-      const url = await this.storageService.uploadFile(optimizedBuffer, key, 'image/webp');
+      let finalBuffer = coverImage.buffer;
+      let finalMimeType = coverImage.mimetype;
+
+      // Only optimize if file is large (> 200KB)
+      if (coverImage.size > 200000) {
+        finalBuffer = await sharp(coverImage.buffer)
+          .resize(1920, null, { fit: 'inside', withoutEnlargement: true })
+          .webp({ quality: 90 })
+          .toBuffer();
+        finalMimeType = 'image/webp';
+      }
+
+      const ext = finalMimeType.split('/')[1];
+      const key = `events/${churchId}/cover-${Date.now()}.${ext}`;
+      const url = await this.storageService.uploadFile(finalBuffer, key, finalMimeType);
       (updateEventDto as any).coverImageUrl = url;
     }
     return this.eventsService.update(id, updateEventDto);

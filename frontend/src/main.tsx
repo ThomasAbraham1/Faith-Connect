@@ -17,6 +17,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToasterProvider } from "./providers/ToasterProvider.tsx";
 import { ContextProvider } from './context/Context.tsx'
 import React from "react";
+import { HelmetProvider } from "react-helmet-async";
 
 const router = createBrowserRouter([
   {
@@ -109,14 +110,16 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   // <React.StrictMode>
-  <QueryClientProvider client={queryClient}>
-    <ContextProvider>
-      <ThemeProvider>
-        <ToasterProvider>
-          <RouterProvider router={router} />
-        </ToasterProvider>
-      </ThemeProvider>
-    </ContextProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <ContextProvider>
+        <ThemeProvider>
+          <ToasterProvider>
+            <RouterProvider router={router} />
+          </ToasterProvider>
+        </ThemeProvider>
+      </ContextProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
   // </React.StrictMode>
 );

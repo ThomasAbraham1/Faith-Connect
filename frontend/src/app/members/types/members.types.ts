@@ -11,6 +11,7 @@ export type FormDataType = {
     anniversaryDate: string;
     email: string;
     lastName: string;
+    middleName: string;
     fatherName: string;
     motherName: string;
     address: string;
@@ -34,6 +35,7 @@ export interface membersResponseObject {
     address: string;
     lastName: string;
     firstName: string;
+    middleName: string;
     motherName: string;
     fatherName: string;
     householdId?: { _id: string; name: string } | string;
@@ -57,6 +59,7 @@ export type Member = {
     rawHouseholdId?: string;
     rawHouseholdRole?: string;
     firstName: string;
+    middleName: string;
     lastName: string;
     fatherName: string;
     motherName: string;

@@ -276,9 +276,19 @@ export const CUMembers = ({
                                 )}
                             </div>
                             <div className="grid gap-3">
-                                <Label htmlFor="lastName">Last Name: <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="middleName">Middle Name:</Label>
+                                <Input id="middleName"  {...register("middleName", {
+                                    // required: 'Last Name is required'
+                                })} />{errors.middleName && (
+                                    <div className="text-red-500 text-sm">
+                                        {errors.middleName.message}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="grid gap-3">
+                                <Label htmlFor="lastName">Last Name:</Label>
                                 <Input id="lastName"  {...register("lastName", {
-                                    required: 'Last Name is required'
+                                    // required: 'Last Name is required'
                                 })} />{errors.lastName && (
                                     <div className="text-red-500 text-sm">
                                         {errors.lastName.message}

@@ -106,6 +106,16 @@ export function DynamicTable1<T>({
     const [rowSelection, setRowSelection] = React.useState(initialRowSelection);
     const [globalFilter, setGlobalFilter] = React.useState("");
 
+    // When the data changes (e.g. new member added), clear any active search
+    // so TanStack Table rebuilds its filter index with the fresh data.
+    const prevDataLengthRef = React.useRef(data?.length ?? 0);
+    React.useEffect(() => {
+        if ((data?.length ?? 0) !== prevDataLengthRef.current) {
+            prevDataLengthRef.current = data?.length ?? 0;
+            setGlobalFilter("");
+        }
+    }, [data]);
+
     const priorityKeys = ["firstName", "lastName", "userName", "email", "phone", "eventName", "eventDate", "eventLocation", "status"];
 
     const childrenRef = React.useRef(children);
@@ -218,6 +228,7 @@ export function DynamicTable1<T>({
         },
         onGlobalFilterChange: setGlobalFilter,
         autoResetPageIndex: false,
+        autoResetExpanded: false,
     });
 
     //  EXPOSE TABLE VIA REF

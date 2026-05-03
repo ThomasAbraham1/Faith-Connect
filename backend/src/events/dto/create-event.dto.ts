@@ -1,5 +1,6 @@
-import { IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator"
-import { Transform } from "class-transformer"
+import { IsArray, IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString, ValidateNested, ArrayMaxSize } from "class-validator"
+import { Transform, Type } from "class-transformer"
+import { FormFieldDto } from "./form-field.dto"
 
 export class CreateEventDto {
     @IsString()
@@ -50,4 +51,11 @@ export class CreateEventDto {
     @IsOptional()
     @IsString()
     coverImageUrl?: string;
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(10, { message: 'Maximum 10 custom fields allowed' })
+    @ValidateNested({ each: true })
+    @Type(() => FormFieldDto)
+    formFields?: FormFieldDto[];
 }

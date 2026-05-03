@@ -33,7 +33,22 @@ interface profilePic {
 
 export class CreateMemberDto {
   userName: string;
+  @IsString()
+  firstName: string;
+  @IsString()
+  lastName: string;
+  @IsString()
+  email: string;
+  @IsString()
+  phone: string;
+  @IsString()
   password: string;
+  @IsString()
+  fatherName: string;
+  @IsString()
+  motherName: string;
+  @IsString()
+  address: string;
   churchId: Types.ObjectId;
   @IsEnum(Role, { each: true })
   roles: Role[];

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Types } from "mongoose";
+import { FormField, FormFieldSchema } from "./FormField.schema";
 
 @Schema({ timestamps: true })
 export class Events {
@@ -34,6 +35,9 @@ export class Events {
 
     @Prop({ type: Boolean, default: true })
     registrationOpen: boolean;
+
+    @Prop({ type: [FormFieldSchema], default: [] })
+    formFields: FormField[];
 }
 
 export const EventsSchema = SchemaFactory.createForClass(Events)
