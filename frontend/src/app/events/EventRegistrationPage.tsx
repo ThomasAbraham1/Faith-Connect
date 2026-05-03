@@ -88,7 +88,6 @@ export const EventRegistrationPage: React.FC = () => {
 
   const fixedFields = [
     { name: 'firstName', label: 'First Name', type: 'text', required: true, placeholder: 'e.g. Thomas' },
-    { name: 'lastName', label: 'Last Name', type: 'text', required: true, placeholder: 'e.g. Abraham' },
     { name: 'phone', label: 'Phone Number', type: 'tel', required: true, placeholder: 'e.g. +91 98765 43210' },
     { name: 'email', label: 'Email Address', type: 'email', required: false, placeholder: 'e.g. you@example.com' },
   ];
