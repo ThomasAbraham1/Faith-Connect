@@ -21,6 +21,7 @@ services:
       - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM}
+      - VITE_APP_API_URL=${VITE_APP_API_URL}
     volumes:
       - ./backend-data/uploads:/app/public/uploads
       - ./backend-data/signatures:/app/public/signatures
