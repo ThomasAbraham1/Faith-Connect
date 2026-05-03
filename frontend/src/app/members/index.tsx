@@ -235,7 +235,13 @@ export const MembersPage = () => {
                   phoneNumbers={[row.original.phone]}
                   names={[`${row.original.firstName} ${row.original.lastName}`]}
                 />
-                <Modal triggerButtonContent={<Eye />} modelTitle={'Profile Information'} modelDescription={'Click on the button below to print the profile information'} triggerButtonVariant={"ghost"}>
+                <Modal 
+                  triggerButtonContent={<Eye />} 
+                  modelTitle={'Profile Information'} 
+                  modelDescription={'Click on the button below to print the profile information'} 
+                  triggerButtonVariant={"ghost"}
+                  contentClassName="max-w-2xl w-[95vw] sm:w-[90vw]"
+                >
                   <ViewProfile memberId={row.original.id}
                     userName={row.getValue("userName")}
                     dateOfBirth={row.original.dateOfBirth}

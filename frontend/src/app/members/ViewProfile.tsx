@@ -86,11 +86,11 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
             
-            <div className="relative p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
+            <div className="relative p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8">
               {/* Profile Image with Ring */}
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl scale-95" />
-                <Avatar className="h-28 w-28 border-4 border-background shadow-2xl relative z-10">
+                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-background shadow-2xl relative z-10">
                   <AvatarImage
                     src={profilePicUrl?.startsWith('http') ? profilePicUrl : `${import.meta.env.VITE_APP_API_URL}${profilePicUrl}`}
                     alt={fullName}
