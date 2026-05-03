@@ -8,5 +8,6 @@ import { StorageModule } from 'src/storage/storage.module';
   controllers: [EventsController, EventsPublicController],
   providers: [EventsService],
   imports: [DatabaseModule, StorageModule],
+  exports: [EventsService],
 })
 export class EventsModule {}

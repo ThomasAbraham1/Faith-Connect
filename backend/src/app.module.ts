@@ -26,6 +26,7 @@ import { GroupsModule } from './groups/groups.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { HouseholdsModule } from './households/households.module';
+import { ShareModule } from './share/share.module';
 
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportModule } from './report/report.module';
@@ -82,6 +83,7 @@ import { ReportModule } from './report/report.module';
     WhatsappModule,
     HouseholdsModule,
     ReportModule,
+    ShareModule,
   ],
   controllers: [AppController],
   providers: [AppService],

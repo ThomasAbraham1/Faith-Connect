@@ -87,7 +87,8 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     },
   });
 
-  const registrationUrl = `${window.location.origin}/e/${eventId}`;
+  const apiBase = import.meta.env.VITE_APP_API_URL || window.location.origin;
+  const registrationUrl = `${apiBase}/share/e/${eventId}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(registrationUrl);

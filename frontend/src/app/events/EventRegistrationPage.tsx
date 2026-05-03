@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
@@ -27,6 +27,20 @@ export const EventRegistrationPage: React.FC = () => {
       return res.data?.data || res.data;
     },
   });
+  
+  useEffect(() => {
+    if (isLoading) {
+      document.title = "Loading Event...";
+    } else if (isError || !event) {
+      document.title = "Event Not Found";
+    } else if (!event.registrationOpen) {
+      document.title = "Registration Closed";
+    } else if (submitted) {
+      document.title = `Registered! — ${event.eventName}`;
+    } else if (event?.eventName) {
+      document.title = `${event.eventName} — Registration`;
+    }
+  }, [event, isLoading, isError, submitted]);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -92,7 +106,7 @@ export const EventRegistrationPage: React.FC = () => {
     return (
       <div className="min-h-screen relative flex flex-col lg:flex-row bg-zinc-950">
         <Helmet>
-          <title>Registered! — {event.eventName}</title>
+          <meta property="og:title" content={`Registered! — ${event.eventName}`} />
         </Helmet>
 
         {/* Background Image / Panel */}
@@ -178,7 +192,6 @@ export const EventRegistrationPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-950 font-sans selection:bg-primary selection:text-white">
       <Helmet>
-        <title>{event.eventName} — Registration</title>
         <meta property="og:title" content={event.eventName} />
         <meta property="og:description" content={event.description || `Register for ${event.eventName} at ${event.churchName}`} />
         {ogImage && <meta property="og:image" content={ogImage} />}
