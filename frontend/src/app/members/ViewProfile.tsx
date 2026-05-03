@@ -79,8 +79,8 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
 
   return (
     <>
-      <div className="print:hidden w-full max-w-2xl mx-auto flex flex-col max-h-[85vh] animate-in fade-in zoom-in duration-300">
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6">
+      <div className="print:hidden w-full max-w-2xl mx-auto flex flex-col animate-in fade-in zoom-in duration-300">
+        <div className="space-y-6 pr-2">
           {/* ── MODERN HERO HEADER ── */}
           <div className=" relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
@@ -214,7 +214,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
         </div>
 
         {/* ── FOOTER ACTIONS ── */}
-        <div className="flex items-center justify-center pt-6 gap-4 border-t border-border/10 mt-2 bg-background/50 backdrop-blur-md pb-2">
+        <div className="flex items-center justify-center pt-8 gap-4 border-t border-border/10 mt-8 pb-4">
           {isPending ? (
             <Button disabled variant="outline" className="rounded-xl px-8 h-12">
               <Loader2 className="h-4 w-4 animate-spin mr-2" /> Initializing...
