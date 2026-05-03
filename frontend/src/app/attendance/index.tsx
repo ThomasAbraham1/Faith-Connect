@@ -188,6 +188,14 @@ export const Attendance = () => {
 
     const columns: ColumnDef<tableDataShape>[] = useMemo(() => [
         {
+            accessorKey: "id",
+            header: "ID",
+        },
+        {
+            accessorKey: "churchId",
+            header: "Church ID",
+        },
+        {
             accessorKey: "name",
             header: ({ column }) => {
                 return (
@@ -236,12 +244,14 @@ export const Attendance = () => {
                         <RadioGroupButton attendanceStatus={row.getValue('status')} radioId={row.getValue('id')}
                             onChange={
                                 (value: string) => {
-                                    const attendanceArrayIndex = tableDataState.findIndex((attendanceRecord) => attendanceRecord.id == row.getValue('id'))
-                                    setTableDataState((prev) => {
-                                        const newTableDataState = [...prev]
-                                        newTableDataState[attendanceArrayIndex].status = value
-                                        return newTableDataState
-                                    })
+                                    const attendanceArrayIndex = tableDataState.findIndex((attendanceRecord) => attendanceRecord.id === row.original.id)
+                                    if (attendanceArrayIndex !== -1) {
+                                        setTableDataState((prev) => {
+                                            const newTableDataState = [...prev]
+                                            newTableDataState[attendanceArrayIndex].status = value
+                                            return newTableDataState
+                                        })
+                                    }
                                 }
                             } radioOptions={['PRESENT', 'ABSENT']} />
                     } />

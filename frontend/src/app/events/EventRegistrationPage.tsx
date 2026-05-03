@@ -27,7 +27,7 @@ export const EventRegistrationPage: React.FC = () => {
       return res.data?.data || res.data;
     },
   });
-  
+
   useEffect(() => {
     if (isLoading) {
       document.title = "Loading Event...";
