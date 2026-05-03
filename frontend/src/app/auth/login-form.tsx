@@ -117,9 +117,9 @@ export function LoginForm({
   ): Promise<loginResponse> => {
     const apiURL = import.meta.env.VITE_APP_API_URL;
     const payload = {
-      userName: username,
-      churchName: churchname,
-      password: password,
+      userName: username.trim(),
+      churchName: churchname.trim(),
+      password: password.trim(),
     };
     mutation.mutate(payload)
     return {} as loginResponse;
