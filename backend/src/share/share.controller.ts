@@ -59,9 +59,15 @@ export class ShareController {
 
       const title = `${event.eventName} — Registration`;
       const description = event.description || `Register for ${event.eventName} at ${event.churchName}`;
+      
+      let fallbackLogo = event.churchLogo || '';
+      if (fallbackLogo && !fallbackLogo.startsWith('http')) {
+        fallbackLogo = `${apiBase}${fallbackLogo}`;
+      }
+
       const imageUrl = event.coverImageUrl 
         ? (event.coverImageUrl.startsWith('http') ? event.coverImageUrl : `${apiBase}${event.coverImageUrl}`)
-        : (event.churchLogo || '');
+        : fallbackLogo;
 
       // Generate the raw HTML with Open Graph tags
       const html = `

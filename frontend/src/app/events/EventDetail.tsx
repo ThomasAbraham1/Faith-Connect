@@ -87,7 +87,12 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     },
   });
 
-  const apiBase = import.meta.env.VITE_APP_API_URL || window.location.origin;
+  let apiBase = import.meta.env.VITE_APP_API_URL || '';
+  if (apiBase.startsWith('/')) {
+    apiBase = `${window.location.origin}${apiBase}`;
+  } else if (!apiBase) {
+    apiBase = window.location.origin;
+  }
   const registrationUrl = `${apiBase}/share/e/${eventId}`;
 
   const copyLink = () => {
