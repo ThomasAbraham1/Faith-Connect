@@ -87,7 +87,7 @@ export const EventRegistrationPage: React.FC = () => {
   }
 
   const fixedFields = [
-    { name: 'firstName', label: 'First Name', type: 'text', required: true, placeholder: 'e.g. Thomas' },
+    { name: 'name', label: 'Name', type: 'text', required: true, placeholder: 'e.g. Thomas Abraham' },
     { name: 'phone', label: 'Phone Number', type: 'tel', required: true, placeholder: 'e.g. +91 98765 43210' },
     { name: 'email', label: 'Email Address', type: 'email', required: false, placeholder: 'e.g. you@example.com' },
   ];
@@ -149,7 +149,7 @@ export const EventRegistrationPage: React.FC = () => {
             <div className="space-y-4">
               <h1 className="text-4xl font-black tracking-tight text-white">You're in!</h1>
               <p className="text-zinc-400 text-lg">
-                Thanks, <span className="font-bold text-white">{responses.firstName}</span>! Your registration for <span className="font-bold text-white">{event.eventName}</span> is confirmed.
+                Thanks, <span className="font-bold text-white">{responses.name}</span>! Your registration for <span className="font-bold text-white">{event.eventName}</span> is confirmed.
               </p>
             </div>
 

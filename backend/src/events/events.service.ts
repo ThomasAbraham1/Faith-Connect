@@ -58,9 +58,9 @@ export class EventsService {
     if (!event.registrationOpen) throw new Error('Registration is closed');
 
     // 1. Validate fixed mandatory fields
-    const { firstName, phone } = responses;
-    if (!firstName || !phone) {
-      throw new Error('First Name and Phone are required');
+    const { name, phone } = responses;
+    if (!name || !phone) {
+      throw new Error('Name and Phone are required');
     }
 
     // 2. Check for duplicate registration by phone number for this event

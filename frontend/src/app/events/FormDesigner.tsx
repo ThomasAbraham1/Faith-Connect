@@ -99,7 +99,7 @@ export const FormDesigner: React.FC<FormDesignerProps> = ({ event, hasRegistrant
   };
 
   const fixedFields = [
-    { label: 'First Name', type: 'Text', required: true },
+    { label: 'Name', type: 'Text', required: true },
     { label: 'Phone', type: 'Tel', required: true },
     { label: 'Email', type: 'Email', required: false },
   ];
