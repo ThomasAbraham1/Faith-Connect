@@ -33,7 +33,7 @@ export class ShareController {
     const isBot = this.botUserAgents.some((bot) => userAgent.includes(bot));
     
     const protocol = req.protocol;
-    const host = req.get('host');
+    const host: string = req.get('host') || 'localhost:3000';
     const apiBase = `${protocol}://${host}${this.configService.get('VITE_APP_API_URL') || ''}`;
     
     const isProduction = this.configService.get('NODE_ENV') === 'production';
