@@ -232,7 +232,7 @@ export const EventRegistrationPage: React.FC = () => {
                 )}
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-zinc-500 leading-none mb-1">Hosted by</p>
-                  <p className="text-sm font-bold text-zinc-300 tracking-wide leading-none">{event.churchName}</p>
+                  <p className="text-sm font-bold text-zinc-300 tracking-wide leading-none capitalize">{event.churchName}</p>
                 </div>
               </div>
             )}
@@ -348,7 +348,7 @@ export const EventRegistrationPage: React.FC = () => {
                   )}
                 </Button>
                 <div className="mt-8 flex justify-center opacity-30 grayscale">
-                  <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-zinc-400">Powered by Faith Connect</span>
+                  <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-zinc-400">Powered by Harpazo Tech</span>
                 </div>
               </div>
             </div>
