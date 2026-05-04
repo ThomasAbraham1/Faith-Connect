@@ -59,8 +59,8 @@ export class ShareController {
 
       const title = `${event.eventName} — Registration`;
       const rawDescription = event.description || `Register for ${event.eventName} at ${event.churchName}`;
-      // Meta tag content can't contain line breaks — collapse them to a space
-      const description = rawDescription.replace(/\r?\n+/g, ' ').trim();
+      // Only use the first paragraph for social previews — everything after the first blank line (e.g. fee instructions) is excluded
+      const description = rawDescription.split(/\r?\n\r?\n/)[0].replace(/\r?\n/g, ' ').trim();
       
       let fallbackLogo = event.churchLogo || '';
       if (fallbackLogo && !fallbackLogo.startsWith('http')) {
