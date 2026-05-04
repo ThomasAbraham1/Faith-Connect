@@ -239,21 +239,28 @@ export const EventRegistrationPage: React.FC = () => {
 
             {/* Header / Details */}
             <div className="space-y-5">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-[1.1]">
                 {event.eventName}
               </h1>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-8 gap-y-2">
                 {event.eventDate && (
-                  <div className="flex items-center gap-3 text-sm font-bold text-zinc-300 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    {new Date(event.eventDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-3.5 w-3.5 text-primary/60" />
+                    <span className="text-[11px] sm:text-xs font-bold tracking-wide text-zinc-400">
+                      {new Date(event.eventDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
                   </div>
                 )}
+                {event.eventDate && event.eventLocation && (
+                  <div className="hidden sm:block h-3 w-px bg-white/20" />
+                )}
                 {event.eventLocation && (
-                  <div className="flex items-center gap-3 text-sm font-bold text-zinc-300 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    {event.eventLocation}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 text-primary/60" />
+                    <span className="text-[11px] sm:text-xs font-bold tracking-wide text-zinc-400">
+                      {event.eventLocation}
+                    </span>
                   </div>
                 )}
               </div>
