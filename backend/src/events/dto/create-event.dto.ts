@@ -53,6 +53,10 @@ export class CreateEventDto {
     coverImageUrl?: string;
 
     @IsOptional()
+    @IsString()
+    registrationFee?: string;
+
+    @IsOptional()
     @IsArray()
     @ArrayMaxSize(10, { message: 'Maximum 10 custom fields allowed' })
     @ValidateNested({ each: true })

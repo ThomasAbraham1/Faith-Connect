@@ -67,7 +67,8 @@ export const CUEvents = ({
                 isRecurring: data?.isRecurring ?? false,
                 recurrenceType: data?.recurrenceType ?? 'WEEKLY',
                 recurrenceDay: data?.recurrenceDay ?? "",
-                recurrenceEndDate: data?.recurrenceEndDate ?? ""
+                recurrenceEndDate: data?.recurrenceEndDate ?? "",
+                registrationFee: (data as any)?.registrationFee ?? "",
             }), [data])}
             addEndpoint="/events"
             editEndpoint={(id) => `/events/${id}`}
@@ -231,11 +232,21 @@ export const CUEvents = ({
                         </div>
 
                         <div className="grid gap-3">
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="registrationFee">Registration Fee <span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                            <Input
+                                id="registrationFee"
+                                placeholder="e.g. ₹100 per person, Children free"
+                                {...register("registrationFee")}
+                            />
+                        </div>
+
+                        <div className="grid gap-3">
+                            <Label htmlFor="description">Description <span className="text-muted-foreground text-xs">(Supports line breaks)</span></Label>
                             <Textarea
                                 id="description"
                                 {...register("description")}
-                                rows={4}
+                                rows={5}
+                                placeholder="Payment instructions, event details, etc."
                             />
                         </div>
                     </div>

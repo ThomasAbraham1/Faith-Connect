@@ -33,6 +33,9 @@ export class Events {
     @Prop({ type: String, required: false })
     coverImageUrl?: string;
 
+    @Prop({ type: String, required: false })
+    registrationFee?: string;
+
     @Prop({ type: Boolean, default: true })
     registrationOpen: boolean;
 

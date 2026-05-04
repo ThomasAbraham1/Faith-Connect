@@ -259,9 +259,22 @@ export const EventRegistrationPage: React.FC = () => {
               </div>
 
               {event.description && (
-                <p className="text-lg text-zinc-400 leading-relaxed max-w-lg">
+                <p className="text-lg text-zinc-400 leading-relaxed max-w-lg whitespace-pre-wrap">
                   {event.description}
                 </p>
+              )}
+
+              {/* Registration Fee Callout */}
+              {event.registrationFee && (
+                <div className="flex items-center gap-4 bg-primary/10 border border-primary/20 rounded-2xl px-5 py-4 max-w-lg">
+                  <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary text-lg font-black">₹</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60 mb-0.5">Registration Fee</p>
+                    <p className="text-white font-bold text-base">{event.registrationFee}</p>
+                  </div>
+                </div>
               )}
             </div>
 
