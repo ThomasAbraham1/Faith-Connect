@@ -88,8 +88,8 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto flex flex-col animate-in fade-in zoom-in duration-300">
-        <div className="space-y-6 pr-2">
+      <div className="print:hidden w-full mx-auto flex flex-col animate-in fade-in zoom-in duration-300">
+        <div className="space-y-6">
           {/* ── MODERN HERO HEADER ── */}
           <div className=" relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
@@ -249,8 +249,8 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
         </div>
       </div>
 
-      {/* ── PRINT VIEW ── */}
-      <div ref={contentRef} style={{ position: 'absolute', left: '-9999px', top: 0, width: '21cm', backgroundColor: 'white' }} className="max-w-3xl mx-auto p-8 bg-white">
+      {/* ── PRINT VIEW (unchanged from before) ── */}
+      <div ref={contentRef} className="hidden print:block max-w-3xl mx-auto p-8 bg-white">
         <style>{`
           @media print {
             @page { size: A4; margin: 1cm; }
