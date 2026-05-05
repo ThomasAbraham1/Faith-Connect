@@ -250,7 +250,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
       </div>
 
       {/* ── PRINT VIEW ── */}
-      <div ref={contentRef} className="hidden max-w-3xl mx-auto p-8 bg-white">
+      <div ref={contentRef} style={{ position: 'absolute', left: '-9999px', top: 0, width: '21cm', backgroundColor: 'white' }} className="max-w-3xl mx-auto p-8 bg-white">
         <style>{`
           @media print {
             @page { size: A4; margin: 1cm; }
