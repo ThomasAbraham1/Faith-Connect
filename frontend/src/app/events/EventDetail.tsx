@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   ArrowLeft,
@@ -24,10 +25,9 @@ import {
   User,
   Phone,
   Mail,
-  DownloadCloud,
+  FileBarChart2,
 } from 'lucide-react';
 import { SendWhatsApp } from '../whatsapp/SendWhatsApp';
-import { handleExcelDownload } from '@/lib/utils';
 import { FormDesigner } from './FormDesigner';
 import { ClipboardEdit } from 'lucide-react';
 
@@ -37,6 +37,7 @@ interface EventDetailProps {
 }
 
 export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('details');
   const [selectedRegistrants, setSelectedRegistrants] = useState<any[]>([]);
@@ -100,12 +101,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     toast.success('Link copied to clipboard!');
   };
 
-   const downloadExcel = async () => {
-    const response = await api.get("/report/registrations?eventId="+eventId, {
-      responseType: "blob",
-    });
-    handleExcelDownload(response, 'registrations.xlsx');
-  };
+
 
   if (eventLoading || !event) {
     return (
@@ -229,11 +225,11 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={downloadExcel}
+                  onClick={() => navigate(`/dashboard/reports?type=registrations&eventId=${eventId}`)}
                   className="h-9 px-3 text-xs gap-2"
                 >
-                  <DownloadCloud className="h-4 w-4" />
-                  Export Excel
+                  <FileBarChart2 className="h-4 w-4" />
+                  Full Report
                 </Button>
 
                 {populatedRegs.length > 0 && (

@@ -88,7 +88,7 @@ export const ViewProfile = ({ memberId, userName, profilePicUrl, phone, churchNa
 
   return (
     <>
-      <div className="print:hidden w-full mx-auto flex flex-col animate-in fade-in zoom-in duration-300">
+      <div className="print:hidden w-full mx-auto flex flex-col animate-in fade-in zoom-in duration-300 overflow-hidden">
         <div className="space-y-6">
           {/* ── MODERN HERO HEADER ── */}
           <div className=" relative rounded-3xl overflow-hidden bg-card border border-border/40 shadow-2xl shadow-primary/5">

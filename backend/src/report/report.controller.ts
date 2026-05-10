@@ -9,14 +9,43 @@ import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 @UseGuards(AuthenticatedGuard)
 export class ReportController {
   constructor(private readonly reportService: ReportService) { }
+
+  @Get('fields/:type')
+  async getReportFields(@Param('type') type: string, @Query() filters: any) {
+    const reportType = type.toUpperCase() as ReportType;
+    if (!Object.values(ReportType).includes(reportType)) {
+      throw new Error('Invalid report type');
+    }
+    return this.reportService.getFields(reportType, filters);
+  }
+
+  @Get(':type/preview')
+  async getReportPreview(
+    @Request() req,
+    @Param('type') type: string,
+    @Query() query: any
+  ) {
+    const churchId = req.user.church._id;
+    const reportType = type.toUpperCase() as ReportType;
+    if (!Object.values(ReportType).includes(reportType)) {
+      throw new Error('Invalid report type');
+    }
+    
+    const { fields, ...filters } = query;
+    const fieldsArray = fields ? fields.split(',').map((f: string) => f.trim()).filter(Boolean) : undefined;
+    
+    return this.reportService.getPreviewData(reportType, filters, churchId, fieldsArray);
+  }
   @Get('users')
   async exportMembersToExcel(
     @Request() req,
-    @Query() filters: any,
+    @Query() query: any,
     @Res() res: Response
   ) {
     // Isolate data by the logged-in user's church/tenant
     const churchId = req.user.church._id;
+    const { fields, ...filters } = query;
+    const fieldsArray = fields ? fields.split(',').map((f: string) => f.trim()).filter(Boolean) : undefined;
 
 
     // Generate the exact filename dynamically
@@ -35,7 +64,7 @@ export class ReportController {
 
     try {
       // Get the workbook from the service
-      const workbook = await this.reportService.generateExcelReport(ReportType.USERS, filters, churchId);
+      const workbook = await this.reportService.generateExcelReport(ReportType.USERS, filters, churchId, fieldsArray);
 
       // Stream the workbook directly to the client
       await workbook.xlsx.write(res);
@@ -51,10 +80,12 @@ export class ReportController {
   @Get('events')
   async exportEventsToExcel(
     @Request() req,
-    @Query() filters: any,
+    @Query() query: any,
     @Res() res: Response
   ) {
     const churchId = req.user.church._id;
+    const { fields, ...filters } = query;
+    const fieldsArray = fields ? fields.split(',').map((f: string) => f.trim()).filter(Boolean) : undefined;
     const dateStr = new Date().toISOString().split('T')[0];
     const fileName = `Events_Export_${dateStr}.xlsx`;
 
@@ -68,7 +99,7 @@ export class ReportController {
     );
 
     try {
-      const workbook = await this.reportService.generateExcelReport(ReportType.EVENTS, filters, churchId);
+      const workbook = await this.reportService.generateExcelReport(ReportType.EVENTS, filters, churchId, fieldsArray);
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {
@@ -81,10 +112,12 @@ export class ReportController {
   @Get('registrations')
   async exportRegistrationsToExcel(
     @Request() req,
-    @Query() filters: any,
+    @Query() query: any,
     @Res() res: Response
   ) {
     const churchId = req.user.church._id;
+    const { fields, ...filters } = query;
+    const fieldsArray = fields ? fields.split(',').map((f: string) => f.trim()).filter(Boolean) : undefined;
     const dateStr = new Date().toISOString().split('T')[0];
     const fileName = `Registrations_Export_${dateStr}.xlsx`;
 
@@ -98,7 +131,7 @@ export class ReportController {
     );
 
     try {
-      const workbook = await this.reportService.generateExcelReport(ReportType.REGISTRATIONS, filters, churchId);
+      const workbook = await this.reportService.generateExcelReport(ReportType.REGISTRATIONS, filters, churchId, fieldsArray);
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {

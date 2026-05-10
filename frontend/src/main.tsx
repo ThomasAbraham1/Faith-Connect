@@ -89,6 +89,10 @@ const router = createBrowserRouter([
             path: `${appRoutes.groups.label}/:groupId`,
             element: appRoutes.groups.element,
           },
+          {
+            path: appRoutes.reports.label,
+            element: appRoutes.reports.element,
+          },
         ],
       },
     ],

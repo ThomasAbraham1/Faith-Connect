@@ -92,7 +92,7 @@ export class EventsService {
       .sort({ createdAt: -1 })
       .exec();
   }
-
+fg
   /** Admin: manually add an existing member to an event */
   async addRegistration(eventId: string, memberId: string, churchId: string) {
     const member = await this.userModel.findById(memberId);

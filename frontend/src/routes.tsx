@@ -6,6 +6,7 @@ import { MembersPage } from "./app/members";
 import { GroupsPage } from "./app/groups";
 import { BulkEmailPage } from "./app/bulk-email";
 import { TemplatesPage } from "./app/bulk-email/TemplatesPage";
+import { ReportsPage } from "./app/reports";
 
 export const appRoutes = {
     members:
@@ -49,5 +50,11 @@ export const appRoutes = {
         path: "/dashboard/templates",
         label: "Templates",
         element: <TemplatesPage />,
+    },
+    reports:
+    {
+        path: "/dashboard/reports",
+        label: "Reports",
+        element: <ReportsPage />,
     }
 }

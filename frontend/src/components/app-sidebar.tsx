@@ -14,7 +14,8 @@ import {
   SquareTerminal,
   CalendarCheck2,
   Mail,
-  Layout
+  Layout,
+  FileBarChart2
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -202,6 +203,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: appRoutes.templates.label,
         url: appRoutes.templates.path,
         icon: Layout,
+      },
+      {
+        name: appRoutes.reports.label,
+        url: appRoutes.reports.path,
+        icon: FileBarChart2,
       },
       // {
       //   name: "Sales & Marketing",

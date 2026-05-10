@@ -1,10 +1,9 @@
 import api from "@/api/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SquarePen, Trash2, Eye, MessageSquare, Printer, DownloadCloud } from "lucide-react";
+import { SquarePen, Trash2, Eye, MessageSquare, Printer, FileBarChart2 } from "lucide-react";
 import { SendWhatsApp } from "../whatsapp/SendWhatsApp";
 import { FaWhatsapp } from "react-icons/fa";
 import { PrintableMembersTable } from "./report/PrintableMembersTable";
-import { handleExcelDownload } from "@/lib/utils";
 import { type Row, type Table as TableType } from "@tanstack/react-table";
 import React, { useCallback, useRef, useState } from "react";
 
@@ -39,13 +38,7 @@ export const MembersPage = () => {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  // Calling reports/users endpoint for generationg excel
-  const downloadExcel = async () => {
-    const response = await api.get("/report/users", {
-      responseType: "blob",
-    });
-    handleExcelDownload(response, 'members.xlsx');
-  };
+
 
   // Function to get selected row and format them for further processing
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
@@ -174,12 +167,12 @@ export const MembersPage = () => {
               />
               <Button
                 variant="outline"
-                onClick={() => downloadExcel()}
+                onClick={() => navigate('/dashboard/reports?type=users')}
                 className="gap-2"
               >
-                <DownloadCloud className="h-4 w-4" />
-                <span className="sm:hidden">Excel</span>
-                <span className="hidden sm:inline">Download Excel</span>
+                <FileBarChart2 className="h-4 w-4" />
+                <span className="sm:hidden">Report</span>
+                <span className="hidden sm:inline">Members Report</span>
               </Button>
               <Button
                 variant="outline"
