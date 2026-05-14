@@ -136,7 +136,6 @@ export class EventsService {
       .sort({ createdAt: -1 })
       .exec();
   }
-fg
   /** Admin: manually add an existing member to an event */
   async addRegistration(eventId: string, memberId: string, churchId: string) {
     const member = await this.userModel.findById(memberId);
@@ -178,5 +177,16 @@ fg
     );
     if (!result) throw new NotFoundException('Registration not found');
     return { success: true, message: 'Registration marked as paid manually' };
+  }
+
+  /** Admin: mark a paid registration as PENDING manually */
+  async markRegistrationAsUnpaid(eventId: string, regId: string) {
+    const result = await this.registrationModel.findByIdAndUpdate(
+      regId,
+      { paymentStatus: 'PENDING' },
+      { new: true }
+    );
+    if (!result) throw new NotFoundException('Registration not found');
+    return { success: true, message: 'Registration marked as unpaid manually' };
   }
 }

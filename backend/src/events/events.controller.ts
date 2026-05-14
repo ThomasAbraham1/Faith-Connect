@@ -145,4 +145,9 @@ export class EventsController {
   markRegistrationAsPaid(@Param('id') eventId: string, @Param('regId') regId: string) {
     return this.eventsService.markRegistrationAsPaid(eventId, regId);
   }
+
+  @Patch(':id/registrations/:regId/mark-unpaid')
+  markRegistrationAsUnpaid(@Param('id') eventId: string, @Param('regId') regId: string) {
+    return this.eventsService.markRegistrationAsUnpaid(eventId, regId);
+  }
 }

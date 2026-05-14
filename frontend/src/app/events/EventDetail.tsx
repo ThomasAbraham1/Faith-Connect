@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { SendWhatsApp } from '../whatsapp/SendWhatsApp';
 import { FormDesigner } from './FormDesigner';
-import { ClipboardEdit, Eye, Trash2, CheckCircle } from 'lucide-react';
+import { ClipboardEdit, Eye, Trash2, CheckCircle, RotateCcw } from 'lucide-react';
 import { DynamicTable1 } from '@/components/dynamic/DynamicTable1';
 import { ActionsColumn } from '@/components/dynamic/ActionsColumn';
 import { Modal } from '@/components/dynamic/Modal';
@@ -116,6 +116,20 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
       toast.success(data.message || 'Registration marked as paid manually!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    }
+  });
+
+  const markUnpaidMutation = useMutation({
+    mutationFn: async (regId: string) => {
+      const response = await api.patch(`/events/${eventId}/registrations/${regId}/mark-unpaid`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+      toast.success(data.message || 'Registration marked as unpaid!');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to update status');
@@ -321,11 +335,11 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 >
                   {(row) => (
                     <ActionsColumn>
-                      {row.original.paymentStatus !== 'PAID' && (
+                      {row.original.paymentStatus !== 'PAID' ? (
                         <Alert 
                           onComfirmFunction={() => markPaidMutation.mutate(row.original.id)}
-                          title="Mark as Paid?"
-                          description="Are you sure you want to manually mark this registration as paid? This action bypasses the payment gateway."
+                          alertTitle="Mark as Paid?"
+                          alertDescription="Are you sure you want to manually mark this registration as paid? This action bypasses the payment gateway."
                         >
                           <Button 
                             variant="ghost" 
@@ -336,6 +350,21 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                             <CheckCircle className="h-4 w-4" />
                           </Button>
                         </Alert>
+                      ) : (
+                        <Alert 
+                          onComfirmFunction={() => markUnpaidMutation.mutate(row.original.id)}
+                          alertTitle="Mark as Unpaid?"
+                          alertDescription="Are you sure you want to mark this registration as unpaid? This will set the status back to pending."
+                        >
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Mark as Unpaid"
+                            className="h-9 w-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50/50"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        </Alert>
                       )}
                       <SendWhatsApp
                         triggerContent={<FaWhatsapp className="h-4 w-4" />}
@@ -344,7 +373,11 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                         phoneNumbers={[row.original.phone]}
                         names={[`${row.original.firstName} ${row.original.lastName}`]}
                       />
-                      <Alert onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.id)}>
+                      <Alert 
+                        onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.id)}
+                        alertTitle="Delete Registration?"
+                        alertDescription="Are you sure you want to delete this registration? This action cannot be undone and will remove all attendee data."
+                      >
                         <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50/50">
                           <Trash2 className="h-4 w-4" />
                         </Button>
