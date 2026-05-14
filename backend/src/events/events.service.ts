@@ -161,4 +161,22 @@ fg
       { upsert: true, new: true },
     );
   }
+
+  /** Admin: delete a registration */
+  async removeRegistration(eventId: string, regId: string) {
+    const result = await this.registrationModel.findByIdAndDelete(regId);
+    if (!result) throw new NotFoundException('Registration not found');
+    return { success: true, message: 'Registration deleted successfully' };
+  }
+
+  /** Admin: mark a pending/failed registration as PAID manually */
+  async markRegistrationAsPaid(eventId: string, regId: string) {
+    const result = await this.registrationModel.findByIdAndUpdate(
+      regId,
+      { paymentStatus: 'PAID' },
+      { new: true }
+    );
+    if (!result) throw new NotFoundException('Registration not found');
+    return { success: true, message: 'Registration marked as paid manually' };
+  }
 }

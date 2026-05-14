@@ -427,7 +427,7 @@ export const EventRegistrationPage: React.FC = () => {
                   ) : isVerifying ? (
                     <><Loader2 className="h-6 w-6 animate-spin mr-3" /> Verifying Payment...</>
                   ) : (
-                    'Confirm Registration'
+                    event.registrationFee && parseFloat(event.registrationFee) > 0 ? 'Pay and Confirm' : 'Confirm Registration'
                   )}
                 </Button>
                 <div className="mt-8 flex justify-center opacity-30 grayscale">

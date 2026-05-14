@@ -29,7 +29,13 @@ import {
 } from 'lucide-react';
 import { SendWhatsApp } from '../whatsapp/SendWhatsApp';
 import { FormDesigner } from './FormDesigner';
-import { ClipboardEdit } from 'lucide-react';
+import { ClipboardEdit, Eye, Trash2, CheckCircle } from 'lucide-react';
+import { DynamicTable1 } from '@/components/dynamic/DynamicTable1';
+import { ActionsColumn } from '@/components/dynamic/ActionsColumn';
+import { Modal } from '@/components/dynamic/Modal';
+import { Alert } from '@/components/dynamic/Alert';
+import { FaWhatsapp } from 'react-icons/fa';
+import { type Row } from '@tanstack/react-table';
 
 interface EventDetailProps {
   eventId: string;
@@ -88,6 +94,34 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     },
   });
 
+  const deleteRegistrationMutation = useMutation({
+    mutationFn: async (regId: string) => {
+      const response = await api.delete(`/events/${eventId}/registrations/${regId}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+      toast.success(data.message || 'Registration deleted successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete registration');
+    }
+  });
+
+  const markPaidMutation = useMutation({
+    mutationFn: async (regId: string) => {
+      const response = await api.patch(`/events/${eventId}/registrations/${regId}/mark-paid`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+      toast.success(data.message || 'Registration marked as paid manually!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    }
+  });
+
   let apiBase = import.meta.env.VITE_APP_API_URL || '';
   if (apiBase.startsWith('/')) {
     apiBase = `${window.location.origin}${apiBase}`;
@@ -103,6 +137,39 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
 
 
 
+  const getSelectedRowsObject = React.useCallback((value: Record<string, Row<unknown>> | boolean) => {
+    if (typeof value === 'boolean') return;
+    const selectedRowsObject = value as Record<string, Row<any>>;
+    const rows = Object.values(selectedRowsObject).map((val) => val.original);
+    setSelectedRegistrants(rows);
+  }, []);
+
+  const tableData = React.useMemo(() => {
+    return (registrations || []).map((reg: any) => {
+      const m = reg.memberId;
+      const firstName = m?.firstName || reg.responses?.firstName || reg.responses?.first_name || 'Guest';
+      const lastName = m?.lastName || reg.responses?.lastName || reg.responses?.last_name || '';
+      const phone = m?.phone || reg.responses?.phone || 'N/A';
+      const email = m?.email || reg.responses?.email || '';
+
+      const fixedKeys = ['firstName', 'lastName', 'phone', 'email', 'first_name', 'last_name'];
+      const customResponses = Object.entries(reg.responses || {})
+        .filter(([key]) => !fixedKeys.includes(key))
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: String(v) }), {});
+
+      return {
+        id: reg._id,
+        firstName,
+        lastName,
+        phone,
+        email,
+        paymentStatus: reg.paymentStatus || 'FREE',
+        source: reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added',
+        ...customResponses
+      };
+    });
+  }, [registrations]);
+
   if (eventLoading || !event) {
     return (
       <div className="flex items-center justify-center h-[400px]">
@@ -110,8 +177,6 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
       </div>
     );
   }
-
-  const populatedRegs = (registrations || []).map((r: any) => r.memberId).filter(Boolean);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -232,13 +297,13 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                   Full Report
                 </Button>
 
-                {populatedRegs.length > 0 && (
+                {selectedRegistrants.length > 0 && (
                   <SendWhatsApp
-                    triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> Send WhatsApp</>}
+                    triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> WhatsApp Selected</>}
                     triggerVariant="outline"
                     triggerClassName="h-9 px-3 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
-                    phoneNumbers={populatedRegs.map((m: any) => m.phone)}
-                    names={populatedRegs.map((m: any) => `${m.firstName} ${m.lastName}`)}
+                    phoneNumbers={selectedRegistrants.map((m: any) => m.phone)}
+                    names={selectedRegistrants.map((m: any) => `${m.firstName} ${m.lastName}`)}
                   />
                 )}
               </div>
@@ -249,96 +314,62 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                <ScrollArea className="h-[500px]">
-                  <div className="divide-y divide-border/50">
-                    {(registrations || []).map((reg: any) => {
-                      const m = reg.memberId;
-                      // Use responses if memberId is missing (new public registrations)
-                      const firstName = m?.firstName || reg.responses?.firstName || reg.responses?.first_name || 'Guest';
-                      const lastName = m?.lastName || reg.responses?.lastName || reg.responses?.last_name || '';
-                      const phone = m?.phone || reg.responses?.phone || 'N/A';
-                      const email = m?.email || reg.responses?.email || '';
-                      const profilePic = m?.profilePic?.profilePicPath || '';
-
-                      // Extract custom responses (everything except the fixed ones)
-                      const fixedKeys = ['firstName', 'lastName', 'phone', 'email', 'first_name', 'last_name'];
-                      const customResponses = Object.entries(reg.responses || {})
-                        .filter(([key]) => !fixedKeys.includes(key));
-
-                      return (
-                        <div key={reg._id} className="flex flex-col p-4 hover:bg-muted/30 transition-colors group">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <Avatar className="h-10 w-10 border-2 border-background">
-                                <AvatarImage src={profilePic} />
-                                <AvatarFallback>
-                                  <User className="h-4 w-4 text-muted-foreground" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-semibold text-sm">{firstName} {lastName}</p>
-                                <div className="flex items-center gap-3">
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Phone className="h-3 w-3" />{phone}
-                                  </span>
-                                  {email && (
-                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Mail className="h-3 w-3" />{email}
-                                    </span>
-                                  )}
-                                </div>
+                <DynamicTable1<any>
+                  data={tableData}
+                  getSelectedRowsObject={getSelectedRowsObject}
+                  columnOptions={{ HideColumns: ['id'] }}
+                >
+                  {(row) => (
+                    <ActionsColumn>
+                      {row.original.paymentStatus !== 'PAID' && (
+                        <Alert 
+                          onComfirmFunction={() => markPaidMutation.mutate(row.original.id)}
+                          title="Mark as Paid?"
+                          description="Are you sure you want to manually mark this registration as paid? This action bypasses the payment gateway."
+                        >
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Mark as Paid"
+                            className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50/50"
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                        </Alert>
+                      )}
+                      <SendWhatsApp
+                        triggerContent={<FaWhatsapp className="h-4 w-4" />}
+                        triggerVariant="ghost"
+                        triggerClassName="text-green-600 hover:text-green-700 hover:bg-green-50/50 h-9 w-9 p-0"
+                        phoneNumbers={[row.original.phone]}
+                        names={[`${row.original.firstName} ${row.original.lastName}`]}
+                      />
+                      <Alert onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.id)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50/50">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </Alert>
+                      <Modal 
+                        triggerButtonContent={<Eye className="h-4 w-4" />} 
+                        modelTitle={'Registration Details'} 
+                        modelDescription={'View all details for this registration'} 
+                        triggerButtonVariant={"ghost"}
+                        contentClassName="max-w-2xl w-[95vw] sm:w-[90vw]"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                          {Object.entries(row.original)
+                            .filter(([k]) => k !== 'id')
+                            .map(([k, v]) => (
+                              <div key={k} className="space-y-1">
+                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{k.replace(/_/g, ' ')}</p>
+                                <p className="text-sm font-medium">{String(v) || '—'}</p>
                               </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <div className="flex items-center gap-2">
-                                {reg.paymentStatus && (
-                                  <Badge
-                                    variant="outline"
-                                    className={
-                                      reg.paymentStatus === 'PAID' ? 'text-[10px] border-green-200 text-green-700 bg-green-50 uppercase tracking-widest' :
-                                      reg.paymentStatus === 'PENDING' ? 'text-[10px] border-amber-200 text-amber-700 bg-amber-50 uppercase tracking-widest' :
-                                      reg.paymentStatus === 'FAILED' ? 'text-[10px] border-red-200 text-red-700 bg-red-50 uppercase tracking-widest' :
-                                      'text-[10px] border-muted text-muted-foreground uppercase tracking-widest'
-                                    }
-                                  >
-                                    {reg.paymentStatus}
-                                  </Badge>
-                                )}
-                                <Badge
-                                  variant="outline"
-                                  className={reg.source === 'PUBLIC_FORM'
-                                    ? 'text-[10px] border-blue-200 text-blue-600 bg-blue-50 uppercase tracking-widest'
-                                    : 'text-[10px] border-muted text-muted-foreground uppercase tracking-widest'}
-                                >
-                                  {reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added'}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Custom Fields Display */}
-                          {customResponses.length > 0 && (
-                            <div className="mt-3 ml-14 grid gap-2">
-                              {customResponses.map(([key, value]) => (
-                                <div key={key} className="flex gap-2 text-xs">
-                                  <span className="font-medium text-muted-foreground uppercase tracking-tight">{key.replace(/_/g, ' ')}:</span>
-                                  <span className="text-foreground">{String(value)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                            ))}
                         </div>
-                      );
-                    })}
-                    {(!registrations || registrations.length === 0) && (
-                      <div className="flex flex-col items-center justify-center py-20">
-                        <Users className="h-12 w-12 text-muted-foreground/20 mb-2" />
-                        <p className="text-muted-foreground text-sm">No registrations yet.</p>
-                        <p className="text-xs text-muted-foreground mt-1">Share the registration link to start collecting registrations.</p>
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                      </Modal>
+                    </ActionsColumn>
+                  )}
+                </DynamicTable1>
               )}
             </CardContent>
           </Card>

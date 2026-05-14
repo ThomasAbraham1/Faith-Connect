@@ -135,4 +135,14 @@ export class EventsController {
     console.log("HOW ARE YOU ")
     return this.eventsService.remove(deleteEventDto.id);
   }
+
+  @Delete(':id/registrations/:regId')
+  removeRegistration(@Param('id') eventId: string, @Param('regId') regId: string) {
+    return this.eventsService.removeRegistration(eventId, regId);
+  }
+
+  @Patch(':id/registrations/:regId/mark-paid')
+  markRegistrationAsPaid(@Param('id') eventId: string, @Param('regId') regId: string) {
+    return this.eventsService.markRegistrationAsPaid(eventId, regId);
+  }
 }
