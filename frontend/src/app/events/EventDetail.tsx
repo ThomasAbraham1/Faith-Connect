@@ -289,14 +289,31 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                                 </div>
                               </div>
                             </div>
-                            <Badge
-                              variant="outline"
-                              className={reg.source === 'PUBLIC_FORM'
-                                ? 'text-xs border-blue-200 text-blue-600 bg-blue-50'
-                                : 'text-xs border-muted text-muted-foreground'}
-                            >
-                              {reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added'}
-                            </Badge>
+                            <div className="flex flex-col items-end gap-2">
+                              <div className="flex items-center gap-2">
+                                {reg.paymentStatus && (
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      reg.paymentStatus === 'PAID' ? 'text-[10px] border-green-200 text-green-700 bg-green-50 uppercase tracking-widest' :
+                                      reg.paymentStatus === 'PENDING' ? 'text-[10px] border-amber-200 text-amber-700 bg-amber-50 uppercase tracking-widest' :
+                                      reg.paymentStatus === 'FAILED' ? 'text-[10px] border-red-200 text-red-700 bg-red-50 uppercase tracking-widest' :
+                                      'text-[10px] border-muted text-muted-foreground uppercase tracking-widest'
+                                    }
+                                  >
+                                    {reg.paymentStatus}
+                                  </Badge>
+                                )}
+                                <Badge
+                                  variant="outline"
+                                  className={reg.source === 'PUBLIC_FORM'
+                                    ? 'text-[10px] border-blue-200 text-blue-600 bg-blue-50 uppercase tracking-widest'
+                                    : 'text-[10px] border-muted text-muted-foreground uppercase tracking-widest'}
+                                >
+                                  {reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added'}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
 
                           {/* Custom Fields Display */}

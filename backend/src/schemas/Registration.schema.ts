@@ -18,7 +18,16 @@ export class Registration {
   responses: Map<string, any>;
 
   @Prop({ type: String, enum: ['PUBLIC_FORM', 'ADMIN_ADDED'], default: 'PUBLIC_FORM' })
-  source: string; 
+  source: string;
+
+  @Prop({ type: String, enum: ['FREE', 'PENDING', 'PAID', 'FAILED'], default: 'FREE' })
+  paymentStatus: string;
+
+  @Prop({ type: String, required: false })
+  razorpayOrderId?: string;
+
+  @Prop({ type: String, required: false })
+  razorpayPaymentId?: string;
 }
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);

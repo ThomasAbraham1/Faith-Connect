@@ -13,12 +13,23 @@ import { Loader2, CheckCircle2, Calendar, MapPin, User2, XCircle } from 'lucide-
 import { toast } from 'sonner';
 import { Helmet } from 'react-helmet-async';
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const API_BASE = import.meta.env.VITE_APP_API_URL;
 
 export const EventRegistrationPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const { data: event, isLoading, isError } = useQuery({
     queryKey: ['public-event', eventId],
@@ -45,9 +56,59 @@ export const EventRegistrationPage: React.FC = () => {
   const mutation = useMutation({
     mutationFn: () =>
       axios.post(`${API_BASE}/events/public/${eventId}/register`, responses),
-    onSuccess: () => {
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    onSuccess: async (res) => {
+      const data = res.data?.data || res.data;
+      
+      if (data.requiresPayment) {
+        const resScript = await loadRazorpayScript();
+        if (!resScript) {
+          toast.error("Razorpay SDK failed to load. Are you online?");
+          return;
+        }
+
+        const options = {
+          key: data.razorpayKeyId,
+          amount: data.order.amount,
+          currency: data.order.currency,
+          name: event?.churchName || 'Event Registration',
+          description: event?.eventName,
+          image: event?.churchLogo || '',
+          order_id: data.order.id,
+          prefill: {
+            name: responses.name,
+            contact: responses.phone,
+            email: responses.email || '',
+          },
+          theme: {
+            color: '#18181b',
+          },
+          handler: async function (response: any) {
+            try {
+              setIsVerifying(true);
+              await axios.post(`${API_BASE}/payment/verify`, {
+                registrationId: data.registrationId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              setSubmitted(true);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+              toast.error("Payment verification failed. Please contact support.");
+            } finally {
+              setIsVerifying(false);
+            }
+          },
+        };
+
+        const paymentObject = new (window as any).Razorpay(options);
+        paymentObject.on('payment.failed', function (response: any) {
+          toast.error(`Payment failed: ${response.error.description}`);
+        });
+        paymentObject.open();
+      } else {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Registration failed. Please check your details.');
@@ -359,10 +420,12 @@ export const EventRegistrationPage: React.FC = () => {
                 <Button
                   className="w-full h-16 text-lg font-black tracking-widest uppercase rounded-2xl shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98] bg-primary hover:bg-primary/90"
                   onClick={() => mutation.mutate()}
-                  disabled={isFormIncomplete || mutation.isPending}
+                  disabled={isFormIncomplete || mutation.isPending || isVerifying}
                 >
                   {mutation.isPending ? (
                     <><Loader2 className="h-6 w-6 animate-spin mr-3" /> Processing...</>
+                  ) : isVerifying ? (
+                    <><Loader2 className="h-6 w-6 animate-spin mr-3" /> Verifying Payment...</>
                   ) : (
                     'Confirm Registration'
                   )}

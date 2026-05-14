@@ -22,6 +22,7 @@ AWS_REGION=ap-south-1
 SQS_QUEUE_NAME=bulk-email-queue
 SQS_QUEUE_URL=https://sqs.ap-south-1.amazonaws.com/020087759950/bulk-email-queue
 VITE_APP_API_URL=/api
+ENCRYPTION_SECRET=godisgood
 EOF
 
 echo "Building and starting Docker containers..."

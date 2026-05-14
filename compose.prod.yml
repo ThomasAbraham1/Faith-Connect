@@ -22,6 +22,7 @@ services:
       - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
       - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM}
       - VITE_APP_API_URL=${VITE_APP_API_URL}
+      - ENCRYPTION_SECRET=${ENCRYPTION_SECRET}
     volumes:
       - ./backend-data/uploads:/app/public/uploads
       - ./backend-data/signatures:/app/public/signatures

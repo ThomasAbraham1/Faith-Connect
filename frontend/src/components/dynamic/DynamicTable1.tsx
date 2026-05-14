@@ -49,7 +49,7 @@ const FormattedCell = React.memo(({ value, columnKey }: { value: any, columnKey:
                 day: 'numeric'
             });
         }
-    } else if (typeof value === "string" && !["email", "userName", "household", "householdRole"].includes(columnKey)) {
+    } else if (typeof value === "string" && !["email", "userName", "household", "householdRole"].includes(columnKey) && !columnKey.toLowerCase().endsWith('id')) {
         displayValue = lodash.startCase(value);
     }
 

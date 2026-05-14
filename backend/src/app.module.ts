@@ -19,6 +19,7 @@ import { join } from 'path';
 import { AttendanceModule } from './attendance/attendance.module'; 
 import { SettingsModule } from './settings/settings.module';
 import { EventsModule } from './events/events.module';
+import { PaymentModule } from './payment/payment.module';
 import { BulkEmailModule } from './bulk-email/bulk-email.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { TemplatesModule } from './templates/templates.module';
@@ -74,6 +75,7 @@ import { ReportModule } from './report/report.module';
     AttendanceModule,
     SettingsModule,
     EventsModule,
+    PaymentModule,
     BulkEmailModule,
     RemindersModule,
     TemplatesModule,
