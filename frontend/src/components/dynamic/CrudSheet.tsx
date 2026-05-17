@@ -175,7 +175,10 @@ export function CrudSheet<T extends FieldValues>({
 
     const onSubmit = async (data: T) => {
         console.log(data)
-        const processedData = defaultBuildData(data, dirtyFields as Partial<T>)
+        const processedData = buildFormData 
+            ? buildFormData(data, dirtyFields as Partial<T>)
+            : defaultBuildData(data, dirtyFields as Partial<T>);
+            
         try {
             await mutation.mutateAsync(processedData);
         } catch (e) {

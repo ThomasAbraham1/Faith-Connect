@@ -36,6 +36,7 @@ import { Modal } from '@/components/dynamic/Modal';
 import { Alert } from '@/components/dynamic/Alert';
 import { FaWhatsapp } from 'react-icons/fa';
 import { type Row } from '@tanstack/react-table';
+import { RichEmailComposer } from '@/components/RichEmailComposer';
 
 interface EventDetailProps {
   eventId: string;
@@ -47,6 +48,8 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('details');
   const [selectedRegistrants, setSelectedRegistrants] = useState<any[]>([]);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailTargets, setEmailTargets] = useState<{ memberIds: string[], emails: string[] }>({ memberIds: [], emails: [] });
 
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ['event', eventId],
@@ -59,8 +62,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   const { data: registrations, isLoading: regsLoading } = useQuery({
     queryKey: ['event-registrations', eventId],
     queryFn: async () => {
-      const res = await api.get(`/events/${eventId}/registrations`);
-      // Interceptor wraps: { data: [...] }, so the array is at res.data.data
+      const res = await api.get(`/events/${eventId}/attendees`);
       const raw = res.data?.data;
       return Array.isArray(raw) ? raw : [];
     },
@@ -79,11 +81,9 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   const toggleRegistrationMutation = useMutation({
     mutationFn: async () => {
       const response = await api.patch(`/events/${eventId}`, { registrationOpen: !event?.registrationOpen })
-      console.log(response)
       return response.data
     },
     onSuccess: (response) => {
-      console.log(response)
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       queryClient.invalidateQueries({ queryKey: ['eventsData'] });
       if (response.data.registrationOpen) {
@@ -105,6 +105,21 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to delete registration');
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (regIds: string[]) => {
+      const response = await api.delete(`/events/${eventId}/registrations/${regIds.join(',')}`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+      toast.success(data.message || 'Selected registrations deleted successfully!');
+      setSelectedRegistrants([]);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete registrations');
     }
   });
 
@@ -149,7 +164,19 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     toast.success('Link copied to clipboard!');
   };
 
-
+  const openEmailModal = (registrants: any[]) => {
+    // Separate members from raw registrants for the composer
+    const memberIds = registrants.filter(r => r.source === 'Group Member').map(r => r.memberId).filter(Boolean);
+    const emails = registrants.filter(r => r.source !== 'Group Member').map(r => r.email).filter(Boolean);
+    
+    if (memberIds.length === 0 && emails.length === 0) {
+      toast.error("No valid email addresses found for selection.");
+      return;
+    }
+    
+    setEmailTargets({ memberIds, emails });
+    setIsEmailModalOpen(true);
+  };
 
   const getSelectedRowsObject = React.useCallback((value: Record<string, Row<unknown>> | boolean) => {
     if (typeof value === 'boolean') return;
@@ -160,26 +187,16 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
 
   const tableData = React.useMemo(() => {
     return (registrations || []).map((reg: any) => {
-      const m = reg.memberId;
-      const firstName = m?.firstName || reg.responses?.firstName || reg.responses?.first_name || 'Guest';
-      const lastName = m?.lastName || reg.responses?.lastName || reg.responses?.last_name || '';
-      const phone = m?.phone || reg.responses?.phone || 'N/A';
-      const email = m?.email || reg.responses?.email || '';
-
-      const fixedKeys = ['firstName', 'lastName', 'phone', 'email', 'first_name', 'last_name'];
-      const customResponses = Object.entries(reg.responses || {})
-        .filter(([key]) => !fixedKeys.includes(key))
-        .reduce((acc, [k, v]) => ({ ...acc, [k]: String(v) }), {});
-
       return {
-        id: reg._id,
-        firstName,
-        lastName,
-        phone,
-        email,
+        id: reg.registrationId || reg.memberId,
+        registrationId: reg.registrationId,
+        memberId: reg.memberId,
+        firstName: reg.firstName,
+        lastName: reg.lastName,
+        phone: reg.phone,
+        email: reg.email,
         paymentStatus: reg.paymentStatus || 'FREE',
-        source: reg.source === 'PUBLIC_FORM' ? 'Public Form' : 'Admin added',
-        ...customResponses
+        source: reg.source === 'GROUP_MEMBER' ? 'Group Member' : 'Public Form',
       };
     });
   }, [registrations]);
@@ -203,10 +220,10 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{event.eventName}</h2>
             <div className="flex items-center gap-3 mt-1">
-              {event.eventDate && (
+              {(event.startDate || event.eventDate) && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Calendar className="h-3 w-3" />
-                  {new Date(event.eventDate).toLocaleDateString()}
+                  {new Date(event.startDate || event.eventDate).toLocaleDateString()}
                 </span>
               )}
               {event.eventLocation && (
@@ -216,14 +233,10 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 </span>
               )}
             </div>
-            {event.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed mt-2 max-w-2xl">{event.description}</p>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3 max-w-[450px] mb-6">
           <TabsTrigger value="details" className="gap-2">
@@ -237,12 +250,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
           </TabsTrigger>
         </TabsList>
 
-        {/* DETAILS TAB */}
         <TabsContent value="details" className="mt-0 space-y-4">
-          {/* Registration Link Card content... */}
-
-
-          {/* Registration Link Card */}
           <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -256,7 +264,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
               </div>
               <p className="text-[10px] text-muted-foreground flex items-center gap-1.5 px-1">
                 <Info className="h-3 w-3 text-primary/60" />
-                For social media (WhatsApp, etc.), use this link instead of copying from your browser's address bar to ensure preview cards display correctly.
+                For social media (WhatsApp, etc.), use this link instead of copying from your browser's address bar.
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="gap-2 flex-1" onClick={copyLink}>
@@ -283,15 +291,13 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
           </Card>
         </TabsContent>
 
-        {/* FORM DESIGNER TAB */}
         <TabsContent value="form" className="mt-0">
           <FormDesigner event={event} hasRegistrants={hasRegistrants} />
         </TabsContent>
 
-        {/* REGISTRANTS TAB */}
         <TabsContent value="registrants" className="mt-0">
           <Card className="bg-background/50 backdrop-blur-xl border-border/50 overflow-hidden">
-            <CardHeader className="border-b border-border/50 bg-muted/20 pt-4 flex flex-row items-center justify-between">
+            <CardHeader className="border-b border-border/50 bg-muted/20 pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <CardTitle className="text-base flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Registrants
@@ -299,8 +305,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                   <Badge variant="secondary">{registrations.length}</Badge>
                 )}
               </CardTitle>
-              <div className="flex items-center gap-2">
-                {/* Download Button */}
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -312,13 +317,36 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 </Button>
 
                 {selectedRegistrants.length > 0 && (
-                  <SendWhatsApp
-                    triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> WhatsApp Selected</>}
-                    triggerVariant="outline"
-                    triggerClassName="h-9 px-3 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800"
-                    phoneNumbers={selectedRegistrants.map((m: any) => m.phone)}
-                    names={selectedRegistrants.map((m: any) => `${m.firstName} ${m.lastName}`)}
-                  />
+                  <div className="flex items-center gap-2">
+                    <SendWhatsApp
+                      triggerContent={<><MessageSquare className="h-4 w-4 mr-1" /> WhatsApp Selected</>}
+                      triggerVariant="outline"
+                      triggerClassName="h-9 px-3 text-xs border-green-200 text-green-700 hover:bg-green-50"
+                      phoneNumbers={selectedRegistrants.map((m: any) => m.phone)}
+                      names={selectedRegistrants.map((m: any) => `${m.firstName} ${m.lastName}`)}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEmailModal(selectedRegistrants)}
+                      className="h-9 px-3 text-xs border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
+                      <Mail className="h-4 w-4 mr-1" /> Email Selected
+                    </Button>
+                    <Alert
+                      onComfirmFunction={() => {
+                        const ids = selectedRegistrants.map(r => r.registrationId).filter(Boolean);
+                        if (ids.length > 0) bulkDeleteMutation.mutate(ids);
+                        else toast.error("Only public registrations can be deleted.");
+                      }}
+                      alertTitle="Delete Selected?"
+                      alertDescription={`Are you sure you want to delete ${selectedRegistrants.length} registrations? This will only remove public registrants, not invited group members.`}
+                    >
+                      <Button variant="outline" size="sm" className="h-9 px-3 text-xs border-red-200 text-red-700 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4 mr-1" /> Delete
+                      </Button>
+                    </Alert>
+                  </div>
                 )}
               </div>
             </CardHeader>
@@ -331,70 +359,77 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 <DynamicTable1<any>
                   data={tableData}
                   getSelectedRowsObject={getSelectedRowsObject}
-                  columnOptions={{ HideColumns: ['id'] }}
+                  columnOptions={{ HideColumns: ['id', 'registrationId', 'memberId'] }}
                 >
                   {(row) => (
                     <ActionsColumn>
-                      {row.original.paymentStatus !== 'PAID' ? (
-                        <Alert 
-                          onComfirmFunction={() => markPaidMutation.mutate(row.original.id)}
-                          alertTitle="Mark as Paid?"
-                          alertDescription="Are you sure you want to manually mark this registration as paid? This action bypasses the payment gateway."
-                        >
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            title="Mark as Paid"
-                            className="h-9 w-9 text-green-600 hover:text-green-700 hover:bg-green-50/50"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                        </Alert>
-                      ) : (
-                        <Alert 
-                          onComfirmFunction={() => markUnpaidMutation.mutate(row.original.id)}
-                          alertTitle="Mark as Unpaid?"
-                          alertDescription="Are you sure you want to mark this registration as unpaid? This will set the status back to pending."
-                        >
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            title="Mark as Unpaid"
-                            className="h-9 w-9 text-orange-600 hover:text-orange-700 hover:bg-orange-50/50"
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
-                        </Alert>
+                      {row.original.registrationId && (
+                        <>
+                          {row.original.paymentStatus !== 'PAID' ? (
+                            <Alert 
+                              onComfirmFunction={() => markPaidMutation.mutate(row.original.registrationId)}
+                              alertTitle="Mark as Paid?"
+                              alertDescription="Manually mark as paid? This bypasses the payment gateway."
+                            >
+                              <Button variant="ghost" size="icon" title="Mark as Paid" className="h-9 w-9 text-green-600 hover:bg-green-50">
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                            </Alert>
+                          ) : (
+                            <Alert 
+                              onComfirmFunction={() => markUnpaidMutation.mutate(row.original.registrationId)}
+                              alertTitle="Mark as Unpaid?"
+                              alertDescription="Set status back to pending?"
+                            >
+                              <Button variant="ghost" size="icon" title="Mark as Unpaid" className="h-9 w-9 text-orange-600 hover:bg-orange-50">
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            </Alert>
+                          )}
+                        </>
                       )}
+                      
                       <SendWhatsApp
                         triggerContent={<FaWhatsapp className="h-4 w-4" />}
                         triggerVariant="ghost"
-                        triggerClassName="text-green-600 hover:text-green-700 hover:bg-green-50/50 h-9 w-9 p-0"
+                        triggerClassName="text-green-600 hover:bg-green-50 h-9 w-9 p-0"
                         phoneNumbers={[row.original.phone]}
                         names={[`${row.original.firstName} ${row.original.lastName}`]}
                       />
-                      <Alert 
-                        onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.id)}
-                        alertTitle="Delete Registration?"
-                        alertDescription="Are you sure you want to delete this registration? This action cannot be undone and will remove all attendee data."
+
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => openEmailModal([row.original])}
+                        className="h-9 w-9 text-blue-600 hover:bg-blue-50"
                       >
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600 hover:text-red-700 hover:bg-red-50/50">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </Alert>
+                        <Mail className="h-4 w-4" />
+                      </Button>
+
+                      {row.original.registrationId && (
+                        <Alert 
+                          onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.registrationId)}
+                          alertTitle="Delete Registration?"
+                          alertDescription="Permanent action. This attendee will be removed."
+                        >
+                          <Button variant="ghost" size="icon" className="h-9 w-9 text-red-600 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </Alert>
+                      )}
                       <Modal 
                         triggerButtonContent={<Eye className="h-4 w-4" />} 
-                        modelTitle={'Registration Details'} 
-                        modelDescription={'View all details for this registration'} 
+                        modelTitle={'Details'} 
+                        modelDescription={'View registration data'} 
                         triggerButtonVariant={"ghost"}
-                        contentClassName="max-w-2xl w-[95vw] sm:w-[90vw]"
+                        contentClassName="max-w-2xl"
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
                           {Object.entries(row.original)
-                            .filter(([k]) => k !== 'id')
+                            .filter(([k]) => !['id', 'registrationId', 'memberId'].includes(k))
                             .map(([k, v]) => (
                               <div key={k} className="space-y-1">
-                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{k.replace(/_/g, ' ')}</p>
+                                <p className="text-xs font-bold text-muted-foreground uppercase">{k.replace(/_/g, ' ')}</p>
                                 <p className="text-sm font-medium">{String(v) || '—'}</p>
                               </div>
                             ))}
@@ -408,6 +443,26 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Rich Email Modal */}
+      <Modal
+        open={isEmailModalOpen}
+        onOpenChange={setIsEmailModalOpen}
+        modelTitle="Compose Email"
+        modelDescription={`Sending to ${emailTargets.memberIds.length + emailTargets.emails.length} recipient(s).`}
+        contentClassName="max-w-[90vw] lg:max-w-[1000px] max-h-[90vh] overflow-y-auto"
+        triggerClassName="hidden"
+      >
+        <div className="py-4">
+          <RichEmailComposer 
+            memberIds={emailTargets.memberIds}
+            emails={emailTargets.emails}
+            eventName={event.eventName}
+            onSuccess={() => setIsEmailModalOpen(false)}
+            onCancel={() => setIsEmailModalOpen(false)}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

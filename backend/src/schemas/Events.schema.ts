@@ -10,7 +10,13 @@ export class Events {
     @Prop({ type: String, required: true })
     eventName: string
     @Prop({ type: Date, default: Date.now })
-    eventDate: Date
+    startDate: Date
+
+    @Prop({ type: Date, required: false })
+    endDate?: Date;
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }], default: [] })
+    invitedGroups: string[];
     @Prop({ type: String })
     eventLocation: string
     @Prop({ type: String })

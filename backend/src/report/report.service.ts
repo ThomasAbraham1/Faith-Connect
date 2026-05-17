@@ -5,8 +5,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId } from 'mongoose';
 import * as ExcelJS from 'exceljs';
 import { User, UserDocument } from 'src/schemas/User.schema';
-import { Events } from 'src/schemas/Events.schema';
+import { Events, EventsSchema } from 'src/schemas/Events.schema';
 import { Registration, RegistrationDocument } from 'src/schemas/Registration.schema';
+import { EventsService } from 'src/events/events.service';
 
 export enum ReportType {
   USERS = 'USERS',
@@ -21,6 +22,7 @@ export class ReportService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Events.name) private eventModel: Model<Events>,
     @InjectModel(Registration.name) private registrationModel: Model<RegistrationDocument>,
+    private eventsService: EventsService,
   ) { }
 
   async generateExcelReport(type: ReportType, filters: any, churchId: string, fields?: string[]): Promise<ExcelJS.Workbook> {
@@ -36,12 +38,17 @@ export class ReportService {
     const { model, sheet, populate } = config;
 
     // 1. Fetch data with population
-    const query = { churchId, ...filters };
-    const data = await (model as any).find(query).populate(populate).limit(5000).exec();
+    let data;
+    if (type === ReportType.REGISTRATIONS && filters.eventId) {
+      data = await this.eventsService.getEventAttendees(filters.eventId);
+    } else {
+      const query = { churchId, ...filters };
+      data = await (model as any).find(query).populate(populate).limit(5000).exec();
+    }
 
     // 2. Initialize Workbook and Worksheet
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Called To Ascend ChMS';
+    workbook.creator = 'Faith Connect ChMS';
     const worksheet = workbook.addWorksheet(sheet);
 
     // 3. Define Columns
@@ -78,12 +85,16 @@ export class ReportService {
         } else {
           rowData[field.key] = this.formatValue(item[field.key]);
 
-          // Special handling for names/email/phone from responses if memberId is missing for registrations
-          if (type === ReportType.REGISTRATIONS && field.key === 'memberId' && rowData['memberId'] === 'N/A' && item.responses) {
-            const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
-            const first = resp.firstName || resp.first_name || '';
-            const last = resp.lastName || resp.last_name || '';
-            rowData['memberId'] = `${first} ${last}`.trim() || 'Guest';
+          // Use flat attendee data if available
+          if (type === ReportType.REGISTRATIONS && field.key === 'memberId') {
+            if (item.firstName || item.lastName) {
+              rowData['memberId'] = `${item.firstName || ''} ${item.lastName || ''}`.trim();
+            } else if (rowData['memberId'] === 'N/A' && item.responses) {
+              const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
+              const first = resp.firstName || resp.first_name || '';
+              const last = resp.lastName || resp.last_name || '';
+              rowData['memberId'] = `${first} ${last}`.trim() || 'Guest';
+            }
           }
         }
       });
@@ -169,8 +180,13 @@ export class ReportService {
     if (!config) throw new Error('Invalid report type');
 
     const { model, populate } = config;
-    const query = { churchId, ...filters };
-    const data = await (model as any).find(query).populate(populate).limit(50).exec();
+    let data;
+    if (type === ReportType.REGISTRATIONS && filters.eventId) {
+      data = await this.eventsService.getEventAttendees(filters.eventId);
+    } else {
+      const query = { churchId, ...filters };
+      data = await (model as any).find(query).populate(populate).limit(50).exec();
+    }
 
     const availableFields = await this.getFields(type, filters);
     const selectedFields = fields && fields.length > 0
@@ -191,10 +207,14 @@ export class ReportService {
           row[columnKey] = this.formatValue(item[f.key]);
 
           // Special fallback for member name in registrations
-          if (type === ReportType.REGISTRATIONS && f.key === 'memberId' && row[columnKey] === 'N/A' && item.responses) {
-            const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
-            const fullName = resp.name || '';
-            row[columnKey] = `${fullName}`.trim() || 'Guest';
+          if (type === ReportType.REGISTRATIONS && f.key === 'memberId') {
+            if (item.firstName || item.lastName) {
+              row[columnKey] = `${item.firstName || ''} ${item.lastName || ''}`.trim();
+            } else if (row[columnKey] === 'N/A' && item.responses) {
+              const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
+              const fullName = resp.name || '';
+              row[columnKey] = `${fullName}`.trim() || 'Guest';
+            }
           }
         }
       });

@@ -30,7 +30,7 @@ export class DashboardService {
     });
     const upcomingEvents = await this.eventsModel.countDocuments({
       churchId,
-      eventDate: { $gte: new Date() },
+      startDate: { $gte: new Date() },
     });
 
     // Budget Aggregation
@@ -126,7 +126,7 @@ export class DashboardService {
       ...newEvents.map(e => ({
         type: 'EVENT',
         title: e.eventName,
-        description: `Event created for ${new Date(e.eventDate).toLocaleDateString()}`,
+        description: `Event created for ${new Date((e as any).startDate || e.eventDate).toLocaleDateString()}`,
         timestamp: (e as any).createdAt,
       })),
       ...newMinistries.map(m => ({

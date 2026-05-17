@@ -1,0 +1,146 @@
+@reference "../../index.css";
+
+/* 
+  Custom styling for react-big-calendar to match our Tailwind Theme
+  We use @apply to seamlessly inherit colors and shapes from our design system
+*/
+
+.rbc-calendar {
+  @apply font-sans;
+}
+
+.rbc-header {
+  @apply py-2 font-semibold text-sm border-border text-muted-foreground uppercase tracking-wider;
+}
+
+.rbc-month-view, .rbc-time-view, .rbc-agenda-view {
+  @apply bg-background border-border rounded-xl shadow-sm border overflow-hidden;
+}
+
+.rbc-month-row, .rbc-day-bg, .rbc-time-header, .rbc-time-content {
+  @apply border-border;
+}
+
+.rbc-off-range-bg {
+  @apply bg-muted/20;
+}
+
+.rbc-today {
+  @apply bg-primary/5;
+}
+
+.rbc-event {
+  @apply bg-primary text-primary-foreground border-none rounded-md px-2 py-1 text-xs font-medium shadow-sm transition-transform hover:scale-[1.02];
+}
+
+.rbc-event.rbc-selected {
+  @apply bg-primary/90 outline outline-2 outline-ring outline-offset-2;
+}
+
+.rbc-show-more {
+  @apply text-primary font-medium text-xs hover:underline bg-transparent;
+}
+
+.rbc-toolbar {
+  @apply mb-4 flex-wrap gap-4;
+}
+
+.rbc-toolbar button {
+  @apply text-foreground bg-background border border-border rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-primary text-primary-foreground border-primary hover:bg-primary/90 focus:bg-primary/90 focus:ring-primary/50;
+}
+
+.rbc-toolbar .rbc-toolbar-label {
+  @apply font-bold text-lg md:text-xl tracking-tight;
+}
+
+.rbc-time-slot {
+  @apply border-border;
+}
+
+.rbc-timeslot-group {
+  @apply border-border min-h-[60px];
+}
+
+.rbc-time-gutter .rbc-timeslot-group {
+  @apply border-border;
+}
+
+.rbc-label {
+  @apply text-xs text-muted-foreground px-2;
+}
+
+.rbc-allday-cell {
+  @apply bg-muted/10 border-border;
+}
+
+.rbc-current-time-indicator {
+  @apply bg-destructive h-[2px];
+}
+
+.rbc-current-time-indicator::before {
+  content: '';
+  @apply absolute -left-1 top-[-4px] h-2 w-2 rounded-full bg-destructive;
+}
+
+/* INTERACTIVE FEEDBACK */
+
+/* Month View: Hover effect for date cells */
+.rbc-day-bg {
+  @apply !transition-colors !duration-150;
+}
+
+.rbc-day-bg:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important; /* Light blue tint, increased from 0.08 */
+  cursor: pointer;
+}
+
+/* Week/Day View: Hover effect for time slots */
+.rbc-time-slot {
+  @apply !transition-colors !duration-150;
+}
+
+.rbc-time-slot:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  cursor: pointer;
+}
+
+.rbc-slot-selection {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Event Card: Hover & Active States */
+.rbc-event {
+  @apply !transition-all !duration-200;
+  overflow: visible !important; /* Fix for clipping the right-side drag resize anchor */
+}
+
+.rbc-event:hover {
+  @apply !shadow-lg !brightness-110 !z-50;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.rbc-event:active {
+  @apply !scale-95 !opacity-80;
+}
+
+/* Drag and Drop Visuals */
+.rbc-addons-dnd-drag-preview {
+  @apply !opacity-50 !shadow-2xl !ring-2 !ring-primary !z-[999];
+}
+
+.rbc-addons-dnd-over {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  border: 2px dashed #3b82f6 !important;
+}
+
+/* Context Menu event wrapper: fill parent so right-click hits anywhere on the event block */
+.rbc-event > * {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}

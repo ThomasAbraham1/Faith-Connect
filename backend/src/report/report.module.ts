@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, userSchema } from 'src/schemas/User.schema';
 import { Events, EventsSchema } from 'src/schemas/Events.schema';
 import { Registration, RegistrationSchema } from 'src/schemas/Registration.schema';
+import { EventsModule } from 'src/events/events.module';
 
 @Module({
   controllers: [ReportController],
@@ -14,7 +15,8 @@ import { Registration, RegistrationSchema } from 'src/schemas/Registration.schem
       { name: User.name, schema: userSchema },
       { name: Events.name, schema: EventsSchema },
       { name: Registration.name, schema: RegistrationSchema },
-    ])
+    ]),
+    EventsModule
   ]
 })
 export class ReportModule { }

@@ -109,7 +109,7 @@ export const Attendance = () => {
         return eventsData.data.data.map((event: any) => ({
             id: event._id,
             name: event.eventName,
-            date: event.eventDate,
+            date: event.startDate || event.eventDate,
             isRecurring: event.isRecurring,
             recurrenceDay: event.recurrenceDay,
         }));

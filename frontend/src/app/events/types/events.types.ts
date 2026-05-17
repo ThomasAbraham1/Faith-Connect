@@ -1,9 +1,11 @@
-
-
 export type TEventsData = {
   id?: string,
   eventName: string,
-  eventDate: string,
+  startDate: Date | string,
+  endDate?: Date | string,
+  startTime?: string | null,
+  endTime?: string | null,
+  invitedGroups?: string[],
   description: string,
   eventLocation: string,
   organizer: string,

@@ -7,11 +7,14 @@ import { Model } from 'mongoose';
 import * as fs from 'fs';
 import { Signature } from 'src/schemas/Signature.schema';
 import { SignatureDto } from './dto/signature.dto';
+import { Group, GroupDocument } from 'src/schemas/Group.schema';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class MembersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(Group.name) private readonly groupModel: Model<GroupDocument>,
   ) { }
   async create(createMemberDto: CreateMemberDto) {
     try {
@@ -127,6 +130,9 @@ export class MembersService {
         // Check pictures to delete length and call file deleter
         if (picturesToDelete.length > 0)
           await this.deleteExistingPicture(picturesToDelete);
+
+        // Cascade cleanup
+        await this.cascadeMemberDeletion(id, session);
       })
       return deleteResult
     }
@@ -138,6 +144,27 @@ export class MembersService {
       await session.endSession()
       console.log('db session for user deletion complete')
     }
+  }
+
+  private async cascadeMemberDeletion(memberIds: string[] | string, session: mongoose.ClientSession) {
+    // 1. Clean up Groups
+    await this.groupModel.updateMany(
+      {
+        $or: [
+          { leaders: { $in: memberIds } },
+          { members: { $in: memberIds } }
+        ]
+      },
+      {
+        $pull: {
+          leaders: { $in: memberIds },
+          members: { $in: memberIds }
+        }
+      },
+      { session }
+    );
+
+    // Future cleanup rules can be added here
   }
 
   deleteProfilePicture(profilePicPath: string) {

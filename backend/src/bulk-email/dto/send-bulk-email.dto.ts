@@ -1,13 +1,18 @@
-import { IsArray, IsNotEmpty, IsString, ArrayMinSize } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 // This class tells NestJS what body shape the POST /bulk-email/send endpoint expects.
 // NestJS will automatically validate this and return a 400 error if data is wrong.
 export class SendBulkEmailDto {
   // memberIds: array of MongoDB _id strings for the people to email
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1, { message: 'Please select at least one member to email.' })
   @IsString({ each: true })
-  memberIds: string[];
+  memberIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  emails?: string[];
 
   // The email subject line
   @IsString()

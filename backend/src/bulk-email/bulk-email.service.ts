@@ -37,42 +37,56 @@ export class BulkEmailService {
     skipped: number;
     skippedNames: string[];
   }> {
-    // Find all users whose _id is in the memberIds array.
-    // $in is a MongoDB operator meaning "find documents where _id is one of these values".
-    const members = await this.userModel.find({
-      _id: { $in: dto.memberIds },
-    });
-
-    if (members.length === 0) {
-      throw new NotFoundException('No members found with the provided IDs.');
-    }
-
     let queued = 0;
     let skipped = 0;
     const skippedNames: string[] = [];
 
-    for (const member of members) {
-      // Skip this member if they don't have an email address stored.
-      if (!member.email) {
-        const name = member.firstName || member.userName || 'Unknown';
-        this.logger.warn(`Skipping ${name} — no email address on file.`);
-        skipped++;
-        skippedNames.push(name);
-        continue;
-      }
-
-      // Replace dynamic placeholders in subject and body
-      const personalizedSubject = this.replacePlaceholders(dto.subject, member);
-      const personalizedBody = this.replacePlaceholders(dto.body, member);
-
-      // Push the email job to SQS. The QueueService will pick it up and send it.
-      await this.queueService.enqueue({
-        to: member.email,
-        subject: personalizedSubject,
-        body: personalizedBody,
+    // 1. Process memberIds (existing members with personalization)
+    if (dto.memberIds && dto.memberIds.length > 0) {
+      const members = await this.userModel.find({
+        _id: { $in: dto.memberIds },
       });
 
-      queued++;
+      for (const member of members) {
+        if (!member.email) {
+          const name = member.firstName || member.userName || 'Unknown';
+          this.logger.warn(`Skipping ${name} — no email address on file.`);
+          skipped++;
+          skippedNames.push(name);
+          continue;
+        }
+
+        const personalizedSubject = this.replacePlaceholders(dto.subject, member);
+        const personalizedBody = this.replacePlaceholders(dto.body, member);
+
+        await this.queueService.enqueue({
+          to: member.email,
+          subject: personalizedSubject,
+          body: personalizedBody,
+        });
+
+        queued++;
+      }
+    }
+
+    // 2. Process raw emails (registrants/guests)
+    if (dto.emails && dto.emails.length > 0) {
+      for (const email of dto.emails) {
+        if (!email) continue;
+
+        // Send directly (no personalization as there's no member record)
+        await this.queueService.enqueue({
+          to: email,
+          subject: dto.subject,
+          body: dto.body,
+        });
+
+        queued++;
+      }
+    }
+
+    if (queued === 0 && skipped === 0) {
+      throw new NotFoundException('No recipients found to email.');
     }
 
     this.logger.log(

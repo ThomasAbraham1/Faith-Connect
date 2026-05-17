@@ -12,6 +12,10 @@ import type { TEventsData } from "./types/events.types";
 import { Alert } from "@/components/dynamic/Alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon, ListIcon } from "lucide-react";
+import { CalendarView } from "./CalendarView";
+import { toast } from "sonner";
 
 function EventsPage() {
   const userContext = useUser();
@@ -20,6 +24,7 @@ function EventsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<TEventsData | null>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const getSelectedRowsObject = useCallback((value: Record<string, Row<unknown>> | boolean) => {
     const selectedRowsObject = value as Record<string, Row<TEventsData>>
@@ -27,7 +32,7 @@ function EventsPage() {
     setSelectedRowIds(arrayOfIds)
   }, [])
 
-  const { isPending, error, data, isFetching } = useQuery({
+  const { isPending, error, data } = useQuery({
     queryKey: ["eventsData"],
     queryFn: async () => {
       const response = await api.get("/events");
@@ -35,7 +40,6 @@ function EventsPage() {
     },
   });
 
-  const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (id: string | String[]) => {
       if (typeof id != 'object') {
@@ -43,11 +47,25 @@ function EventsPage() {
       }
       return api.delete(`/events/${(id as []).join(',')}`)
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["eventsData"] })
+      toast.success("Event(s) deleted successfully");
       if (tableRef.current) {
         tableRef.current.resetRowSelection();
       }
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string, updates: any }) => {
+      return api.patch(`/events/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["eventsData"] });
+      toast.success("Event updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to update event");
     }
   });
 
@@ -74,67 +92,119 @@ function EventsPage() {
 
       <Card>
         <CardContent className="pt-6">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              {selectedRowIds.length > 0 ? (
-                <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
-                  <Button variant="destructive">Delete Selected</Button>
-                </Alert>
-              ) : (
-                <CUEvents
-                  trigger="Add Event"
-                  triggerVariant="default"
-                  open={isSheetOpen}
-                  onOpenChange={(open: boolean) => {
-                    setIsSheetOpen(open);
-                    if (!open) setEditingEvent(null);
-                  }}
-                  onSuccess={() => {
-                    setIsSheetOpen(false);
-                    setEditingEvent(null);
-                  }}
-                  data={editingEvent}
-                />
-              )}
+          <Tabs defaultValue="calendar" className="w-full">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <TabsList>
+                <TabsTrigger value="calendar" className="gap-2">
+                  <CalendarIcon className="h-4 w-4" /> Calendar
+                </TabsTrigger>
+                <TabsTrigger value="list" className="gap-2">
+                  <ListIcon className="h-4 w-4" /> List View
+                </TabsTrigger>
+              </TabsList>
+
+              <div>
+                {selectedRowIds.length > 0 ? (
+                  <Alert onComfirmFunction={() => mutation.mutate(selectedRowIds)}>
+                    <Button variant="destructive">Delete Selected</Button>
+                  </Alert>
+                ) : (
+                  <CUEvents
+                    trigger="Add Event"
+                    triggerVariant="default"
+                    open={isSheetOpen}
+                    onOpenChange={(open: boolean) => {
+                      setIsSheetOpen(open);
+                      if (!open) setEditingEvent(null);
+                    }}
+                    onSuccess={() => {
+                      setIsSheetOpen(false);
+                      setEditingEvent(null);
+                    }}
+                    data={editingEvent}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <DynamicTable1<any>
-            ref={tableRef}
-            data={dataArray}
-            getSelectedRowsObject={getSelectedRowsObject}
-            columnOptions={{
-              HideColumns: ["id", "churchId", "_id", "formFields"]
-            }}
-          >
-            {(row) =>
-              <ActionsColumn>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/dashboard/Events/${row.original._id || row.original.id}/registrations`)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setEditingEvent(row.original);
-                    setIsSheetOpen(true);
-                  }}
-                >
-                  <SquarePen className="h-4 w-4" />
-                </Button>
+            <TabsContent value="calendar" className="mt-0">
+              <CalendarView 
+                events={dataArray} 
+                onSelectEvent={(event) => {
+                  setEditingEvent(event);
+                  setIsSheetOpen(true);
+                }}
+                onSelectSlot={(slotInfo) => {
+                  const isAllDaySelection = slotInfo.start.getHours() === 0 && slotInfo.start.getMinutes() === 0;
+                  
+                  const formatTime = (date: Date) => {
+                    return date.toTimeString().slice(0, 5);
+                  };
 
-                <Alert onComfirmFunction={() => mutation.mutate((row.original._id || row.original.id) as string)}>
-                  <Button variant="ghost" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </Alert>
-              </ActionsColumn>
-            }
-          </DynamicTable1>
+                  const editingObj: any = {
+                    startDate: slotInfo.start,
+                  };
+
+                  if (isAllDaySelection) {
+                    // Check if it's a multi-day selection
+                    const durationMs = slotInfo.end.getTime() - slotInfo.start.getTime();
+                    if (durationMs > 24 * 60 * 60 * 1000) {
+                      editingObj.endDate = new Date(slotInfo.end.getTime() - 1000); // inclusive
+                    }
+                  } else {
+                    editingObj.startTime = formatTime(slotInfo.start);
+                    editingObj.endTime = formatTime(slotInfo.end);
+                  }
+                  
+                  setEditingEvent(editingObj);
+                  setIsSheetOpen(true);
+                }}
+                onEventUpdate={(id, updates) => updateMutation.mutate({ id, updates })}
+                onDeleteEvent={(id) => mutation.mutate(id)}
+                onViewRegistrants={(id) => navigate(`/dashboard/Events/${id}/registrations`)}
+              />
+            </TabsContent>
+
+            <TabsContent value="list" className="mt-0">
+              <DynamicTable1<any>
+                ref={tableRef}
+                data={dataArray}
+                getSelectedRowsObject={getSelectedRowsObject}
+                columnOptions={{
+                  HideColumns: ["id", "churchId", "_id", "formFields"]
+                }}
+              >
+                {(row) =>
+                  <ActionsColumn>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate(`/dashboard/Events/${row.original._id || row.original.id}/registrations`)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setEditingEvent(row.original);
+                        setIsSheetOpen(true);
+                      }}
+                    >
+                      <SquarePen className="h-4 w-4" />
+                    </Button>
+
+                    <Alert onComfirmFunction={() => mutation.mutate((row.original._id || row.original.id) as string)}>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </Alert>
+                  </ActionsColumn>
+                }
+              </DynamicTable1>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

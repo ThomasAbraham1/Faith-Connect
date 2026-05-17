@@ -220,7 +220,7 @@ export const EventRegistrationPage: React.FC = () => {
                   <Calendar className="h-4 w-4 text-primary" />
                 </div>
                 <span className="font-bold tracking-tight">
-                  {event.eventDate ? new Date(event.eventDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBA'}
+                  {(event.startDate || event.eventDate) ? new Date(event.startDate || event.eventDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBA'}
                 </span>
               </div>
               {event.eventLocation && (
@@ -305,15 +305,15 @@ export const EventRegistrationPage: React.FC = () => {
               </h1>
 
               <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-8 gap-y-2">
-                {event.eventDate && (
+                {(event.startDate || event.eventDate) && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3.5 w-3.5 text-primary/60" />
                     <span className="text-[11px] sm:text-xs font-bold tracking-wide text-zinc-400">
-                      {new Date(event.eventDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(event.startDate || event.eventDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
                 )}
-                {event.eventDate && event.eventLocation && (
+                {(event.startDate || event.eventDate) && event.eventLocation && (
                   <div className="hidden sm:block h-3 w-px bg-white/20" />
                 )}
                 {event.eventLocation && (

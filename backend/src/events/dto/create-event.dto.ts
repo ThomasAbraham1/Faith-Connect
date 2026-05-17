@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString, ValidateNested, ArrayMaxSize } from "class-validator"
+import { IsArray, IsBoolean, IsDate, IsDateString, IsNotEmpty, IsOptional, IsString, ValidateNested, ArrayMaxSize } from "class-validator"
 import { Transform, Type } from "class-transformer"
 import { FormFieldDto } from "./form-field.dto"
 
@@ -6,9 +6,26 @@ export class CreateEventDto {
     @IsString()
     @IsNotEmpty()
     eventName: string
-    @IsString()
     @IsNotEmpty()
-    eventDate: Date
+    @Transform(({ value }) => new Date(value))
+    @IsDate()
+    startDate: Date
+    
+    @IsOptional()
+    @Transform(({ value }) => (value === "" || value === "null" || value === null) ? undefined : new Date(value))
+    @IsDate()
+    endDate?: Date
+
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === "" || value === "null" || value === null) return undefined;
+        if (typeof value === 'string') return value.split(',').filter(Boolean);
+        return value;
+    })
+    @IsArray()
+    @IsString({ each: true })
+    invitedGroups?: string[]
+
     @IsString()
     @IsNotEmpty()
     eventLocation: string
@@ -25,18 +42,18 @@ export class CreateEventDto {
     isRecurring?: boolean
 
     @IsOptional()
-    @Transform(({ value }) => value === "" ? undefined : value)
+    @Transform(({ value }) => (value === "" || value === "null" || value === null) ? undefined : value)
     @IsString()
     recurrenceType?: string
 
     @IsOptional()
-    @Transform(({ value }) => value === "" ? undefined : value)
+    @Transform(({ value }) => (value === "" || value === "null" || value === null) ? undefined : value)
     @IsString()
     recurrenceDay?: string
 
     @IsOptional()
-    @Transform(({ value }) => value === "" ? undefined : value)
-    @IsDateString() // Using IsDateString because frontend sends JSON
+    @Transform(({ value }) => (value === "" || value === "null" || value === null) ? undefined : value)
+    @IsDateString()
     recurrenceEndDate?: Date
 
     @IsOptional()

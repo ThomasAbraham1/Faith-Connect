@@ -6,6 +6,7 @@ import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { DeleteEventDto } from './dto/delete-event.dto';
+import { DeleteRegistrationDto } from './dto/delete-registration.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { StorageService } from 'src/storage/storage.service';
 
@@ -132,13 +133,17 @@ export class EventsController {
 
   @Delete(':id')
   remove(@Param() deleteEventDto: DeleteEventDto) {
-    console.log("HOW ARE YOU ")
     return this.eventsService.remove(deleteEventDto.id);
   }
 
   @Delete(':id/registrations/:regId')
-  removeRegistration(@Param('id') eventId: string, @Param('regId') regId: string) {
-    return this.eventsService.removeRegistration(eventId, regId);
+  removeRegistration(@Param('id') eventId: string, @Param() params: DeleteRegistrationDto) {
+    return this.eventsService.removeRegistration(eventId, params.regId);
+  }
+
+  @Get(':id/attendees')
+  getEventAttendees(@Param('id') id: string) {
+    return this.eventsService.getEventAttendees(id);
   }
 
   @Patch(':id/registrations/:regId/mark-paid')
