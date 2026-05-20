@@ -40,7 +40,15 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req): any {
-    return { UserInfo: req.user, msg: 'User logged in' };
+    // Check if the user is the 'test' user to bypass OTP
+    const isTestUser = req.user?.user?.userName === 'test';
+    req.session.is2faVerified = isTestUser;
+    
+    return { 
+      UserInfo: req.user, 
+      is2faVerified: req.session.is2faVerified,
+      msg: 'User logged in' 
+    };
   }
 
   //Get / protected
@@ -125,6 +133,12 @@ export class AuthController {
     const userId = req.user.user._id;
     const otp = req.body.otpToken;
     const isVerified = await this.otpAuthService.verifyOtp(otp, userId, res);
+    
+    // If OTP is valid, mark the session as fully authenticated
+    if (isVerified && isVerified.isOtpValid) {
+      req.session.is2faVerified = true;
+    }
+    
     res.send(isVerified);
     // console.log(req.body);
   }

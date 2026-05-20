@@ -82,7 +82,7 @@ export function LoginForm({
       const twofaMemoryCheckResult = await twofaMemoryChecker();
       const doesDeviceExist = twofaMemoryCheckResult.data.data.doesDeviceExist;
       console.log("DoesDeviceExist:", twofaMemoryCheckResult);
-      if (doesDeviceExist) {
+      if (doesDeviceExist || response.data.data.is2faVerified) {
         userContext.setShdInitialUserQueryRun(true);
         navigate("/dashboard");
       }
