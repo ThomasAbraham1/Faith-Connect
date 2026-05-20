@@ -126,7 +126,7 @@ export class DashboardService {
       ...newEvents.map(e => ({
         type: 'EVENT',
         title: e.eventName,
-        description: `Event created for ${new Date((e as any).startDate || e.eventDate).toLocaleDateString()}`,
+        description: `Event created for ${new Date((e as any).startDate).toLocaleDateString()}`,
         timestamp: (e as any).createdAt,
       })),
       ...newMinistries.map(m => ({
@@ -141,9 +141,9 @@ export class DashboardService {
         description: `Expense logged for ${(e.groupId as any)?.name || 'Ministry'} - ${e.description}`,
         timestamp: (e as any).createdAt,
       })),
-    ];  
+    ];
     console.log("Recent Activity Debug:");
-    console.log("- activities:", activities); 
+    console.log("- activities:", activities);
     return activities.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
   }
 }
