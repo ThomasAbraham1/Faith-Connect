@@ -10,7 +10,8 @@ export class AuthenticatedGuard implements CanActivate {
     
     // 2. Allow access to OTP verification routes
     const path = request.route.path;
-    if (path === '/auth/otpRequest' || path === '/auth/verifyOtp') {
+    console.log("path",path)
+    if (path === '/auth/otpRequest' || path === '/auth/verifyOtp' || path === '/auth/twofaMemoryCheck') {
       return true;
     }
     

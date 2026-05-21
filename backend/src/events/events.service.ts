@@ -326,14 +326,17 @@ export class EventsService implements OnModuleInit {
 
     // Add or update with registration info
     registrations.forEach(reg => {
+      const responses = reg.responses as any;
       // Use registration _id as unique key
       attendeesMap.set(reg._id.toString(), {
         registrationId: reg._id,
-        firstName: reg.responses?.firstName || reg.responses?.first_name || 'Guest',
-        lastName: reg.responses?.lastName || reg.responses?.last_name || '',
-        phone: reg.responses?.phone || 'N/A',
-        email: reg.responses?.email || '',
+        firstName: responses?.firstName || responses?.first_name || 'Guest',
+        lastName: responses?.lastName || responses?.last_name || '',
+        phone: responses?.phone || 'N/A',
+        email: responses?.email || '',
         source: 'REGISTRANT',
+        registeredAt: reg.createdAt,
+        name: responses?.name || '',
         paymentStatus: reg.paymentStatus,
         responses: reg.responses // Added for report support
       });

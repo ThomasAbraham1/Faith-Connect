@@ -64,6 +64,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}/attendees`);
       const raw = res.data?.data;
+      console.log(raw)
       return Array.isArray(raw) ? raw : [];
     },
     refetchOnWindowFocus: true,
@@ -191,10 +192,12 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
         id: reg.registrationId || reg.memberId,
         registrationId: reg.registrationId,
         memberId: reg.memberId,
-        firstName: reg.firstName,
-        lastName: reg.lastName,
+        name: reg.name,
+        // firstName: reg.firstName,
+        // lastName: reg.lastName,
         phone: reg.phone,
         email: reg.email,
+        date: reg.registeredAt,
         paymentStatus: reg.paymentStatus || 'FREE',
         source: reg.source === 'GROUP_MEMBER' ? 'Group Member' : 'Public Form',
       };

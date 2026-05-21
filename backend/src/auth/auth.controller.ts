@@ -94,13 +94,18 @@ export class AuthController {
   //  2FA memory check
   @UseGuards(AuthenticatedGuard)
   @Post('twofaMemoryCheck')
-  async twofaMemoryCheck(@Request() req: expressRequest) {
+  async twofaMemoryCheck(@Request() req) {
     try {
       if (!req.cookies['rememberDeviceToken'])
         // throw new NotFoundException('Remember Device Token was not found');
         return { doesDeviceExist: false };
       const rememberDeviceToken = req.cookies['rememberDeviceToken'];
-      return this.authService.twofaMemoryCheck(rememberDeviceToken, req);
+      const result = await this.authService.twofaMemoryCheck(rememberDeviceToken, req);
+      
+      if (result && result.doesDeviceExist) {
+        req.session.is2faVerified = true;
+      }
+      return result;
     } catch (e) {
       console.error(e);
       return e;

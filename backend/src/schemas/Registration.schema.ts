@@ -28,6 +28,9 @@ export class Registration {
 
   @Prop({ type: String, required: false })
   razorpayPaymentId?: string;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const RegistrationSchema = SchemaFactory.createForClass(Registration);
