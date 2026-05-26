@@ -320,7 +320,9 @@ export class EventsService implements OnModuleInit {
         lastName: m.lastName,
         phone: m.phone,
         email: m.email,
-        source: 'GROUP_MEMBER'
+        source: 'GROUP_MEMBER',
+        eventId: event._id,
+        eventName: event.eventName,
       });
     });
 
@@ -330,7 +332,8 @@ export class EventsService implements OnModuleInit {
       // Use registration _id as unique key
       attendeesMap.set(reg._id.toString(), {
         registrationId: reg._id,
-        firstName: responses?.firstName || responses?.first_name || 'Guest',
+        // Use empty string (not 'Guest') so the report can fall through to responses.name
+        firstName: responses?.firstName || responses?.first_name || '',
         lastName: responses?.lastName || responses?.last_name || '',
         phone: responses?.phone || 'N/A',
         email: responses?.email || '',
@@ -340,6 +343,8 @@ export class EventsService implements OnModuleInit {
         paymentStatus: reg.paymentStatus,
         razorpayOrderId: reg.razorpayOrderId || '',
         razorpayPaymentId: reg.razorpayPaymentId || '',
+        eventId: event._id,
+        eventName: event.eventName,
         responses: reg.responses // Added for report support
       });
     });

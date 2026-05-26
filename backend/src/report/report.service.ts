@@ -95,6 +95,9 @@ export class ReportService {
         } else if (type === ReportType.REGISTRATIONS && (field.key === 'razorpayOrderId' || field.key === 'razorpayPaymentId')) {
           // Flat attendee objects carry these directly
           rowData[field.key] = item[field.key] || 'N/A';
+        } else if (type === ReportType.REGISTRATIONS && field.key === 'eventId') {
+          // attendee objects carry eventName directly from getEventAttendees
+          rowData[field.key] = item.eventName || 'N/A';
         } else {
           rowData[field.key] = this.formatValue(item[field.key]);
 
@@ -102,11 +105,14 @@ export class ReportService {
           if (type === ReportType.REGISTRATIONS && field.key === 'memberId') {
             if (item.firstName || item.lastName) {
               rowData['memberId'] = `${item.firstName || ''} ${item.lastName || ''}`.trim();
-            } else if (rowData['memberId'] === 'N/A' && item.responses) {
+            } else if (item.name) {
+              // Form had a single 'name' field instead of firstName/lastName
+              rowData['memberId'] = item.name;
+            } else if (item.responses) {
               const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
               const first = resp.firstName || resp.first_name || '';
               const last = resp.lastName || resp.last_name || '';
-              rowData['memberId'] = `${first} ${last}`.trim() || 'Guest';
+              rowData['memberId'] = `${first} ${last}`.trim() || resp.name || 'Guest';
             }
           }
         }
@@ -173,14 +179,10 @@ export class ReportService {
     if (type === ReportType.REGISTRATIONS && filters.eventId && isValidObjectId(filters.eventId)) {
       const event = await this.eventModel.findById(filters.eventId);
       // Add registration fee from the event as a synthetic field
+      // (razorpayOrderId / razorpayPaymentId come from baseFields via schema paths — no need to add them here)
       if (event?.registrationFee) {
         extraFields.push({ key: 'registrationFee', label: 'Registration Fee' });
       }
-      // Expose Razorpay IDs as report columns
-      extraFields.push(
-        { key: 'razorpayOrderId', label: 'Razorpay Order ID' },
-        { key: 'razorpayPaymentId', label: 'Razorpay Payment ID' },
-      );
       if (event && event.formFields) {
         customFields = event.formFields.map(f => ({
           key: `custom_${f.name}`,
@@ -237,6 +239,9 @@ export class ReportService {
           row[columnKey] = previewEventFee ?? 'N/A';
         } else if (type === ReportType.REGISTRATIONS && (f.key === 'razorpayOrderId' || f.key === 'razorpayPaymentId')) {
           row[columnKey] = item[f.key] || 'N/A';
+        } else if (type === ReportType.REGISTRATIONS && f.key === 'eventId') {
+          // attendee objects carry eventName directly from getEventAttendees
+          row[columnKey] = item.eventName || 'N/A';
         } else {
           row[columnKey] = this.formatValue(item[f.key]);
 
@@ -244,10 +249,12 @@ export class ReportService {
           if (type === ReportType.REGISTRATIONS && f.key === 'memberId') {
             if (item.firstName || item.lastName) {
               row[columnKey] = `${item.firstName || ''} ${item.lastName || ''}`.trim();
-            } else if (row[columnKey] === 'N/A' && item.responses) {
+            } else if (item.name) {
+              // Form had a single 'name' field instead of firstName/lastName
+              row[columnKey] = item.name;
+            } else if (item.responses) {
               const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
-              const fullName = resp.name || '';
-              row[columnKey] = `${fullName}`.trim() || 'Guest';
+              row[columnKey] = resp.name || resp.firstName || resp.first_name || 'Guest';
             }
           }
         }
