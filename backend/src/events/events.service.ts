@@ -338,6 +338,8 @@ export class EventsService implements OnModuleInit {
         registeredAt: reg.createdAt,
         name: responses?.name || '',
         paymentStatus: reg.paymentStatus,
+        razorpayOrderId: reg.razorpayOrderId || '',
+        razorpayPaymentId: reg.razorpayPaymentId || '',
         responses: reg.responses // Added for report support
       });
     });

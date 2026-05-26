@@ -74,6 +74,13 @@ export class ReportService {
     headerRow.height = 25;
 
     // 5. Add the Data Rows
+    // Fetch the event once if needed so we can include registrationFee on every row
+    let eventRegistrationFee: string | undefined;
+    if (type === ReportType.REGISTRATIONS && filters.eventId) {
+      const ev = await this.eventModel.findById(filters.eventId).lean();
+      eventRegistrationFee = (ev as any)?.registrationFee;
+    }
+
     data.forEach((item: any) => {
       const rowData = {};
 
@@ -82,6 +89,12 @@ export class ReportService {
           const name = field.key.replace('custom_', '');
           const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
           rowData[field.key] = resp?.[name] ?? '';
+        } else if (field.key === 'registrationFee') {
+          // Registration fee comes from the event, not the registration document
+          rowData[field.key] = eventRegistrationFee ?? 'N/A';
+        } else if (type === ReportType.REGISTRATIONS && (field.key === 'razorpayOrderId' || field.key === 'razorpayPaymentId')) {
+          // Flat attendee objects carry these directly
+          rowData[field.key] = item[field.key] || 'N/A';
         } else {
           rowData[field.key] = this.formatValue(item[field.key]);
 
@@ -154,10 +167,20 @@ export class ReportService {
     });
 
     let customFields: any[] = [];
+    let extraFields: any[] = [];
     // TODO: Consider generalizing this instead of hardcoding REGISTRATIONS.
     // Question: Should we open this to anything with custom fields? How do we dynamically qualify if an entity has custom fields?
     if (type === ReportType.REGISTRATIONS && filters.eventId && isValidObjectId(filters.eventId)) {
       const event = await this.eventModel.findById(filters.eventId);
+      // Add registration fee from the event as a synthetic field
+      if (event?.registrationFee) {
+        extraFields.push({ key: 'registrationFee', label: 'Registration Fee' });
+      }
+      // Expose Razorpay IDs as report columns
+      extraFields.push(
+        { key: 'razorpayOrderId', label: 'Razorpay Order ID' },
+        { key: 'razorpayPaymentId', label: 'Razorpay Payment ID' },
+      );
       if (event && event.formFields) {
         customFields = event.formFields.map(f => ({
           key: `custom_${f.name}`,
@@ -166,7 +189,7 @@ export class ReportService {
       }
     }
 
-    return [...baseFields, ...customFields];
+    return [...baseFields, ...extraFields, ...customFields];
   }
 
   async getPreviewData(type: ReportType, filters: any, churchId: string, fields?: string[]) {
@@ -193,6 +216,13 @@ export class ReportService {
       ? availableFields.filter(f => fields.includes(f.key))
       : availableFields;
 
+    // Fetch the event once to get registrationFee for preview rows
+    let previewEventFee: string | undefined;
+    if (type === ReportType.REGISTRATIONS && filters.eventId) {
+      const ev = await this.eventModel.findById(filters.eventId).lean();
+      previewEventFee = (ev as any)?.registrationFee;
+    }
+
     return data.map((item: any) => {
       const row = {};
       selectedFields.forEach(f => {
@@ -203,6 +233,10 @@ export class ReportService {
           const name = f.key.replace('custom_', '');
           const resp = item.responses instanceof Map ? Object.fromEntries(item.responses) : item.responses;
           row[columnKey] = resp?.[name] ?? '';
+        } else if (f.key === 'registrationFee') {
+          row[columnKey] = previewEventFee ?? 'N/A';
+        } else if (type === ReportType.REGISTRATIONS && (f.key === 'razorpayOrderId' || f.key === 'razorpayPaymentId')) {
+          row[columnKey] = item[f.key] || 'N/A';
         } else {
           row[columnKey] = this.formatValue(item[f.key]);
 
