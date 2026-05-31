@@ -47,7 +47,7 @@ export class MailerService {
   async sendOne(job: EmailJob): Promise<void> {
     const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
 
-    if (!isProduction) {
+    if (isProduction) {
       await this.sendActualEmail(job);
     } else {
       await this.sendViaMailtrap(job);
