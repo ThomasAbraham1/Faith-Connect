@@ -50,7 +50,7 @@ export class BulkEmailService {
       for (const member of members) {
         if (!member.email) {
           const name = member.firstName || member.userName || 'Unknown';
-          this.logger.warn(`Skipping ${name} — no email address on file.`);
+          this.logger.warn(`Skipping ${name} — no email address on file.`); 
           skipped++;
           skippedNames.push(name);
           continue;

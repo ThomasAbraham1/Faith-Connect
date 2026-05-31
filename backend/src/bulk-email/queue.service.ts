@@ -132,7 +132,7 @@ export class QueueService implements OnModuleInit {
         const messages = result.Messages ?? [];
 
         for (const message of messages) {
-          let job: EmailJob | null = null;
+          let job: EmailJob | null = null; 
           try {
             // Parse the JSON we stored in enqueue()
             job = JSON.parse(message.Body!);

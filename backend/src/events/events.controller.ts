@@ -13,7 +13,7 @@ import { StorageService } from 'src/storage/storage.service';
 // --- PUBLIC routes (no auth) ---
 @Controller('events/public')
 export class EventsPublicController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(private readonly eventsService: EventsService) { }
 
   @Get(':id')
   findPublic(@Param('id') id: string) {
@@ -108,6 +108,7 @@ export class EventsController {
         console.error('Error parsing formFields:', e);
       }
     }
+
 
     if (coverImage) {
       const churchId = req.user.church._id;

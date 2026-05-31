@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { Resend } from 'resend';
 
 // One email job — contains everything needed to send a single email.
 export interface EmailJob {
@@ -26,17 +27,18 @@ export class MailerService {
   // This is the AWS SES client — only used in production.
   private sesClient: SESClient;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private readonly configService: ConfigService, @Inject('RESEND') private readonly resend: Resend) {
     // Only create the SES client if we're in production.
-    if (this.configService.get<string>('NODE_ENV') === 'production') {
-      this.sesClient = new SESClient({
-        region: this.configService.get<string>('AWS_REGION')!,
-        credentials: {
-          accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID')!,
-          secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY')!,
-        },
-      });
-    }
+    // if (this.configService.get<string>('NODE_ENV') === 'production') {
+    //   this.sesClient = new SESClient({
+    //     region: this.configService.get<string>('AWS_REGION')!, 
+    //     credentials: {
+    //       accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID')!,
+    //       secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY')!,
+    //     },
+    //   });
+    // }
+
   }
 
   /**
@@ -45,8 +47,8 @@ export class MailerService {
   async sendOne(job: EmailJob): Promise<void> {
     const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
 
-    if (isProduction) {
-      await this.sendViaSes(job);
+    if (!isProduction) {
+      await this.sendActualEmail(job);
     } else {
       await this.sendViaMailtrap(job);
     }
@@ -78,23 +80,33 @@ export class MailerService {
   // ─── AWS SES (Production) ─────────────────────────────────────────────────
   // AWS SES is Amazon's high-volume email service.
   // Requires a verified sender email in the AWS console.
-  private async sendViaSes(job: EmailJob): Promise<void> {
+  async sendActualEmail(job: EmailJob): Promise<void> {
     const fromEmail = this.configService.get<string>('SES_FROM_EMAIL');
 
-    const command = new SendEmailCommand({
-      Source: `Faith Connect <${fromEmail}>`,
-      Destination: {
-        ToAddresses: [job.to],
-      },
-      Message: {
-        Subject: { Data: job.subject },
-        Body: {
-          Html: { Data: job.body },
-        },
-      },
+    // const command = new SendEmailCommand({
+    //   Source: `Faith Connect <${fromEmail}>`,
+    //   Destination: {
+    //     ToAddresses: [job.to],
+    //   },
+    //   Message: {
+    //     Subject: { Data: job.subject },
+    //     Body: {
+    //       Html: { Data: job.body },
+    //     },
+    //   },
+    // });
+
+    const { data, error } = await this.resend.emails.send({
+      from: `Faith Connect <${fromEmail}>`,
+      to: job.to,
+      subject: job.subject,
+      html: job.body,
     });
 
-    await this.sesClient.send(command);
-    this.logger.log(`[PROD] Email sent to ${job.to} via AWS SES`);
+    if (data) {
+      this.logger.log(`[PROD] Email sent to ${job.to} via Resend`);
+    } else {
+      this.logger.log(`[PROD] Email not sent to ${job.to} via Resend ${JSON.stringify(error)}`);
+    }
   }
 }

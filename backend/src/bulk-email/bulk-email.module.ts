@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User, userSchema } from 'src/schemas/User.schema';
 import { BulkEmailController } from './bulk-email.controller';
 import { BulkEmailService } from './bulk-email.service';
 import { QueueService } from './queue.service';
 import { MailerService } from './mailer.service';
+import { Resend } from 'resend';
 
 /**
  * BulkEmailModule groups everything related to bulk email into one NestJS module.
@@ -28,7 +29,11 @@ import { MailerService } from './mailer.service';
     MongooseModule.forFeature([{ name: User.name, schema: userSchema }]),
   ],
   controllers: [BulkEmailController],
-  providers: [BulkEmailService, QueueService, MailerService],
-  exports: [QueueService], // Added so RemindersModule can push jobs to the Queue
-})
+  providers: [BulkEmailService, QueueService, MailerService, {
+    provide: 'RESEND',
+    useFactory: (configService: ConfigService) => new Resend(configService.get<string>('RESEND_API_KEY')),
+    inject: [ConfigService]
+  }],
+  exports: [QueueService, MailerService], // Added so RemindersModule can push jobs to the Queue
+}) 
 export class BulkEmailModule { }

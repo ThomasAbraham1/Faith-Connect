@@ -23,6 +23,7 @@ services:
       - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM}
       - VITE_APP_API_URL=${VITE_APP_API_URL}
       - ENCRYPTION_SECRET=${ENCRYPTION_SECRET}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - ./backend-data/uploads:/app/public/uploads
       - ./backend-data/signatures:/app/public/signatures
