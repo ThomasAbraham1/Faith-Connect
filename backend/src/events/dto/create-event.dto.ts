@@ -18,7 +18,7 @@ export class CreateEventDto {
 
     @IsOptional()
     @Transform(({ value }) => {
-        if (value === "" || value === "null" || value === null) return undefined;
+        if (value === "" || value === "null" || value === null) return [];
         if (typeof value === 'string') return value.split(',').filter(Boolean);
         return value;
     })

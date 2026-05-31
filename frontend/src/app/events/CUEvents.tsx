@@ -168,7 +168,11 @@ export const CUEvents = ({
                     } else if (val instanceof FileList && val.length) {
                         fd.append(key, val[0]);
                     } else if (Array.isArray(val)) {
-                        val.forEach(item => fd.append(key, item));
+                        if (val.length === 0) {
+                            fd.append(key, "");
+                        } else {
+                            val.forEach(item => fd.append(key, item));
+                        }
                     } else {
                         fd.append(key, val === null ? "" : String(val));
                     }
@@ -195,6 +199,7 @@ export const CUEvents = ({
             {({ register, control, watch, setValue, formState: { errors } }) => {
                 const isRecurring = watch("isRecurring");
                 const { AvatarUploadCropperContent } = useAvatarUploadHandler(setValue, control);
+                console.log(watch('invitedGroups'))
 
                 return (
                     <div className="grid gap-6 px-4">
