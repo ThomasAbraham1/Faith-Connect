@@ -7,6 +7,8 @@ import { BulkEmailService } from './bulk-email.service';
 import { QueueService } from './queue.service';
 import { MailerService } from './mailer.service';
 import { Resend } from 'resend';
+import { Batch, BatchSchema } from 'src/schemas/Batch.schema';
+import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
 
 /**
  * BulkEmailModule groups everything related to bulk email into one NestJS module.
@@ -27,6 +29,8 @@ import { Resend } from 'resend';
     ConfigModule,
     // Register the User model so we can use @InjectModel(User.name) in BulkEmailService
     MongooseModule.forFeature([{ name: User.name, schema: userSchema }]),
+    MongooseModule.forFeature([{ name: Batch.name, schema: BatchSchema }]),
+    MongooseModule.forFeature([{ name: EmailLog.name, schema: EmailLogSchema }]),
   ],
   controllers: [BulkEmailController],
   providers: [BulkEmailService, QueueService, MailerService, {
@@ -35,5 +39,5 @@ import { Resend } from 'resend';
     inject: [ConfigService]
   }],
   exports: [QueueService, MailerService], // Added so RemindersModule can push jobs to the Queue
-}) 
+})
 export class BulkEmailModule { }

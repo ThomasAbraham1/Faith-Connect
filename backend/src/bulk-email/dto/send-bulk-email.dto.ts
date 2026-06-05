@@ -23,4 +23,8 @@ export class SendBulkEmailDto {
   @IsString()
   @IsNotEmpty({ message: 'Email body cannot be empty.' })
   body: string;
-}
+
+  @IsString()
+  @IsOptional()
+  eventId?: string; 
+} 

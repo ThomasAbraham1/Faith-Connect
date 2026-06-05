@@ -6,6 +6,10 @@ import { Resend } from 'resend';
 
 // One email job — contains everything needed to send a single email.
 export interface EmailJob {
+  eventId?: string,
+  churchId: string,
+  emailLogId?: string,
+  batchId: string,
   to: string;
   subject: string;
   body: string;
@@ -50,7 +54,8 @@ export class MailerService {
     if (isProduction) {
       await this.sendActualEmail(job);
     } else {
-      await this.sendViaMailtrap(job);
+      await this.sendActualEmail(job);
+      // await this.sendViaMailtrap(job);
     }
   }
 
@@ -95,18 +100,24 @@ export class MailerService {
     //     },
     //   },
     // });
+    try {
 
-    const { data, error } = await this.resend.emails.send({
-      from: `Faith Connect <${fromEmail}>`,
-      to: job.to,
-      subject: job.subject,
-      html: job.body,
-    });
+      const { data, error } = await this.resend.emails.send({
+        from: `Faith Connect <${fromEmail}>`,
+        to: job.to,
+        subject: job.subject,
+        html: job.body,
+      });
+      
+      if (data) {
+        this.logger.log(`[PROD] Email sent to ${job.to} via Resend`);
+      } else {
+        throw error
+      }
 
-    if (data) {
-      this.logger.log(`[PROD] Email sent to ${job.to} via Resend`);
-    } else {
-      this.logger.log(`[PROD] Email not sent to ${job.to} via Resend ${JSON.stringify(error)}`);
+    } catch (err) {
+      this.logger.log(`[PROD] Email not sent to ${job.to} via Resend ${JSON.stringify(err)}`);
+      throw err
     }
   }
 }

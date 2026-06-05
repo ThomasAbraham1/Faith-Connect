@@ -9,6 +9,8 @@ import { Model, Types } from 'mongoose';
 import { Church } from 'src/schemas/Church.schema';
 import { Group } from 'src/schemas/Group.schema';
 import { PaymentService } from '../payment/payment.service';
+import { Batch } from 'src/schemas/Batch.schema';
+import { EmailLog } from 'src/schemas/EmailLog.schema';
 
 @Injectable()
 export class EventsService implements OnModuleInit {
@@ -18,6 +20,8 @@ export class EventsService implements OnModuleInit {
     @InjectModel(Registration.name) private readonly registrationModel: Model<Registration>,
     @InjectModel(Church.name) private readonly churchModel: Model<Church>,
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
+    @InjectModel(Batch.name) private readonly batchModel: Model<Batch>,
+    @InjectModel(EmailLog.name) private readonly emailLogModel: Model<EmailLog>,
     private readonly paymentService: PaymentService,
   ) { }
 
@@ -350,5 +354,12 @@ export class EventsService implements OnModuleInit {
     });
 
     return Array.from(attendeesMap.values());
+  }
+// 
+
+  async getEventBatches(eventId: string) {
+    const batches = await this.batchModel.find({ eventId });
+    const emailLogs = await this.emailLogModel.find({batchId: { $in: batches.map(b => b._id) } })
+    return { batches, emailLogs };
   }
 }

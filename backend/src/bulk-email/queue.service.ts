@@ -8,7 +8,10 @@ import {
   DeleteMessageCommand,
 } from '@aws-sdk/client-sqs';
 import { EmailJob, MailerService } from './mailer.service';
-
+import { InjectModel, ModelDefinition } from '@nestjs/mongoose';
+import { Batch } from 'src/schemas/Batch.schema';
+import { Model } from 'mongoose';
+import { EmailLog, EmailLogType } from 'src/schemas/EmailLog.schema';
 /**
  * QueueService handles putting email jobs INTO the queue and consuming them FROM the queue.
  *
@@ -37,6 +40,8 @@ export class QueueService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    @InjectModel(Batch.name) private readonly batchModel: Model<Batch>,
+    @InjectModel(EmailLog.name) private readonly emailLogModel: Model<EmailLog>,
   ) { }
 
   /**
@@ -128,17 +133,28 @@ export class QueueService implements OnModuleInit {
             WaitTimeSeconds: 5, // Long polling — waits up to 5s if queue is empty
           }),
         );
-
         const messages = result.Messages ?? [];
 
         for (const message of messages) {
-          let job: EmailJob | null = null; 
+          let job: EmailJob | null = null;
           try {
             // Parse the JSON we stored in enqueue()
             job = JSON.parse(message.Body!);
 
             // Send the actual email
             await this.mailerService.sendOne(job!);
+
+            // 1. Create the EmailLog to track this specific recipient's success
+            const emailLog = await this.emailLogModel.findByIdAndUpdate(job?.emailLogId,{
+              churchId: job?.churchId,
+              batchId: job?.batchId,
+              recipientEmail: job?.to,
+              subject: job?.subject,
+              type: 'BULK', // from your EmailLogType enum
+              status: 'SENT'
+            });
+
+
 
             // Tell SQS "I've processed this — delete it from the queue" 
             await this.sqsClient.send(
@@ -157,7 +173,7 @@ export class QueueService implements OnModuleInit {
             // --- SMART DROP LOGIC ---
             // If the error is permanent (4xx), we drop the job to stop the retry loop.
             // AWS SES returns 400 for things like "Email address not verified" or "Invalid address".
-            const httpStatus = err.$metadata?.httpStatusCode;
+            const httpStatus = err.statusCode || err.$metadata?.httpStatusCode;
             const isPermanentFailure = httpStatus && httpStatus >= 400 && httpStatus < 500 && httpStatus !== 429;
 
             if (isPermanentFailure) {
@@ -176,6 +192,11 @@ export class QueueService implements OnModuleInit {
               this.logger.warn(`TRANSIENT FAILURE: Keeping job for ${recipient} in queue for retry.`);
               // We don't delete the message — SQS will retry it after a visibility timeout.
             }
+            // Updating email log with FAILED status
+            await this.emailLogModel.findByIdAndUpdate(job?.emailLogId, {
+              status: 'FAILED', 
+              error: err?.message
+            });
           }
         }
       } catch (err) {

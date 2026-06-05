@@ -37,7 +37,7 @@ import { Alert } from '@/components/dynamic/Alert';
 import { FaWhatsapp } from 'react-icons/fa';
 import { type Row } from '@tanstack/react-table';
 import { RichEmailComposer } from '@/components/RichEmailComposer';
-
+import { LogViewer } from '@/components/dynamic/LogViewer';
 interface EventDetailProps {
   eventId: string;
   onBack: () => void;
@@ -51,29 +51,53 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [emailTargets, setEmailTargets] = useState<{ memberIds: string[], emails: string[] }>({ memberIds: [], emails: [] });
 
+
+  // Fetching events
   const { data: event, isLoading: eventLoading } = useQuery({
     queryKey: ['event', eventId],
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}`);
+      // console.log("this is event", res.data.data)
       return res.data?.data || res.data;
     },
   });
 
+
+  // Fetch registrations
   const { data: registrations, isLoading: regsLoading } = useQuery({
     queryKey: ['event-registrations', eventId],
     queryFn: async () => {
       const res = await api.get(`/events/${eventId}/attendees`);
       const raw = res.data?.data;
-      console.log(raw)
+      // console.log(raw)
       return Array.isArray(raw) ? raw : [];
     },
     refetchOnWindowFocus: true,
   });
 
-  // Force refetch when switching to the registrants tab
+  // Fetching batches
+  const { data: batchData, isPending: batchesLoading } = useQuery({
+    queryKey: ['event-batches', eventId],
+    queryFn: async () => {
+      const res = await api.get(`/events/${eventId}/batches`);
+      const raw = res.data?.data;
+      console.log("this is batches", raw)
+      return {
+        batches: raw?.batches || [],
+        emailLogs: raw?.emailLogs || []
+      };
+    },
+    // refetchInterval: 2000,
+    refetchOnWindowFocus: true,
+  });
+
+  // Force refetch when switching tabs
   React.useEffect(() => {
     if (activeTab === 'registrants') {
       queryClient.invalidateQueries({ queryKey: ['event-registrations', eventId] });
+    } else if (activeTab === 'details') {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['event-batches', eventId] });
     }
   }, [activeTab, eventId, queryClient]);
 
@@ -169,12 +193,12 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
     // Separate members from raw registrants for the composer
     const memberIds = registrants.filter(r => r.source === 'Group Member').map(r => r.memberId).filter(Boolean);
     const emails = registrants.filter(r => r.source !== 'Group Member').map(r => r.email).filter(Boolean);
-    
+
     if (memberIds.length === 0 && emails.length === 0) {
       toast.error("No valid email addresses found for selection.");
       return;
     }
-    
+
     setEmailTargets({ memberIds, emails });
     setIsEmailModalOpen(true);
   };
@@ -291,7 +315,92 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                 </Button>
               </div>
             </CardContent>
+            {/* Communication Logs Card */}
+            <Card className="bg-background/50 backdrop-blur-xl border-border/50 overflow-hidden">
+              <CardHeader className="pb-3 border-b border-border/50">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-primary" />
+                  Communication Logs
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 space-y-4">
+                {batchesLoading ? (
+                  <p className="text-sm text-muted-foreground animate-pulse">Loading logs...</p>
+                ) : batchData?.batches?.length === 0 && batchData?.emailLogs?.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No communication logs found for this event.</p>
+                ) : (
+                  <Tabs defaultValue="batches" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="batches">Batches ({batchData?.batches?.length || 0})</TabsTrigger>
+                      <TabsTrigger value="logs">Detailed Logs ({batchData?.emailLogs?.length || 0})</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="batches" className="mt-0 space-y-3">
+                      <LogViewer
+                        data={batchData?.batches || []}
+                        searchKeys={['name']}
+                        searchPlaceholder="Search batches by name..."
+                        itemsPerPage={5}
+                        renderItem={(batch: any) => {
+                          const logs = batchData?.emailLogs.filter((log: any) => log.batchId === batch._id);
+                          const total = logs.length;
+                          const sent = logs.filter((log: any) => log.status === 'SENT').length;
+                          const failed = logs.filter((log: any) => log.status === 'FAILED').length;
+                          const pending = logs.filter((log: any) => log.status === 'PENDING').length;
+
+                          return (
+                            <div key={batch._id} className="p-3 rounded-lg border border-border/50 bg-muted/10 flex flex-col gap-2 transition-all hover:bg-muted/30">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium truncate">{batch.name || 'Event Bulk Email'}</span>
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                  {new Date(batch.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs mt-1">
+                                <span className="text-muted-foreground font-medium bg-background px-2 py-0.5 rounded-full border border-border/50">Total: {total}</span>
+                                <span className="text-green-500/90 font-medium bg-green-500/10 px-2 py-0.5 rounded-full">Sent: {sent}</span>
+                                {pending > 0 && <span className="text-yellow-500/90 font-medium bg-yellow-500/10 px-2 py-0.5 rounded-full">Pending: {pending}</span>}
+                                {failed > 0 && <span className="text-red-500/90 font-medium bg-red-500/10 px-2 py-0.5 rounded-full">Failed: {failed}</span>}
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="logs" className="mt-0">
+                      <LogViewer
+                        data={batchData?.emailLogs || []}
+                        searchKeys={['recipientEmail', 'subject', 'status']}
+                        searchPlaceholder="Search by email, subject or status..."
+                        itemsPerPage={8}
+                        renderItem={(log: any) => (
+                          <div key={log._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-border/50 bg-background/50 hover:bg-muted/20 transition-all gap-2">
+                            <div className="flex flex-col gap-1 min-w-0">
+                              <span className="text-sm font-medium text-foreground truncate">{log.recipientEmail}</span>
+                              <span className="text-[11px] text-muted-foreground truncate">{log.subject}</span>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              {log.status === 'SENT' ? (
+                                <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">SENT</span>
+                              ) : log.status === 'FAILED' ? (
+                                <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">FAILED</span>
+                              ) : (
+                                <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">PENDING</span>
+                              )}
+                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">{new Date(log.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        )}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </CardContent>
+            </Card>
+
           </Card>
+
         </TabsContent>
 
         <TabsContent value="form" className="mt-0">
@@ -369,7 +478,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                       {row.original.registrationId && (
                         <>
                           {row.original.paymentStatus !== 'PAID' ? (
-                            <Alert 
+                            <Alert
                               onComfirmFunction={() => markPaidMutation.mutate(row.original.registrationId)}
                               alertTitle="Mark as Paid?"
                               alertDescription="Manually mark as paid? This bypasses the payment gateway."
@@ -379,7 +488,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                               </Button>
                             </Alert>
                           ) : (
-                            <Alert 
+                            <Alert
                               onComfirmFunction={() => markUnpaidMutation.mutate(row.original.registrationId)}
                               alertTitle="Mark as Unpaid?"
                               alertDescription="Set status back to pending?"
@@ -391,7 +500,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                           )}
                         </>
                       )}
-                      
+
                       <SendWhatsApp
                         triggerContent={<FaWhatsapp className="h-4 w-4" />}
                         triggerVariant="ghost"
@@ -400,9 +509,9 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                         names={[`${row.original.firstName} ${row.original.lastName}`]}
                       />
 
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => openEmailModal([row.original])}
                         className="h-9 w-9 text-blue-600 hover:bg-blue-50"
                       >
@@ -410,7 +519,7 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                       </Button>
 
                       {row.original.registrationId && (
-                        <Alert 
+                        <Alert
                           onComfirmFunction={() => deleteRegistrationMutation.mutate(row.original.registrationId)}
                           alertTitle="Delete Registration?"
                           alertDescription="Permanent action. This attendee will be removed."
@@ -420,10 +529,10 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                           </Button>
                         </Alert>
                       )}
-                      <Modal 
-                        triggerButtonContent={<Eye className="h-4 w-4" />} 
-                        modelTitle={'Details'} 
-                        modelDescription={'View registration data'} 
+                      <Modal
+                        triggerButtonContent={<Eye className="h-4 w-4" />}
+                        modelTitle={'Details'}
+                        modelDescription={'View registration data'}
                         triggerButtonVariant={"ghost"}
                         contentClassName="max-w-2xl"
                       >
@@ -457,10 +566,11 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
         triggerClassName="hidden"
       >
         <div className="py-4">
-          <RichEmailComposer 
+          <RichEmailComposer
             memberIds={emailTargets.memberIds}
             emails={emailTargets.emails}
             eventName={event.eventName}
+            eventId={eventId}
             onSuccess={() => setIsEmailModalOpen(false)}
             onCancel={() => setIsEmailModalOpen(false)}
           />

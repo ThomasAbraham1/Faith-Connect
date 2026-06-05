@@ -15,7 +15,7 @@ export class EmailLog {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Church', required: true })
   churchId: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false })
   recipientId: string;
 
   @Prop({ required: true })
@@ -32,6 +32,9 @@ export class EmailLog {
 
   @Prop()
   error?: string;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Batch', required: false })
+  batchId?: string;
 }
 
 export const EmailLogSchema = SchemaFactory.createForClass(EmailLog);

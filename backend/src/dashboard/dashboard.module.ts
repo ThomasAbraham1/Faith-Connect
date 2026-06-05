@@ -8,12 +8,14 @@ import { Events, EventsSchema } from 'src/schemas/Events.schema';
 import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
 import { Group, GroupSchema } from 'src/schemas/Group.schema';
 import { Expense, ExpenseSchema } from 'src/schemas/Expense.schema';
+import { Batch, BatchSchema } from 'src/schemas/Batch.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: userSchema },
       { name: Attendance.name, schema: AttendanceSchema },
+      { name: Batch.name, schema: BatchSchema },
       { name: Events.name, schema: EventsSchema },
       { name: EmailLog.name, schema: EmailLogSchema },
       { name: Group.name, schema: GroupSchema },
@@ -23,4 +25,4 @@ import { Expense, ExpenseSchema } from 'src/schemas/Expense.schema';
   controllers: [DashboardController],
   providers: [DashboardService],
 })
-export class DashboardModule {}
+export class DashboardModule { }

@@ -24,7 +24,7 @@ export const AppLayout = () => {
   const location = useLocation();
   const isNavigating = navigation.state == "loading";
   const isFetching = useIsFetching();
-  
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -37,9 +37,9 @@ export const AppLayout = () => {
                 <LoadingSpinner />
               </div> : <></>
             }
-          <div key={location.pathname} className="animate-in fade-in duration-500 h-full">
-            <Outlet></Outlet>
-          </div>
+            <div key={location.pathname} className="animate-in fade-in duration-500 h-full">
+              <Outlet></Outlet>
+            </div>
           </>
         </div>
       </SidebarInset>

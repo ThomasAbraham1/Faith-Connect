@@ -12,6 +12,7 @@ import { User, userSchema } from 'src/schemas/User.schema';
 import { Group, GroupSchema } from 'src/schemas/Group.schema';
 import { Household, HouseholdSchema } from 'src/schemas/Household.schema';
 import { Registration, RegistrationSchema } from 'src/schemas/Registration.schema';
+import { EmailLog, EmailLogSchema } from 'src/schemas/EmailLog.schema';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Registration, RegistrationSchema } from 'src/schemas/Registration.schem
       { name: Group.name, schema: GroupSchema },
       { name: Household.name, schema: HouseholdSchema },
       { name: Registration.name, schema: RegistrationSchema },
+      { name: EmailLog.name, schema: EmailLogSchema },
     ]),
   ],
   exports: [MongooseModule], // This module now exports all configured models

@@ -44,6 +44,7 @@ interface RichEmailComposerProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   eventName?: string; // Optional context for subject
+  eventId?: string;
 }
 
 export const RichEmailComposer = ({
@@ -52,6 +53,7 @@ export const RichEmailComposer = ({
   onSuccess,
   onCancel,
   eventName,
+  eventId,
 }: RichEmailComposerProps) => {
   const navigate = useNavigate();
   const editor = useRef<any>(null);
@@ -73,7 +75,7 @@ export const RichEmailComposer = ({
 
   // Send Mutation
   const sendMutation = useMutation({
-    mutationFn: async (payload: { memberIds?: string[]; emails?: string[]; subject: string; body: string }) => {
+    mutationFn: async (payload: { memberIds?: string[]; emails?: string[]; subject: string; body: string; eventId?: string}) => {
       const response = await api.post("/bulk-email/send", payload);
       return response.data;
     },
@@ -109,6 +111,7 @@ export const RichEmailComposer = ({
       emails: emails.length > 0 ? emails : undefined,
       subject,
       body,
+      eventId
     });
   };
 

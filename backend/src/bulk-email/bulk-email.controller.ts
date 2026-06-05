@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { BulkEmailService } from './bulk-email.service';
 import { SendBulkEmailDto } from './dto/send-bulk-email.dto';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
@@ -14,7 +14,7 @@ import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 @UseGuards(AuthenticatedGuard)
 @Controller('bulk-email')
 export class BulkEmailController {
-  constructor(private readonly bulkEmailService: BulkEmailService) {}
+  constructor(private readonly bulkEmailService: BulkEmailService) { }
 
   /**
    * POST /bulk-email/send
@@ -35,12 +35,13 @@ export class BulkEmailController {
    * }
    */
   @Post('send')
-  async sendBulkEmail(@Body() dto: SendBulkEmailDto) {
-    const result = await this.bulkEmailService.sendBulkEmail(dto);
+  async sendBulkEmail(@Req() req, @Body() dto: SendBulkEmailDto) {
+    const churchId = req.user.church._id;
+    const result = await this.bulkEmailService.sendBulkEmail(dto, churchId);
 
     return {
       message: 'Emails queued successfully.',
       ...result,
     };
   }
-}
+} 

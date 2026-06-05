@@ -156,4 +156,10 @@ export class EventsController {
   markRegistrationAsUnpaid(@Param('id') eventId: string, @Param('regId') regId: string) {
     return this.eventsService.markRegistrationAsUnpaid(eventId, regId);
   }
+
+  // Event Batches
+  @Get(':eventId/batches')
+  getEventBatches(@Param('eventId') eventId: string) {
+    return this.eventsService.getEventBatches(eventId);
+  }
 }

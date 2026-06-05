@@ -22,6 +22,8 @@ import { EventsModule } from './events/events.module';
 import { PaymentModule } from './payment/payment.module';
 import { BulkEmailModule } from './bulk-email/bulk-email.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { BatchModule } from './batch/batch.module';
+
 import { TemplatesModule } from './templates/templates.module';
 import { GroupsModule } from './groups/groups.module';
 import { ExpensesModule } from './expenses/expenses.module';
@@ -78,6 +80,7 @@ import { ReportModule } from './report/report.module';
     PaymentModule,
     BulkEmailModule,
     RemindersModule,
+    BatchModule,
     TemplatesModule,
     DashboardModule,
     GroupsModule,
