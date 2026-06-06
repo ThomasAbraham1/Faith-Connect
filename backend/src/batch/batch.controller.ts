@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { BatchService } from './batch.service';
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
+import { BatchType } from '../schemas/Batch.schema';
 
 @UseGuards(AuthenticatedGuard)
 @Controller('batches')
@@ -20,7 +21,7 @@ export class BatchController {
   @Post()
   create(
     @Req() req,
-    @Body() data: { name?: string; type?: string; eventId?: string },
+    @Body() data: { name?: string; type?: BatchType; eventId?: string },
   ) {
     const churchId = req.user.church._id;
     return this.batchService.create(churchId, data);
@@ -42,7 +43,7 @@ export class BatchController {
   update(
     @Req() req,
     @Param('id') id: string,
-    @Body() data: { name?: string; type?: string; eventId?: string },
+    @Body() data: { name?: string; type?: BatchType; eventId?: string },
   ) {
     const churchId = req.user.church._id;
     return this.batchService.update(churchId, id, data);

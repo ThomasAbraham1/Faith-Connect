@@ -70,7 +70,6 @@ export class RemindersService {
       await this.queueService.enqueue({
         to: user.email,
         churchId: user.churchId,
-        batchId: null, // Not part of a bulk batch
         subject,
         body,
       });

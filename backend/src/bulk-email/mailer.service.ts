@@ -7,9 +7,9 @@ import { Resend } from 'resend';
 // One email job — contains everything needed to send a single email.
 export interface EmailJob {
   eventId?: string,
-  churchId: string,
+  churchId?: string,
   emailLogId?: string,
-  batchId: string,
+  batchId?: string,
   to: string;
   subject: string;
   body: string;
@@ -22,7 +22,7 @@ export interface EmailJob {
  * In production   → uses AWS SES (Amazon's bulk email service)
  *
  * The rest of the app doesn't need to care which one is being used.
- */
+ */ 
 @Injectable()
 export class MailerService {
   // Logger lets us print messages to the console with a nice prefix.

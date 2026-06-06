@@ -49,19 +49,17 @@ export class QueueService implements OnModuleInit {
    * Sets up the SQS client, ensures the queue exists, then starts consuming.
    */
   async onModuleInit() {
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const sqsEndpoint = this.configService.get<string>('SQS_ENDPOINT');
 
-    this.sqsClient = new SQSClient({
+    this.sqsClient = new SQSClient({  
       region: this.configService.get<string>('AWS_REGION') || 'us-east-1',
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID') || 'test',
         secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || 'test',
       },
-      // In development, point to LocalStack instead of real AWS.
-      // In production, leave endpoint undefined so the SDK uses the real AWS endpoint.
-      ...(isProduction
-        ? {}
-        : { endpoint: this.configService.get<string>('SQS_ENDPOINT') || 'http://localhost:4566' }),
+      // In development (LocalStack), SQS_ENDPOINT should be defined (e.g. http://localhost:4566).
+      // If SQS_ENDPOINT is not defined, the SDK will default to real AWS SQS.
+      ...(sqsEndpoint ? { endpoint: sqsEndpoint } : {}),
     });
 
     // Make sure the queue exists (creates it if it doesn't).
@@ -72,10 +70,16 @@ export class QueueService implements OnModuleInit {
   }
 
   /**
-   * Creates the SQS queue if it doesn't already exist.
-   * SQS's CreateQueue is idempotent — safe to call even if queue already exists.
+   * Creates the SQS queue if it doesn't already exist, or uses SQS_QUEUE_URL.
    */
   private async ensureQueueExists(): Promise<void> {
+    const configuredUrl = this.configService.get<string>('SQS_QUEUE_URL');
+    if (configuredUrl) {
+      this.queueUrl = configuredUrl;
+      this.logger.log(`Using pre-configured SQS queue URL: ${this.queueUrl}`);
+      return;
+    }
+
     const queueName = this.configService.get<string>('SQS_QUEUE_NAME') || 'bulk-email-queue';
 
     try {
@@ -145,7 +149,7 @@ export class QueueService implements OnModuleInit {
             await this.mailerService.sendOne(job!);
 
             // 1. Create the EmailLog to track this specific recipient's success
-            const emailLog = await this.emailLogModel.findByIdAndUpdate(job?.emailLogId,{
+            const emailLog = await this.emailLogModel.findByIdAndUpdate(job?.emailLogId, {
               churchId: job?.churchId,
               batchId: job?.batchId,
               recipientEmail: job?.to,
@@ -194,7 +198,7 @@ export class QueueService implements OnModuleInit {
             }
             // Updating email log with FAILED status
             await this.emailLogModel.findByIdAndUpdate(job?.emailLogId, {
-              status: 'FAILED', 
+              status: 'FAILED',
               error: err?.message
             });
           }
