@@ -384,7 +384,8 @@ export const EventDetail: React.FC<EventDetailProps> = ({ eventId, onBack }) => 
                               {log.status === 'SENT' ? (
                                 <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">SENT</span>
                               ) : log.status === 'FAILED' ? (
-                                <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">FAILED</span>
+                                <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">FAILED - {log.error}</span>
+                                
                               ) : (
                                 <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">PENDING</span>
                               )}
