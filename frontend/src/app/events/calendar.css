@@ -94,7 +94,7 @@
 }
 
 .rbc-day-bg:hover {
-  background-color: rgba(59, 130, 246, 0.15) !important; /* Light blue tint, increased from 0.08 */
+  @apply !bg-foreground/10;
   cursor: pointer;
 }
 
@@ -104,12 +104,12 @@
 }
 
 .rbc-time-slot:hover {
-  background-color: rgba(59, 130, 246, 0.15) !important;
+  @apply !bg-foreground/10;
   cursor: pointer;
 }
 
-.rbc-slot-selection {
-  background-color: rgba(59, 130, 246, 0.2) !important;
+.rbc-slot-selection, .rbc-selected-cell {
+  @apply !bg-foreground/20;
 }
 
 /* Event Card: Hover & Active States */
@@ -133,8 +133,8 @@
 }
 
 .rbc-addons-dnd-over {
-  background-color: rgba(59, 130, 246, 0.15) !important;
-  border: 2px dashed #3b82f6 !important;
+  @apply !bg-foreground/15;
+  border: 2px dashed var(--primary) !important;
 }
 
 /* Context Menu event wrapper: fill parent so right-click hits anywhere on the event block */
