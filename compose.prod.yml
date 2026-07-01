@@ -27,26 +27,24 @@ services:
     volumes:
       - ./backend-data/uploads:/app/public/uploads
       - ./backend-data/signatures:/app/public/signatures
+    networks:
+      - default
 
   # ─── FRONTEND (NGINX) ──────────────────────────────────────────────────────
   frontend:
     image: ghcr.io/thomasabraham1/faith-connect-frontend:latest
     container_name: fc-frontend
     restart: always
-    ports:
-      - "80:80"
-      - "443:443"
+    environment:
+      - VIRTUAL_HOST=app.harpazotech.com
+      - LETSENCRYPT_HOST=app.harpazotech.com
     depends_on:
       - backend
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+    networks:
+      - default
+      - proxy-network
 
-  # ─── CERTBOT (SSL GENERATOR) ────────────────────────────────────────────────
-  certbot:
-    image: certbot/certbot
-    container_name: fc-certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+networks:
+  proxy-network:
+    external: true
+    name: nginx-proxy
